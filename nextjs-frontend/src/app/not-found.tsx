@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { ArrowLeft, Home, Search } from "lucide-react";
 import { PrimaryBtn } from "@/components/ui/buttons";
 import { RevealBlock } from "@/components/ui/misc";
+import { ArrowLeft, Home, Search } from "lucide-react";
+import Link from "next/link";
 
 export default function NotFound() {
   return (
@@ -17,7 +17,7 @@ export default function NotFound() {
             <span className="text-[120px] font-black text-white/5 leading-none select-none">
               404
             </span>
-            <div className="text-gold font-mono tracking-[0.3em] uppercase text-sm -mt-15">
+            <div className="text-gold font-mono tracking-[0.3em] uppercase text-sm -mt-11">
               Lost in the Canvas
             </div>
           </div>

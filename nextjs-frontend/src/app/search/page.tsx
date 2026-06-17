@@ -53,7 +53,7 @@ export default function SearchPage() {
                       key={i}
                       href={
                         isOriginalWork
-                          ? `/shop/${item.id}`
+                          ? `/shop/${item.slug}`
                           : `/courses/${item.id}`
                       }
                       className="group bg-dark p-6 hover:bg-muted-light transition-colors cursor-pointer"

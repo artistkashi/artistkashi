@@ -17,6 +17,7 @@ import "@/api/config";
 import { AppShell } from "@/components/layout/AppShell";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { AuthProvider } from "@/lib/auth-store";
+import { QueryProvider } from "@/lib/QueryProvider";
 import { siteName, siteUrl } from "@/lib/seo";
 import "./globals.css";
 
@@ -84,7 +85,9 @@ export default function RootLayout({
           ]}
         />
         <AuthProvider>
-          <AppShell>{children}</AppShell>
+          <QueryProvider>
+            <AppShell>{children}</AppShell>
+          </QueryProvider>
         </AuthProvider>
       </body>
     </html>

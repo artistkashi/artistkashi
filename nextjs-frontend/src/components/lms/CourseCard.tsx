@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
-import { Play, Clock, Star } from "lucide-react";
 import { CourseRead } from "@/api/openapi-client";
-import { RevealBlock } from "@/components/ui/misc";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
+import { RevealBlock } from "@/components/ui/misc";
+import { displayPrice } from "@/lib/utils";
+import { Clock, Play, Star } from "lucide-react";
+import Link from "next/link";
 
 interface CourseCardProps {
   course: CourseRead;
@@ -17,49 +17,49 @@ export function CourseCard({ course, delay = 0 }: CourseCardProps) {
     <RevealBlock delay={delay}>
       <Link
         href={`/courses/${course.id}`}
-        className="group bg-dark block w-full text-left hover:bg-muted-light transition-colors"
+        className="group bg-surface block w-full text-left transition-all duration-500 card-luxury-hover overflow-hidden rounded-sm"
       >
         <div className="relative overflow-hidden aspect-video">
           <ImageWithFallback
             src={course.image_url || ""}
             alt={course.title}
-            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
+            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-linear-to-t from-dark via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-dark/80 via-transparent to-transparent opacity-60" />
           <div className="absolute top-4 left-4">
-            <span className="bg-dark/80 backdrop-blur-sm text-gold text-tiny font-mono tracking-widest uppercase px-2.5 py-1 border border-gold/30">
+            <span className="bg-background/80 backdrop-blur-sm text-primary text-2xs font-mono tracking-widest uppercase px-3 py-1.5 border border-primary/20">
               {course.category || "Masterclass"}
             </span>
           </div>
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-            <div className="w-14 h-14 bg-text-main/10 backdrop-blur-md border border-text-main/20 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 backdrop-blur-[2px]">
+            <div className="w-16 h-16 bg-primary/10 border border-primary/30 flex items-center justify-center rounded-full gold-glow">
               <Play
-                size={20}
-                fill="var(--color-text-main)"
-                className="text-text-main ml-1"
+                size={24}
+                fill="var(--color-primary)"
+                className="text-primary ml-1.5"
               />
             </div>
           </div>
         </div>
-        <div className="p-6 border-t border-border">
-          <div className="text-label font-mono text-text-muted tracking-[0.15em] mb-3">
-            {course.instructor}
+        <div className="p-6">
+          <div className="text-2xs font-mono text-text-muted tracking-[0.2em] uppercase mb-3">
+            Curated by {course.instructor}
           </div>
-          <h3 className="text-text-main font-bold text-xl leading-tight mb-2">
+          <h3 className="text-foreground font-bold text-xl leading-tight mb-3 tracking-wide group-hover:text-primary transition-colors italic">
             {course.title}
           </h3>
-          <p className="text-text-muted text-sm mb-5 line-clamp-2">
+          <p className="text-text-muted text-sm mb-6 line-clamp-2 leading-relaxed font-mono">
             {course.description}
           </p>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 text-xs font-mono text-text-muted">
-              <span className="flex items-center gap-1.5">
-                <Clock size={12} />
+          <div className="flex items-center justify-between pt-6 border-t border-border/10">
+            <div className="flex items-center gap-4 text-2xs font-mono text-text-muted uppercase tracking-widest">
+              <span className="flex items-center gap-2">
+                <Clock size={12} className="text-primary" />
                 {course.duration || "Self-paced"}
               </span>
             </div>
-            <span className="text-text-main font-bold text-lg">
-              €{course.price}
+            <span className="text-primary font-bold text-xl italic">
+              {displayPrice(course.price)}
             </span>
           </div>
         </div>
@@ -73,62 +73,70 @@ export function CourseCardGrid({ course, delay = 0 }: CourseCardProps) {
     <RevealBlock delay={delay}>
       <Link
         href={`/courses/${course.id}`}
-        className="group bg-dark hover:bg-muted-light transition-colors block w-full text-left"
+        className="group bg-surface block w-full text-left transition-all duration-500 card-luxury-hover overflow-hidden rounded-sm"
       >
         <div className="relative overflow-hidden aspect-video">
           <ImageWithFallback
             src={course.image_url || ""}
             alt={course.title}
-            className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-linear-to-t from-dark to-transparent" />
-          <div className="absolute top-4 right-4 bg-dark/70 backdrop-blur text-text-main text-tiny font-mono tracking-widest px-2.5 py-1 border border-border">
+          <div className="absolute inset-0 bg-linear-to-t from-dark to-transparent opacity-40" />
+          <div className="absolute top-4 right-4 bg-background/80 backdrop-blur-sm text-foreground text-2xs font-mono tracking-widest px-3 py-1.5 border border-border uppercase">
             {course.category || "Masterclass"}
           </div>
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="w-12 h-12 bg-text-main/10 border border-white/20 flex items-center justify-center">
-              <Play size={18} fill="white" className="text-white ml-0.5" />
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
+            <div className="w-12 h-12 bg-primary/20 border border-primary/40 flex items-center justify-center rounded-full gold-glow">
+              <Play
+                size={20}
+                fill="var(--color-primary)"
+                className="text-primary ml-1"
+              />
             </div>
           </div>
         </div>
-        <div className="p-6 border-t border-border">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="flex gap-0.5">
+        <div className="p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex gap-1">
               {Array.from({ length: 5 }).map((_, j) => (
                 <Star
-                  key={j}
-                  size={10}
+                  key={`course-star-${course.id}-${j}`}
+                  size={12}
                   fill={
-                    j < Math.floor(course.rating) ? "var(--color-gold)" : "none"
+                    j < Math.floor(course.rating)
+                      ? "var(--color-primary)"
+                      : "none"
                   }
                   className={
-                    j < Math.floor(course.rating) ? "text-gold" : "text-border"
+                    j < Math.floor(course.rating)
+                      ? "text-primary gold-glow"
+                      : "text-border"
                   }
                 />
               ))}
             </div>
-            <span className="text-text-muted text-label font-mono">
-              {course.rating} ({course.students_count.toLocaleString()})
+            <span className="text-text-muted text-2xs font-mono tracking-tighter uppercase">
+              {course.rating} / 5.0
             </span>
           </div>
-          <h3 className="text-text-main font-bold text-lg mb-1">
+          <h3 className="text-foreground font-bold text-lg mb-2 tracking-wide group-hover:text-primary transition-colors italic">
             {course.title}
           </h3>
-          <p className="text-text-muted text-sm mb-5 line-clamp-2">
+          <p className="text-text-muted text-xs mb-6 line-clamp-2 leading-relaxed font-mono opacity-80">
             {course.description}
           </p>
-          <div className="flex items-center gap-3 text-label font-mono text-text-muted mb-5">
-            <span className="flex items-center gap-1">
-              <Clock size={11} />
+          <div className="flex items-center gap-4 text-2xs font-mono text-text-muted mb-6 uppercase tracking-widest">
+            <span className="flex items-center gap-2">
+              <Clock size={11} className="text-primary" />
               {course.duration || "Self-paced"}
             </span>
           </div>
-          <div className="flex items-center justify-between border-t border-border pt-4">
-            <span className="text-text-main font-bold text-2xl">
-              €{course.price}
+          <div className="flex items-center justify-between border-t border-border/10 pt-5 mt-auto">
+            <span className="text-primary font-bold text-2xl italic">
+              {displayPrice(course.price)}
             </span>
-            <span className="text-text-muted text-xs font-mono uppercase tracking-widest flex items-center gap-1 group-hover:text-gold transition-colors">
-              Enroll <Play size={12} />
+            <span className="text-text-muted text-2xs font-mono uppercase tracking-widest flex items-center gap-2 group-hover:text-primary transition-colors border-b border-transparent hover:border-primary/40 pb-0.5">
+              Enroll <Play size={10} className="fill-current" />
             </span>
           </div>
         </div>

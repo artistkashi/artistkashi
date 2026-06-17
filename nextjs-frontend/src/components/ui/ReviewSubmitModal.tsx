@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { X, Star } from "lucide-react";
-import { createReview, ReviewType } from "@/api/openapi-client";
 import { unwrap } from "@/api/client-service";
+import { createReview, ReviewType } from "@/api/openapi-client";
+import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AnimatePresence, motion } from "framer-motion";
+import { Send, Sparkles, Star, X } from "lucide-react";
+import { useCallback } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+import { PrimaryBtn } from "./buttons";
 
 interface ReviewSubmitModalProps {
   isOpen: boolean;
@@ -14,6 +20,16 @@ interface ReviewSubmitModalProps {
   entityName?: string;
 }
 
+const reviewSchema = z.object({
+  rating: z.number().min(1).max(5),
+  text: z
+    .string()
+    .min(1, "The narrative must not be empty")
+    .max(1000, "The narrative is too long"),
+});
+
+type ReviewFormData = z.infer<typeof reviewSchema>;
+
 export function ReviewSubmitModal({
   isOpen,
   onClose,
@@ -22,140 +38,215 @@ export function ReviewSubmitModal({
   entityId,
   entityName,
 }: ReviewSubmitModalProps) {
-  const [rating, setRating] = useState(5);
-  const [text, setText] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const form = useForm<ReviewFormData>({
+    resolver: zodResolver(reviewSchema),
+    defaultValues: {
+      rating: 5,
+      text: "",
+    },
+  });
 
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      setError("");
-      setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    watch,
+    formState: { isSubmitting, errors },
+  } = form;
 
+  const onSubmit = useCallback(
+    async (data: ReviewFormData) => {
       try {
         await unwrap(
           createReview({
             body: {
               type: reviewType,
               entity_id: entityId!,
-              rating,
-              text,
+              rating: data.rating,
+              text: data.text,
             },
           })
         );
 
-        setText("");
-        setRating(5);
+        reset();
         onClose();
         onSuccess?.();
       } catch (err: unknown) {
-        setError((err as Error).message || "Failed to submit review");
-      } finally {
-        setLoading(false);
+        console.error("Failed to submit review:", err);
       }
     },
-    [reviewType, entityId, rating, text, onClose, onSuccess]
+    [reviewType, entityId, onClose, onSuccess, reset]
   );
 
-  if (!isOpen) return null;
+  const watchedText = watch("text");
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Share Your Review</h2>
-          <button
+    <AnimatePresence>
+      {isOpen && (
+        <div
+          key="review-modal-outer"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        >
+          <motion.div
+            key="review-modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-            aria-label="Close"
+            className="absolute inset-0 bg-background/95 backdrop-blur-sm"
+          />
+
+          <motion.div
+            key="review-modal-content"
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="relative w-full max-w-lg bg-surface border border-border shadow-lg flex flex-col card-luxury overflow-hidden"
           >
-            <X size={20} />
-          </button>
-        </div>
-
-        {entityName && (
-          <p className="text-sm text-gray-600 mb-4">
-            Reviewing: <span className="font-semibold">{entityName}</span>
-          </p>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Rating */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Rating</label>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setRating(star)}
-                  className="transition-transform hover:scale-110"
-                >
-                  <Star
-                    size={24}
-                    className={
-                      star <= rating
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300"
-                    }
-                  />
-                </button>
-              ))}
+            {/* Header */}
+            <div className="p-card border-b border-border flex justify-between items-center bg-surface shrink-0">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 border border-primary/20 flex items-center justify-center bg-gold-bg">
+                  <Sparkles className="text-primary" size={20} />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold tracking-[0.2em] text-foreground uppercase">
+                    Chronicle Vision
+                  </h2>
+                  <p className="text-2xs text-text-muted font-mono tracking-[0.3em] uppercase mt-0.5">
+                    Share your aesthetic truth
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className="w-10 h-10 flex items-center justify-center hover:bg-gold-bg transition-all rounded-full text-text-muted hover:text-primary"
+              >
+                <X size={20} />
+              </button>
             </div>
-          </div>
 
-          {/* Review Text */}
-          <div>
-            <label
-              htmlFor="review-text"
-              className="block text-sm font-medium mb-2"
-            >
-              Your Review
-            </label>
-            <textarea
-              id="review-text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Share your thoughts..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows={4}
-              minLength={1}
-              maxLength={1000}
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              {text.length}/1000 characters
+            <div className="p-card space-y-8">
+              {entityName && (
+                <div className="border-l-2 border-primary/30 pl-4 py-1">
+                  <p className="text-2xs font-mono uppercase tracking-[0.2em] text-text-muted">
+                    Analyzing
+                  </p>
+                  <p className="text-sm font-bold text-foreground tracking-wide mt-0.5">
+                    {entityName}
+                  </p>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+                {/* Rating */}
+                <div className="space-y-4">
+                  <label className="text-label! font-mono tracking-widest uppercase text-text-muted block">
+                    Intimacy Level (Rating)
+                  </label>
+                  <Controller
+                    name="rating"
+                    control={control}
+                    render={({ field }) => (
+                      <div className="flex gap-4">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={`submit-star-${star}`}
+                            type="button"
+                            onClick={() => field.onChange(star)}
+                            className="group transition-all duration-300 transform active:scale-90"
+                          >
+                            <Star
+                              size={28}
+                              className={cn(
+                                "transition-all duration-500",
+                                star <= field.value
+                                  ? "fill-primary text-primary gold-glow"
+                                  : "text-border group-hover:text-primary/40"
+                              )}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  />
+                  {errors.rating && (
+                    <p className="text-xs text-danger font-mono mt-1">
+                      {errors.rating.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Review Text */}
+                <div className="space-y-4">
+                  <label
+                    htmlFor="review-text"
+                    className="text-label! font-mono tracking-widest uppercase text-text-muted block"
+                  >
+                    The Chronicle (Narrative)
+                  </label>
+                  <div className="relative">
+                    <textarea
+                      id="review-text"
+                      {...register("text")}
+                      placeholder="Detail the depth, the brushstrokes, the soul of the piece..."
+                      className="w-full bg-surface border border-border px-4 py-4 text-sm text-foreground rounded-sm focus:border-primary outline-none transition-all duration-300 resize-none min-h-40 placeholder:text-text-muted/40"
+                    />
+                    <div className="absolute bottom-4 right-4">
+                      <p
+                        className={cn(
+                          "text-2xs font-mono tracking-widest transition-colors",
+                          (watchedText || "").length > 900
+                            ? "text-danger"
+                            : "text-text-muted/40"
+                        )}
+                      >
+                        {(watchedText || "").length}/1000
+                      </p>
+                    </div>
+                  </div>
+                  {errors.text && (
+                    <p className="text-xs text-danger font-mono mt-1">
+                      {errors.text.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    disabled={isSubmitting}
+                    className="flex-1 px-8 py-4 border border-border text-text-muted text-2xs font-mono uppercase tracking-[0.2em] hover:border-primary hover:text-primary transition-all disabled:opacity-50"
+                  >
+                    Dismiss
+                  </button>
+                  <PrimaryBtn
+                    type="submit"
+                    disabled={isSubmitting || !watchedText?.trim()}
+                    className="flex-1 text-xs"
+                  >
+                    {isSubmitting ? (
+                      <div className="luxury-loader scale-75" />
+                    ) : (
+                      <>
+                        <Send size={14} className="mr-2" />
+                        <span>Imprint Archive</span>
+                      </>
+                    )}
+                  </PrimaryBtn>
+                </div>
+              </form>
+            </div>
+
+            <p className="text-2xs font-mono tracking-widest text-text-muted/30 pb-6 text-center uppercase">
+              Visions are refined by the curator before public unveiling.
             </p>
-          </div>
-
-          {/* Error Message */}
-          {error && <p className="text-sm text-red-600">{error}</p>}
-
-          {/* Actions */}
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={loading}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading || !text.trim()}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "Submitting..." : "Submit Review"}
-            </button>
-          </div>
-        </form>
-
-        <p className="text-xs text-gray-500 mt-4 text-center">
-          Your review will be moderated before appearing publicly.
-        </p>
-      </div>
-    </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }

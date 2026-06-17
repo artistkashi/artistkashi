@@ -58,7 +58,7 @@ export function GoldDivider({ className }: { className?: string }) {
 
 export function Tag({ label }: { label: string }) {
   return (
-    <span className="text-label tracking-[0.15em] uppercase font-mono text-text-muted border border-border px-3 py-1">
+    <span className="text-label tracking-[0.15em] uppercase font-mono text-text-muted border border-border px-3 py-1 rounded">
       {label}
     </span>
   );

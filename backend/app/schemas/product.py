@@ -3,13 +3,14 @@ from __future__ import annotations
 import re
 from datetime import datetime
 from decimal import Decimal
+from urllib.parse import urlparse
 
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    HttpUrl,
     computed_field,
+    field_validator,
     model_validator,
 )
 
@@ -99,10 +100,26 @@ class ProductImageInput(BaseModel):
     and never go through this schema.
     """
 
-    image_url: HttpUrl | None = None
+    image_url: str | None = None
     alt_text: str | None = Field(None, max_length=255)
     is_primary: bool = False
     sort_order: int = Field(0, ge=0)
+
+    @field_validator("image_url")
+    @classmethod
+    def validate_image_url(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+
+        parsed = urlparse(value)
+
+        if parsed.scheme not in {"http", "https"}:
+            raise ValueError("Image URL must start with http:// or https://")
+
+        if not parsed.netloc:
+            raise ValueError("Invalid image URL")
+
+        return value
 
 
 class ProductImageCreate(ProductImageInput):
@@ -135,9 +152,9 @@ class ProductImageRead(TimestampSchema):
 class ProductVariantCreate(BaseModel):
     variant_type_id: int
 
-    width: Decimal | None = Field(None, gt=0, decimal_places=2)
+    width: Decimal | None = Field(None, ge=0, decimal_places=2)
 
-    height: Decimal | None = Field(None, gt=0, decimal_places=2)
+    height: Decimal | None = Field(None, ge=0, decimal_places=2)
     dimension_unit: DimensionUnit | None = DimensionUnit.CM
 
     sku: str | None = Field(None, max_length=100)
@@ -164,16 +181,16 @@ class ProductVariantUpdate(BaseModel):
 
     variant_type_id: int | None = None
 
-    width: Decimal | None = None
-    height: Decimal | None = None
+    width: Decimal | None = Field(None, ge=0, decimal_places=2)
+    height: Decimal | None = Field(None, ge=0, decimal_places=2)
 
     dimension_unit: DimensionUnit | None = None
 
     sku: str | None = None
 
-    price: Decimal | None = None
+    price: Decimal | None = Field(None, ge=0, decimal_places=2)
 
-    stock_quantity: int | None = None
+    stock_quantity: int | None = Field(None, ge=0)
 
     is_default: bool | None = None
 
@@ -248,21 +265,41 @@ class _ProductComputedMixin(BaseModel):
         return self.images[0].image_url if self.images else None
 
 
-# ─── Product ──────────────────────────────────────────────────────────────────
+# ─── Product Image and Variant State (Unified Payload) ─────────────────────────
+
+
+class ProductVariantState(BaseModel):
+    id: int | None = None
+    variant_type_id: int
+    price: Decimal = Field(..., gt=0, decimal_places=2)
+    width: Decimal | None = Field(None, ge=0, decimal_places=2)
+    height: Decimal | None = Field(None, ge=0, decimal_places=2)
+    dimension_unit: DimensionUnit = DimensionUnit.CM
+    stock_quantity: int = Field(0, ge=0)
+    is_default: bool = False
+    is_available: bool = True
+    sku: str | None = Field(None, max_length=100)
+
+
+class ProductImageState(BaseModel):
+    id: int | None = None  # For existing images
+    image_url: str | None = None  # For external images or existing image reference
+    file_index: int | None = None  # For new uploaded files
+    alt_text: str | None = Field(None, max_length=255)
+    is_primary: bool = False
+    sort_order: int = Field(0, ge=0)
 
 
 class ProductCreateRequest(BaseModel):
     product: ProductCreate
-    variants: list[ProductVariantCreate] = Field(default_factory=list)
-    external_images: list[ProductImageInput] = Field(default_factory=list)
+    variants: list[ProductVariantState]
+    images: list[ProductImageState]
 
 
 class ProductUpdateRequest(BaseModel):
     product: ProductUpdate
-    variants: list[ProductVariantUpdate] = Field(default_factory=list)
-    external_images: list[ProductImageInput] = Field(default_factory=list)
-    deleted_variant_ids: list[int] = Field(default_factory=list)
-    deleted_image_ids: list[int] = Field(default_factory=list)
+    variants: list[ProductVariantState]
+    images: list[ProductImageState]
 
 
 class ProductBase(BaseModel):
@@ -276,6 +313,8 @@ class ProductBase(BaseModel):
 
     medium: ProductMediumRead | None = None
     category: ProductCategoryRead | None = None
+
+    status: ProductStatus = ProductStatus.DRAFT
 
     @computed_field
     @property
@@ -296,7 +335,7 @@ class ProductCreate(BaseModel):
     is_framed: bool = False
     certificate_of_authenticity: bool = False
     category_id: int | None = None
-    weight_grams: int | None = Field(None, gt=0)
+    weight_grams: int | None = Field(None, ge=0)
     is_featured: bool = False
     sort_order: int = Field(0, ge=0)
     status: ProductStatus = ProductStatus.DRAFT
@@ -323,7 +362,7 @@ class ProductUpdate(BaseModel):
     is_framed: bool | None = None
     certificate_of_authenticity: bool | None = None
     category_id: int | None = None
-    weight_grams: int | None = Field(None, gt=0)
+    weight_grams: int | None = Field(None, ge=0)
     is_featured: bool | None = None
     sort_order: int | None = Field(None, ge=0)
     status: ProductStatus | None = None
@@ -405,11 +444,7 @@ class ProductListRead(_ProductComputedMixin):
 
 
 class ProductCardRead(ProductBase):
-    price: Decimal = Field(
-        default=Decimal("0.00"),
-        ge=0,
-        decimal_places=2,
-    )
+    price: Decimal = Field(default=Decimal("0.00"), ge=0, decimal_places=2)
 
     primary_image: str | None = None
 

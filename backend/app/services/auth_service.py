@@ -116,7 +116,6 @@ class AuthService:
             email=payload.email,
             user_schema=User,
         )
-        print(user)
 
         if not user:
             raise UnauthorizedException("Invalid email or password")

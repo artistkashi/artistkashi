@@ -1,7 +1,6 @@
 import { client } from "@/api/openapi-client/client.gen";
 
 client.setConfig({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "",
   throwOnError: true,
 });
 

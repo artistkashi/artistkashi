@@ -29,18 +29,18 @@ export function AppShell({ children }: { children: ReactNode }) {
           <motion.div
             key="loader"
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-1000 bg-dark flex flex-col items-center justify-center"
+            className="fixed inset-0 z-1000 bg-background flex flex-col items-center justify-center"
           >
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-4xl italic font-black tracking-tighter text-text-main"
+              className="text-4xl italic font-black tracking-tighter text-foreground"
             >
-              ARTIST<span className="text-gold">KASHI</span>
+              ARTIST<span className="text-primary">KASHI</span>
             </motion.h1>
             <motion.div className="w-48 h-px bg-border mt-8 relative overflow-hidden">
               <motion.div
-                className="absolute inset-0 bg-gold"
+                className="absolute inset-0 bg-primary"
                 initial={{ x: "-100%" }}
                 animate={{ x: "100%" }}
                 transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
@@ -60,10 +60,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         position="bottom-right"
         toastOptions={{
           style: {
-            background: "var(--color-muted-light)",
+            background: "var(--color-surface)",
             border: "1px solid var(--color-border)",
             color: "var(--color-text-main)",
-            borderRadius: "0",
+            borderRadius: "var(--radius-sm)",
           },
         }}
       />

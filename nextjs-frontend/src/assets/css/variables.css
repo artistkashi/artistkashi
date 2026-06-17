@@ -1,25 +1,53 @@
 @theme {
-  /* Colors - Cinematic Luxury Palette */
+  /* =========================================
+   COLORS — CINEMATIC LUXURY PALETTE
+   ========================================= */
+
   --color-gold: #b89d5c;
+  --color-gold-bg: rgba(184, 157, 92, 0.12);
+
   --color-dark: #0a0a0a;
   --color-dark-soft: #0d0d0d;
+
+  --color-surface: #121212;
+  --color-surface-hover: #1a1a1a;
+  --color-surface-elevated: #1f1f1f;
+
   --color-muted: #171717;
   --color-muted-light: #131313;
-  --color-border: #2a2a2a;
+
   --color-border-soft: #1a1a1a;
+  --color-border: #2a2a2a;
+  --color-border-strong: #3a3a3a;
+
   --color-text-main: #f5f5f5;
   --color-text-muted: #8b8b8b;
 
-  /* Map standard tailwind colors to our palette */
+  --color-green: #728c63;
+  --color-green-bg: rgba(114, 140, 99, 0.12);
+
+  --color-red: #a86262;
+  --color-red-bg: rgba(168, 98, 98, 0.12);
+
+  --color-blue: #6484a8;
+  --color-blue-bg: rgba(100, 132, 168, 0.12);
+
+  /* Semantic aliases */
+
   --color-background: var(--color-dark);
   --color-foreground: var(--color-text-main);
+
   --color-primary: var(--color-gold);
   --color-secondary: var(--color-muted);
 
-  /* Fonts - controlled by next/font/google when available; fallbacks used in CSS where necessary */
-  /* DO NOT redefine --font-inter-tight or --font-dm-mono here to allow next/font to inject performant font-face and variable values. */
+  --color-success: var(--color-green);
+  --color-danger: var(--color-red);
+  --color-info: var(--color-blue);
 
-  /* Spacing Tokens */
+  /* =========================================
+   SPACING SYSTEM (8px based)
+   ========================================= */
+
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -32,17 +60,10 @@
   --space-10: 48px;
   --space-11: 60px;
   --space-12: 80px;
+  --space-13: 96px;
+  --space-14: 120px;
+  --space-15: 160px;
 
-  /* Radius Tokens */
-  --radius-xs: 2px;
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 24px;
-  --radius-full: 9999px;
-
-  /* Spacing Utility Mappings */
   --spacing-1: var(--space-1);
   --spacing-2: var(--space-2);
   --spacing-3: var(--space-3);
@@ -56,9 +77,23 @@
   --spacing-11: var(--space-11);
   --spacing-12: var(--space-12);
 
-  --spacing-360: 90rem; /* 1440px */
+  --spacing-360: 90rem;
 
-  /* Text Sizes */
+  /* =========================================
+   BORDER RADIUS
+   ========================================= */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+
+  /* =========================================
+   TYPOGRAPHY
+   ========================================= */
+
   --text-2xs: 10px;
   --text-xs: 12px;
   --text-sm: 14px;
@@ -70,20 +105,53 @@
   --text-4xl: 36px;
   --text-5xl: 48px;
 
-  /* Semantic Text Sizes */
   --text-label: 11px;
 
-  /* Display sizes (Responsive clamps) */
+  /* Cinematic Display Scale */
+
+  --text-display-xl: clamp(64px, 8vw, 120px);
   --text-display-huge: clamp(48px, 7vw, 96px);
   --text-display-lg: clamp(32px, 5vw, 72px);
   --text-display-md: clamp(24px, 3vw, 40px);
   --text-display-sm: clamp(20px, 2vw, 32px);
 
-  /* Semantic Heading Utilities */
-  --text-h1: var(--text-display-huge);
-  --text-h2: var(--text-display-lg);
-  --text-h3: var(--text-display-md);
-  --text-h4: var(--text-display-sm);
-  --text-h5: var(--text-2xl);
-  --text-h6: var(--text-xl);
+  /* Semantic Headings */
+
+  --text-h1: var(--text-display-xl);
+  --text-h2: var(--text-display-huge);
+  --text-h3: var(--text-display-lg);
+  --text-h4: var(--text-display-md);
+  --text-h5: var(--text-display-sm);
+  --text-h6: var(--text-2xl);
+
+  /* =========================================
+   SHADOWS
+   ========================================= */
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
+
+  /* =========================================
+   ANIMATION
+   ========================================= */
+
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 600ms;
+  --duration-cinematic: 1000ms;
+
+  /* =========================================
+   Z-INDEX
+   ========================================= */
+
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-toast: 500;
 }

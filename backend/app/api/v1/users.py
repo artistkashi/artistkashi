@@ -50,7 +50,6 @@ async def list_profiles(
         return_total_count=True,
         **filters,
     )
-    print(users_data)
     return build_paginated_response(
         result=users_data,
         page=page,

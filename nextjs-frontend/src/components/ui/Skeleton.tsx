@@ -4,7 +4,7 @@ export function Skeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "bg-border/10 gold-shimmer relative overflow-hidden",
+        "bg-border/10 gold-shimmer relative overflow-hidden rounded",
         className
       )}
     />

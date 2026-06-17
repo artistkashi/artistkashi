@@ -1,7 +1,7 @@
 from typing import Annotated
 
-from fastapi import APIRouter, File, Query, UploadFile
-from fastapi.params import Body
+from fastapi import APIRouter, File, Form, Query, UploadFile
+from pydantic import Json
 
 from app.api.dependencies import DatabaseDep
 from app.core.pagination import build_paginated_response
@@ -23,7 +23,7 @@ router = APIRouter(tags=["Products"])
 @router.post("", response_model=SuccessResponse[ProductDetailRead])
 async def create_product(
     session: DatabaseDep,
-    payload: Annotated[ProductCreateRequest, Body(media_type="application/json")],
+    payload: Annotated[Json[ProductCreateRequest], Form()],
     files: list[UploadFile] | None = File(None),
 ):
     result = await product_service.create_product_complete(
@@ -123,7 +123,7 @@ async def get_product(product_id: int, session: DatabaseDep):
 async def update_product(
     product_id: int,
     session: DatabaseDep,
-    payload: Annotated[ProductUpdateRequest, Body(media_type="application/json")],
+    payload: Annotated[Json[ProductUpdateRequest], Form()],
     files: list[UploadFile] | None = File(None),
 ):
     result = await product_service.update_product_complete(

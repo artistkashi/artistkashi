@@ -4141,7 +4141,12 @@
       "Body_ADMIN-create_product": {
         "properties": {
           "payload": {
-            "$ref": "#/components/schemas/ProductCreateRequest"
+            "type": "string",
+            "contentMediaType": "application/json",
+            "contentSchema": {
+              "$ref": "#/components/schemas/ProductCreateRequest"
+            },
+            "title": "Payload"
           },
           "files": {
             "anyOf": [
@@ -4168,7 +4173,12 @@
       "Body_ADMIN-update_product": {
         "properties": {
           "payload": {
-            "$ref": "#/components/schemas/ProductUpdateRequest"
+            "type": "string",
+            "contentMediaType": "application/json",
+            "contentSchema": {
+              "$ref": "#/components/schemas/ProductUpdateRequest"
+            },
+            "title": "Payload"
           },
           "files": {
             "anyOf": [
@@ -5252,6 +5262,10 @@
               }
             ]
           },
+          "status": {
+            "$ref": "#/components/schemas/ProductStatus",
+            "default": "draft"
+          },
           "is_sold": {
             "type": "boolean",
             "title": "Is Sold",
@@ -5316,6 +5330,10 @@
                 "type": "null"
               }
             ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProductStatus",
+            "default": "draft"
           },
           "price": {
             "type": "string",
@@ -5642,7 +5660,7 @@
             "anyOf": [
               {
                 "type": "integer",
-                "exclusiveMinimum": 0.0
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -5703,22 +5721,24 @@
           },
           "variants": {
             "items": {
-              "$ref": "#/components/schemas/ProductVariantCreate"
+              "$ref": "#/components/schemas/ProductVariantState"
             },
             "type": "array",
             "title": "Variants"
           },
-          "external_images": {
+          "images": {
             "items": {
-              "$ref": "#/components/schemas/ProductImageInput"
+              "$ref": "#/components/schemas/ProductImageState"
             },
             "type": "array",
-            "title": "External Images"
+            "title": "Images"
           }
         },
         "type": "object",
         "required": [
-          "product"
+          "product",
+          "variants",
+          "images"
         ],
         "title": "ProductCreateRequest"
       },
@@ -5807,6 +5827,9 @@
               }
             ]
           },
+          "status": {
+            "$ref": "#/components/schemas/ProductStatus"
+          },
           "description": {
             "anyOf": [
               {
@@ -5869,9 +5892,6 @@
               }
             ],
             "title": "Weight Grams"
-          },
-          "status": {
-            "$ref": "#/components/schemas/ProductStatus"
           },
           "is_featured": {
             "type": "boolean",
@@ -5942,9 +5962,9 @@
           "title",
           "slug",
           "is_original_available",
+          "status",
           "is_framed",
           "certificate_of_authenticity",
-          "status",
           "is_featured",
           "sort_order",
           "price",
@@ -5952,50 +5972,6 @@
           "is_sold"
         ],
         "title": "ProductDetailRead"
-      },
-      "ProductImageInput": {
-        "properties": {
-          "image_url": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 2083,
-                "minLength": 1,
-                "format": "uri"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Image Url"
-          },
-          "alt_text": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 255
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Alt Text"
-          },
-          "is_primary": {
-            "type": "boolean",
-            "title": "Is Primary",
-            "default": false
-          },
-          "sort_order": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Sort Order",
-            "default": 0
-          }
-        },
-        "type": "object",
-        "title": "ProductImageInput",
-        "description": "Represents one external image URL submitted in the product form.\nUploaded files are handled separately as multipart file fields\nand never go through this schema."
       },
       "ProductImageRead": {
         "properties": {
@@ -6067,6 +6043,68 @@
           "source_type"
         ],
         "title": "ProductImageRead"
+      },
+      "ProductImageState": {
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "file_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Index"
+          },
+          "alt_text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alt Text"
+          },
+          "is_primary": {
+            "type": "boolean",
+            "title": "Is Primary",
+            "default": false
+          },
+          "sort_order": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Sort Order",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "ProductImageState"
       },
       "ProductMediumCreate": {
         "properties": {
@@ -6351,7 +6389,7 @@
             "anyOf": [
               {
                 "type": "integer",
-                "exclusiveMinimum": 0.0
+                "minimum": 0.0
               },
               {
                 "type": "null"
@@ -6427,139 +6465,26 @@
           },
           "variants": {
             "items": {
-              "$ref": "#/components/schemas/ProductVariantUpdate"
+              "$ref": "#/components/schemas/ProductVariantState"
             },
             "type": "array",
             "title": "Variants"
           },
-          "external_images": {
+          "images": {
             "items": {
-              "$ref": "#/components/schemas/ProductImageInput"
+              "$ref": "#/components/schemas/ProductImageState"
             },
             "type": "array",
-            "title": "External Images"
-          },
-          "deleted_variant_ids": {
-            "items": {
-              "type": "integer"
-            },
-            "type": "array",
-            "title": "Deleted Variant Ids"
-          },
-          "deleted_image_ids": {
-            "items": {
-              "type": "integer"
-            },
-            "type": "array",
-            "title": "Deleted Image Ids"
+            "title": "Images"
           }
         },
         "type": "object",
         "required": [
-          "product"
+          "product",
+          "variants",
+          "images"
         ],
         "title": "ProductUpdateRequest"
-      },
-      "ProductVariantCreate": {
-        "properties": {
-          "variant_type_id": {
-            "type": "integer",
-            "title": "Variant Type Id"
-          },
-          "width": {
-            "anyOf": [
-              {
-                "type": "number",
-                "exclusiveMinimum": 0.0
-              },
-              {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Width"
-          },
-          "height": {
-            "anyOf": [
-              {
-                "type": "number",
-                "exclusiveMinimum": 0.0
-              },
-              {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Height"
-          },
-          "dimension_unit": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DimensionUnit"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "cm"
-          },
-          "sku": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 100
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sku"
-          },
-          "price": {
-            "anyOf": [
-              {
-                "type": "number",
-                "exclusiveMinimum": 0.0
-              },
-              {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
-              }
-            ],
-            "title": "Price",
-            "examples": [
-              799.0
-            ]
-          },
-          "stock_quantity": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Stock Quantity",
-            "default": 0
-          },
-          "is_default": {
-            "type": "boolean",
-            "title": "Is Default",
-            "default": false
-          },
-          "is_available": {
-            "type": "boolean",
-            "title": "Is Available",
-            "default": true
-          }
-        },
-        "type": "object",
-        "required": [
-          "variant_type_id",
-          "price"
-        ],
-        "title": "ProductVariantCreate"
       },
       "ProductVariantRead": {
         "properties": {
@@ -6700,7 +6625,7 @@
         ],
         "title": "ProductVariantRead"
       },
-      "ProductVariantUpdate": {
+      "ProductVariantState": {
         "properties": {
           "id": {
             "anyOf": [
@@ -6714,24 +6639,31 @@
             "title": "Id"
           },
           "variant_type_id": {
+            "type": "integer",
+            "title": "Variant Type Id"
+          },
+          "price": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "number",
+                "exclusiveMinimum": 0.0
               },
               {
-                "type": "null"
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
               }
             ],
-            "title": "Variant Type Id"
+            "title": "Price"
           },
           "width": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "minimum": 0.0
               },
               {
                 "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
               },
               {
                 "type": "null"
@@ -6742,11 +6674,12 @@
           "height": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "number",
+                "minimum": 0.0
               },
               {
                 "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
               },
               {
                 "type": "null"
@@ -6755,77 +6688,44 @@
             "title": "Height"
           },
           "dimension_unit": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DimensionUnit"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/DimensionUnit",
+            "default": "cm"
+          },
+          "stock_quantity": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Stock Quantity",
+            "default": 0
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default",
+            "default": false
+          },
+          "is_available": {
+            "type": "boolean",
+            "title": "Is Available",
+            "default": true
           },
           "sku": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 100
               },
               {
                 "type": "null"
               }
             ],
             "title": "Sku"
-          },
-          "price": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Price"
-          },
-          "stock_quantity": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Stock Quantity"
-          },
-          "is_default": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Default"
-          },
-          "is_available": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Available"
           }
         },
         "type": "object",
-        "title": "ProductVariantUpdate"
+        "required": [
+          "variant_type_id",
+          "price"
+        ],
+        "title": "ProductVariantState"
       },
       "PublicUserRead": {
         "properties": {

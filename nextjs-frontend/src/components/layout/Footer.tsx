@@ -42,7 +42,7 @@ export function Footer() {
             title: "Collect",
             links: [
               { label: "Shop", href: "/shop" },
-              { label: "Original Works", href: "/shop/1" },
+              { label: "Original Works", href: "/shop/solitude-in-ochre" },
               { label: "Commissions", href: "/shop" },
             ],
           },

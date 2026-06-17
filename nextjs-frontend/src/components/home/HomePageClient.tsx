@@ -89,7 +89,7 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
             </span>
           </motion.div>
 
-          <motion.h1
+          <motion.h2
             initial={{ opacity: 0, y: 60 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -103,7 +103,7 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
                 ) : null}
               </span>
             ))}
-          </motion.h1>
+          </motion.h2>
 
           <motion.p
             initial={{ opacity: 0, y: 30 }}
@@ -191,7 +191,7 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
           {featuredPaintings.map((p, i) => (
             <RevealBlock key={p.id} delay={i * 0.1}>
               <Link
-                href={`/shop/${p.id}`}
+                href={`/shop/${p.slug}`}
                 className="group relative bg-dark overflow-hidden block w-full text-left"
               >
                 <div className="relative overflow-hidden aspect-3/4">
@@ -216,7 +216,7 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
                       {p.title}
                     </div>
                     <div className="text-text-muted text-sm mt-1">
-                      €
+                      ₹
                       {(typeof p.price === "string"
                         ? parseFloat(p.price)
                         : (p.price ?? 0)
@@ -301,7 +301,7 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
                       </span>
                     </div>
                     <span className="text-text-main font-bold text-lg">
-                      €{c.price}
+                      ₹{c.price}
                     </span>
                   </div>
                 </div>
@@ -399,7 +399,7 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
               className={i === 0 ? "md:row-span-2" : undefined}
             >
               <Link
-                href={`/shop/${painting.id}`}
+                href={`/shop/${painting.slug}`}
                 className={cn(
                   "group relative overflow-hidden block w-full bg-muted-light",
                   i === 0 ? "aspect-4/5 md:aspect-auto md:h-full" : "aspect-4/3"
@@ -504,7 +504,7 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gold font-bold text-xl">
-                      €{course.price}
+                      ₹{course.price}
                     </span>
                     <span className="text-text-muted text-xs font-mono flex items-center gap-1 group-hover:text-text-main transition-colors">
                       View <ArrowUpRight size={12} />

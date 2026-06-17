@@ -1,10 +1,17 @@
 from fastapi import UploadFile
 from fastcrud import compute_offset
 from fastcrud.types import GetMultiResponseModel
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import ConflictException, ErrorCode, NotFoundException
+from app.core.config import settings
+from app.core.exceptions import (
+    ConflictException,
+    DatabaseException,
+    ErrorCode,
+    NotFoundException,
+    ValidationException,
+)
 from app.crud.product import (
     PRODUCT_DETAIL_JOINS,
     PRODUCT_LIST_JOINS,
@@ -47,7 +54,7 @@ from app.schemas.product import (
     VariantTypeRead,
     VariantTypeUpdate,
 )
-from app.services.cloudflare_service import cloudflare_image_service
+from app.services.storage_service import storage_service
 
 
 class ProductService:
@@ -178,7 +185,6 @@ class ProductService:
                     error_code=ErrorCode.PRODUCT_ALREADY_EXISTS,
                 )
         await self.get_product(session=session, product_id=product_id, check=True)
-        print(payload.model_dump(exclude_unset=True))
         updated = await crud_product.update(
             db=session,
             id=product_id,
@@ -191,11 +197,6 @@ class ProductService:
             raise RuntimeError("Failed to update product")
 
         return updated
-
-    async def delete_product(self, *, session: AsyncSession, product_id: int):
-        await self.get_product(session=session, product_id=product_id, check=True)
-
-        await crud_product.delete(db=session, id=product_id)
 
     async def list_products(
         self,
@@ -232,30 +233,10 @@ class ProductService:
         )
 
         result["data"] = [
-            ProductCardRead(
-                id=item.id,
-                title=item.title,
-                slug=item.slug,
-                short_description=item.short_description,
-                medium=item.medium,
-                category=item.category,
-                price=item.price,
-                primary_image=item.primary_image,
-            )
-            for item in result["data"]
+            ProductCardRead.model_validate(item) for item in result["data"]
         ]
 
         return result
-
-    # return await crud_product.get_multi_with_relations(
-    #     db=session,
-    #     offset=compute_offset(page, page_size) if page else 0,
-    #     limit=page_size,
-    #     schema_to_select=ProductListRead,
-    #     return_total_count=True,
-    #     relationships=PRODUCT_RELATIONS,
-    #     **filters,
-    # )
 
     async def list_published_products(
         self, *, session: AsyncSession, page: int = 1, page_size: int = 20
@@ -303,51 +284,85 @@ class ProductService:
         payload: ProductCreateRequest,
         files: list[UploadFile] | None = None,
     ) -> ProductDetailRead:
+        errors: dict[str, list[str]] = {}
+
+        # ── Validations ──────────────────────────────────────────────────────
+
+        # 1. Variants
+        if not payload.variants:
+            errors["variants"] = ["At least one variant is required"]
+        else:
+            default_count = sum(1 for v in payload.variants if v.is_default)
+            if default_count != 1:
+                errors["variants"] = ["Exactly one variant must be marked as default"]
+
+        # 2. Images
+        if not payload.images and not files:
+            errors["images"] = ["At least one image is required"]
+        else:
+            primary_count = sum(1 for img in payload.images if img.is_primary)
+            if primary_count != 1:
+                errors["images"] = ["Exactly one image must be marked as primary"]
+
+        if errors:
+            raise ValidationException(message="Validation failed", details=errors)
+
+        # ── 1. Create Product ────────────────────────────────────────────────
+
         product = await self.create_product(session=session, payload=payload.product)
 
-        #
-        # Variants
-        #
+        # ── 2. Create Variants ───────────────────────────────────────────────
 
-        for variant in payload.variants:
+        for v_state in payload.variants:
             await product_variant_service.create_variant(
-                session=session, product_id=product.id, payload=variant
-            )
-
-        #
-        # External Images
-        #
-
-        for image in payload.external_images:
-            await crud_product_image.create(
-                db=session,
-                object=ProductImageCreate(
-                    product_id=product.id,
-                    image_url=image.image_url,
-                    alt_text=image.alt_text,
-                    is_primary=image.is_primary,
-                    sort_order=image.sort_order,
-                    source_type=ImageSourceType.EXTERNAL_URL,
+                session=session,
+                product_id=product.id,
+                payload=ProductVariantCreate(
+                    variant_type_id=v_state.variant_type_id,
+                    price=v_state.price,
+                    width=v_state.width,
+                    height=v_state.height,
+                    dimension_unit=v_state.dimension_unit,
+                    stock_quantity=v_state.stock_quantity,
+                    is_default=v_state.is_default,
+                    is_available=v_state.is_available,
+                    sku=v_state.sku,
                 ),
             )
 
-        #
-        # Uploaded Images
-        #
+        # ── 3. Handle Images ─────────────────────────────────────────────────
 
+        # Upload files first if any
+        uploaded_urls = []
         if files:
-            image_urls = await cloudflare_image_service.upload_images(files)
+            uploaded_urls = await storage_service.upload_images(files)
 
-            for index, image_url in enumerate(image_urls):
-                await crud_product_image.create(
-                    db=session,
-                    object=ProductImageCreate(
-                        product_id=product.id,
-                        image_url=image_url,
-                        sort_order=index,
-                        source_type=ImageSourceType.UPLOAD,
-                    ),
-                )
+        for img_state in payload.images:
+            image_url = img_state.image_url
+            source_type = ImageSourceType.EXTERNAL_URL
+
+            # If it's a file upload reference
+            if img_state.file_index is not None:
+                if img_state.file_index < len(uploaded_urls):
+                    image_url = uploaded_urls[img_state.file_index]
+                    source_type = ImageSourceType.UPLOAD
+                else:
+                    continue  # Should not happen with proper frontend logic
+
+            if not image_url:
+                continue
+
+            await product_image_service.add_image(
+                session=session,
+                product_id=product.id,
+                payload=ProductImageInput(
+                    image_url=image_url,
+                    alt_text=img_state.alt_text,
+                    is_primary=img_state.is_primary,
+                    sort_order=img_state.sort_order,
+                ),
+                source_type=source_type,
+            )
 
         return await self.get_product_detail(
             session=session, product_id=product.id, check=True
@@ -361,80 +376,180 @@ class ProductService:
         payload: ProductUpdateRequest,
         files: list[UploadFile] | None = None,
     ) -> ProductDetailRead:
+        errors: dict[str, list[str]] = {}
+
+        # ── 1. Validations ───────────────────────────────────────────────────
+
+        if not payload.variants:
+            errors["variants"] = ["At least one variant is required"]
+        else:
+            default_count = sum(1 for v in payload.variants if v.is_default)
+            if default_count != 1:
+                errors["variants"] = ["Exactly one variant must be marked as default"]
+
+        if not payload.images and not files:
+            errors["images"] = ["At least one image is required"]
+        else:
+            primary_count = sum(1 for img in payload.images if img.is_primary)
+            if primary_count != 1:
+                errors["images"] = ["Exactly one image must be marked as primary"]
+
+        if errors:
+            raise ValidationException(message="Validation failed", details=errors)
+
+        # Fetch existing state for diffing
+        existing = await self.get_product_detail(
+            session=session, product_id=product_id, check=True
+        )
+
+        # ── 2. Update Core Product ───────────────────────────────────────────
+
         await self.update_product(
             session=session, product_id=product_id, payload=payload.product
         )
 
-        #
-        # Delete variants
-        #
+        # ── 3. Sync Variants ─────────────────────────────────────────────────
 
-        for variant_id in payload.deleted_variant_ids:
+        payload_variant_ids = {v.id for v in payload.variants if v.id}
+        existing_variant_ids = {v.id for v in existing.variants}
+
+        # Deletions
+        for v_id in existing_variant_ids - payload_variant_ids:
             await product_variant_service.delete_variant(
-                session=session, variant_id=variant_id
+                session=session, variant_id=v_id
             )
 
-        #
-        # Delete images
-        #
-
-        for image_id in payload.deleted_image_ids:
-            await product_image_service.delete_image(session=session, image_id=image_id)
-
-        #
-        # Variants
-        #
-
-        for variant in payload.variants:
-            if getattr(variant, "id", None):
+        # Updates & Creations
+        for v_state in payload.variants:
+            if v_state.id:
+                # Update
                 await product_variant_service.update_variant(
-                    session=session, variant_id=variant.id, payload=variant
+                    session=session,
+                    variant_id=v_state.id,
+                    payload=ProductVariantUpdate(**v_state.model_dump(exclude={"id"})),
                 )
-
             else:
+                # Create
                 await product_variant_service.create_variant(
-                    session=session, product_id=product_id, payload=variant
+                    session=session,
+                    product_id=product_id,
+                    payload=ProductVariantCreate(**v_state.model_dump(exclude={"id"})),
                 )
 
-        #
-        # New External Images
-        #
+        # ── 4. Sync Images ───────────────────────────────────────────────────
 
-        for image in payload.external_images:
-            await crud_product_image.create(
-                db=session,
-                object=ProductImageCreate(
-                    product_id=product_id,
-                    image_url=image.image_url,
-                    alt_text=image.alt_text,
-                    is_primary=image.is_primary,
-                    sort_order=image.sort_order,
-                    source_type=ImageSourceType.EXTERNAL_URL,
-                ),
-            )
+        payload_image_ids = {img.id for img in payload.images if img.id}
+        existing_images_map = {img.id: img for img in existing.images}
 
-        #
-        # New Uploaded Images
-        #
+        # Deletions (and S3 cleanup)
+        deleted_keys = []
+        for img_id in existing_images_map.keys() - payload_image_ids:
+            img = existing_images_map[img_id]
+            if img.source_type == ImageSourceType.UPLOAD:
+                try:
+                    key = img.image_url.split(f"/{settings.S3_BUCKET_NAME}/", 1)[1]
+                    deleted_keys.append(key)
+                except (IndexError, AttributeError):
+                    pass
+            await product_image_service.delete_image(session=session, image_id=img_id)
 
+        if deleted_keys:
+            await storage_service.delete_files(deleted_keys)
+
+        # Upload new files
+        uploaded_urls = []
         if files:
-            image_urls = await cloudflare_image_service.upload_images(files)
+            uploaded_urls = await storage_service.upload_images(files)
 
-            for image_url in image_urls:
-                await crud_product_image.create(
-                    db=session,
-                    object=ProductImageCreate(
-                        product_id=product_id,
-                        image_url=image_url,
-                        alt_text=None,
-                        is_primary=False,
-                        source_type=ImageSourceType.UPLOAD,
+        # Updates & Creations
+        for img_state in payload.images:
+            if img_state.id:
+                # Update existing
+                await product_image_service.update_image(
+                    session=session,
+                    image_id=img_state.id,
+                    payload=ProductImageUpdate(
+                        alt_text=img_state.alt_text,
+                        is_primary=img_state.is_primary,
+                        sort_order=img_state.sort_order,
                     ),
                 )
+            else:
+                # New image (External or Uploaded)
+                image_url = img_state.image_url
+                source_type = ImageSourceType.EXTERNAL_URL
+
+                if img_state.file_index is not None:
+                    if img_state.file_index < len(uploaded_urls):
+                        image_url = uploaded_urls[img_state.file_index]
+                        source_type = ImageSourceType.UPLOAD
+                    else:
+                        continue
+
+                if image_url:
+                    await product_image_service.add_image(
+                        session=session,
+                        product_id=product_id,
+                        payload=ProductImageInput(
+                            image_url=image_url,
+                            alt_text=img_state.alt_text,
+                            is_primary=img_state.is_primary,
+                            sort_order=img_state.sort_order,
+                        ),
+                        source_type=source_type,
+                    )
 
         return await self.get_product_detail(
             session=session, product_id=product_id, check=True
         )
+
+    async def delete_product(
+        self,
+        *,
+        session: AsyncSession,
+        product_id: int,
+    ) -> bool:
+        product = await self.get_product_detail(
+            session=session,
+            product_id=product_id,
+            check=True,
+        )
+
+        # Collect S3 keys for all uploaded images
+        keys: list[str] = []
+        for image in product.images:
+            if image.source_type == ImageSourceType.UPLOAD and image.image_url:
+                try:
+                    key = image.image_url.split(f"/{settings.S3_BUCKET_NAME}/", 1)[1]
+                    keys.append(key)
+                except (IndexError, AttributeError):
+                    pass
+
+        # Delete from S3
+        if keys:
+            await storage_service.delete_files(keys)
+
+        # Delete from DB (variants and images deleted via cascade)
+        try:
+            await crud_product.delete(
+                db=session,
+                id=product_id,
+            )
+
+            return True
+
+        except NoResultFound as exc:
+            raise NotFoundException(
+                resource="Product",
+                identifier=product_id,
+                error_code=ErrorCode.PRODUCT_NOT_FOUND,
+            ) from exc
+
+        except Exception as exc:
+            raise DatabaseException(
+                message="Failed to delete product",
+                details=str(exc),
+            ) from exc
 
 
 class ProductMediumService:
@@ -780,6 +895,7 @@ class ProductVariantService:
         variant = await self.get_product_variant(
             session=session, filter=ProductVariantCheckDB(id=variant_id), check=True
         )
+        variant_type = None
 
         if payload.variant_type_id is not None:
             variant_type = await variant_type_service.get_variant_type(
@@ -793,6 +909,11 @@ class ProductVariantService:
         )
         check_width = payload.width if payload.width is not None else variant.width
         check_height = payload.height if payload.height is not None else variant.height
+        check_dimension_unit = (
+            payload.dimension_unit.value
+            if payload.dimension_unit
+            else variant.dimension_unit.value
+        )
 
         existing = await self.get_product_variant(
             session=session,
@@ -801,6 +922,7 @@ class ProductVariantService:
                 variant_type_id=check_variant_type_id,
                 width=check_width,
                 height=check_height,
+                dimension_unit=check_dimension_unit,
             ),
         )
 
@@ -813,22 +935,27 @@ class ProductVariantService:
             raise ConflictException(
                 message=(
                     f"Variant '{variant_name}' "
-                    f"with size {payload.width} × {payload.height} "
-                    f"{payload.dimension_unit.value} already exists"
+                    f"with size {check_width} × {check_height} "
+                    f"{check_dimension_unit} "
+                    f"already exists"
                 ),
                 error_code=ErrorCode.PRODUCT_VARIANT_ALREADY_EXISTS,
             )
 
         if payload.is_default is True:
-            await crud_product_variant.update(
-                db=session,
-                object={"is_default": False},
-                allow_multiple=True,
-                product_id=variant.product_id,
-                id__ne=variant_id,
-            )
+            try:
+                await crud_product_variant.update(
+                    db=session,
+                    object={"is_default": False},
+                    allow_multiple=True,
+                    product_id=variant.product_id,
+                    id__ne=variant_id,
+                )
+            except NoResultFound:
+                pass
+
         sku_exists = await crud_product_variant.exists(
-            db=session, sku=payload.sku, id__not=variant_id
+            db=session, sku=payload.sku, id__ne=variant_id
         )
         if sku_exists:
             raise ConflictException(
@@ -836,16 +963,22 @@ class ProductVariantService:
                 error_code=ErrorCode.PRODUCT_VARIANT_SKU_ALREADY_EXISTS,
             )
 
-        updated = await crud_product_variant.update(
-            db=session,
-            id=variant_id,
-            object=payload.model_dump(exclude_unset=True),
-            schema_to_select=ProductVariantRead,
-            return_as_model=True,
-        )
+        try:
+            updated = await crud_product_variant.update(
+                db=session,
+                id=variant_id,
+                object=payload.model_dump(exclude_unset=True),
+                schema_to_select=ProductVariantRead,
+                return_as_model=True,
+            )
 
-        if updated is None:
-            raise RuntimeError("Failed to update variant")
+        except NoResultFound:
+            raise ValidationException(  # noqa: B904
+                message="Validation failed",
+                details={
+                    "payload.variants": [f"Variant {variant_id} no longer exists."]
+                },
+            )
 
         return updated
 
@@ -925,30 +1058,42 @@ class ProductImageService:
         return image
 
     async def add_image(
-        self, *, session: AsyncSession, product_id: int, payload: ProductImageInput
+        self,
+        *,
+        session: AsyncSession,
+        product_id: int,
+        payload: ProductImageInput,
+        source_type: ImageSourceType = ImageSourceType.EXTERNAL_URL,
     ):
         await product_service.get_product(
             session=session, product_id=product_id, check=True
         )
 
         if payload.is_primary is True:
-            await crud_product_image.update(
-                db=session,
-                object={"is_primary": False},
-                allow_multiple=True,
-                product_id=product_id,
-            )
-
-        data = payload.model_dump()
-        data["product_id"] = product_id
+            try:
+                await crud_product_image.update(
+                    db=session,
+                    object={"is_primary": False},
+                    allow_multiple=True,
+                    product_id=product_id,
+                )
+            except NoResultFound:
+                pass
 
         image_count = await crud_product_image.count(db=session, product_id=product_id)
 
         if image_count == 0:
-            data["is_primary"] = True
+            payload.is_primary = True
         image = await crud_product_image.create(
             db=session,
-            object=data,
+            object=ProductImageCreate(
+                product_id=product_id,
+                image_url=payload.image_url,
+                alt_text=payload.alt_text,
+                is_primary=payload.is_primary,
+                sort_order=payload.sort_order,
+                source_type=source_type,
+            ),
             schema_to_select=ProductImageRead,
             return_as_model=True,
         )
@@ -964,10 +1109,17 @@ class ProductImageService:
         image = await self.get_image(session=session, image_id=image_id, check=True)
 
         if payload.is_primary is False and image.is_primary:
-            raise ConflictException(
-                message="A product must have one primary image",
-                error_code=ErrorCode.CONFLICT,
+            primary_count = await crud_product_image.count(
+                db=session,
+                product_id=image.product_id,
+                is_primary=True,
             )
+
+            if primary_count <= 1:
+                raise ConflictException(
+                    message="A product must have one primary image",
+                    error_code=ErrorCode.CONFLICT,
+                )
 
         if payload.is_primary is True:
             await crud_product_image.update(
@@ -1004,7 +1156,13 @@ class ProductImageService:
                 error_code=ErrorCode.CONFLICT,
             )
 
-        await crud_product_image.delete(db=session, id=image_id)
+        deleted = await crud_product_image.delete(
+            db=session,
+            id=image_id,
+        )
+
+        if not deleted:
+            raise RuntimeError("Failed to delete image")
 
         if image.is_primary:
             next_image = await crud_product_image.get(

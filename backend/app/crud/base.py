@@ -227,6 +227,8 @@ class BaseCRUD(FastCRUD):
         joins_config,
         offset=0,
         limit=20,
+        sort_columns=None,
+        sort_orders=None,
         **filters,
     ):
         return await self.get_multi_joined(
@@ -237,6 +239,8 @@ class BaseCRUD(FastCRUD):
             joins_config=joins_config,
             offset=offset,
             limit=limit,
+            sort_columns=sort_columns or ["created_at"],
+            sort_orders=sort_orders or ["desc"],
             return_total_count=True,
             **filters,
         )

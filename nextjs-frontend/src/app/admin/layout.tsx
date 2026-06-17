@@ -1,14 +1,15 @@
 "use client";
 
-import { getErrorMessage } from "@/lib/error-handler";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useAuth } from "@/lib/auth-store";
+import { getErrorMessage } from "@/lib/error-handler";
 import { cn } from "@/lib/utils";
 import {
   Bell,
   BookOpen,
   ChevronRight,
   LayoutDashboard,
+  Library,
   LogOut,
   Menu,
   Package,
@@ -56,6 +57,7 @@ export default function AdminLayout({
     },
     { label: "Courses", href: "/admin/courses", icon: BookOpen },
     { label: "Products", href: "/admin/products", icon: Package },
+    { label: "Catalog", href: "/admin/catalog", icon: Library },
     { label: "Orders", href: "/admin/orders", icon: ShoppingBag },
     { label: "Users", href: "/admin/users", icon: Users },
     { label: "Settings", href: "/admin/settings", icon: Settings },
@@ -85,7 +87,7 @@ export default function AdminLayout({
         {/* Sidebar */}
         <aside
           className={cn(
-            "fixed inset-y-0 left-0 bg-muted-light/80 backdrop-blur-xl border-r border-border z-50 lg:static lg:inset-0 flex flex-col overflow-hidden transition-width duration-300 ease-in-out",
+            "fixed inset-y-0 left-0 glass-luxury border-r border-gold/10 z-50 lg:static lg:inset-0 flex flex-col overflow-hidden transition-width duration-300 ease-in-out",
             sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           )}
           style={{ width: sidebarCollapsed ? "5rem" : "18rem" }}
@@ -94,7 +96,7 @@ export default function AdminLayout({
           <div className="h-20 flex items-center justify-center px-4 border-b border-border shrink-0 overflow-hidden">
             <Link href="/admin" className="flex items-center justify-center">
               {sidebarCollapsed ? (
-                <div className="flex items-center justify-center w-10 h-10 bg-dark border border-border rounded-lg font-extrabold text-lg transition-all duration-300">
+                <div className="flex items-center justify-center w-10 h-10 bg-dark border border-border rounded font-extrabold text-lg transition-all duration-300">
                   <span className="text-text-main">A</span>
                   <span className="text-gold">K</span>
                 </div>
@@ -114,14 +116,18 @@ export default function AdminLayout({
           {/* Scrollable Nav Area */}
           <nav className="flex-1 overflow-y-auto py-8 px-4 space-y-1 scrollbar-hide overflow-x-hidden">
             {menuItems.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive =
+                item.href === "/admin"
+                  ? pathname === "/admin"
+                  : pathname === item.href ||
+                    pathname.startsWith(item.href + "/");
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all group relative",
+                    "flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all group relative rounded",
                     isActive
                       ? "bg-gold text-dark"
                       : "text-text-muted hover:text-text-main hover:bg-muted",
@@ -153,7 +159,7 @@ export default function AdminLayout({
 
                   {/* Tooltip for collapsed state */}
                   {sidebarCollapsed && (
-                    <div className="absolute left-full ml-4 px-2 py-1 bg-gold text-dark text-xs font-mono tracking-widest uppercase opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap hidden lg:block border border-dark">
+                    <div className="absolute left-full ml-4 px-2 py-1 bg-gold text-dark text-xs font-mono tracking-widest uppercase opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 whitespace-nowrap hidden lg:block border border-dark rounded">
                       {item.label}
                     </div>
                   )}
@@ -171,13 +177,13 @@ export default function AdminLayout({
           >
             <div
               className={cn(
-                "bg-dark/50 flex items-center border border-border/50 transition-all duration-300 overflow-hidden",
+                " flex items-center border border-border/50 glass-input transition-all duration-300 overflow-hidden rounded",
                 sidebarCollapsed
-                  ? "justify-center p-2 rounded-lg"
-                  : "p-4 mb-4 gap-3"
+                  ? "justify-center rounded-lg bg-transparent "
+                  : "mb-4 gap-3"
               )}
             >
-              <div className="w-10 h-10 bg-muted border border-border flex items-center justify-center text-gold font-bold text-sm shrink-0">
+              <div className="w-10 h-10 bg-muted border border-border flex items-center justify-center text-gold font-bold text-sm shrink-0 rounded">
                 {(user?.full_name ?? "Admin")
                   .split(" ")
                   .filter(Boolean)
@@ -228,7 +234,7 @@ export default function AdminLayout({
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {/* Top Header - Fixed */}
-          <header className="h-20 bg-muted-light/80 backdrop-blur-xl border-b border-border flex items-center justify-between px-4 lg:px-8 shrink-0 z-30">
+          <header className="h-20 glass-luxury border-b border-gold/10 flex items-center justify-between px-4 lg:px-8 shrink-0 z-30">
             <div className="flex items-center gap-4">
               <button
                 className="lg:hidden text-text-muted hover:text-text-main"
@@ -250,7 +256,7 @@ export default function AdminLayout({
                 )}
               </button>
 
-              <div className="hidden md:flex items-center gap-2 bg-dark/50 px-4 py-2 border border-border focus-within:border-gold transition-colors ml-2">
+              <div className="hidden md:flex items-center gap-2 glass-input px-4 py-2 border focus-within:border-gold transition-colors ml-2 rounded">
                 <Search size={16} className="text-text-muted" />
                 <input
                   type="text"
@@ -268,7 +274,7 @@ export default function AdminLayout({
 
               <Link
                 href="/dashboard"
-                className="hidden sm:block text-label font-mono tracking-widest uppercase text-gold hover:text-text-main transition-colors border border-gold/30 px-3 py-1.5"
+                className="hidden sm:block text-label font-mono tracking-widest uppercase text-gold hover:text-text-main transition-colors border border-gold/30 px-3 py-1.5 rounded"
               >
                 Student View
               </Link>

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
-import { Search, Menu, X, User, Heart, ShoppingBag } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-store";
 import { getSafeReturnTo } from "@/lib/auth-utils";
+import { cn } from "@/lib/utils";
+import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -37,16 +37,16 @@ export function Navbar() {
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
           scrolled
-            ? "bg-dark/70 backdrop-blur-xl border-b border-border"
+            ? "bg-background/80 backdrop-blur-xl border-b border-border shadow-md"
             : "bg-transparent"
         )}
       >
         <div className="max-w-360 mx-auto px-8 lg:px-16 flex items-center justify-between h-20">
-          <Link href="/" className="flex flex-col leading-none">
-            <span className="text-text-main text-xl font-extrabold tracking-[0.12em] uppercase">
+          <Link href="/" className="flex flex-col leading-none group">
+            <span className="text-foreground text-xl font-extrabold tracking-[0.12em] uppercase group-hover:text-primary transition-colors">
               Artist
             </span>
-            <span className="text-gold text-tiny font-mono tracking-[0.25em] uppercase -mt-0.5">
+            <span className="text-primary text-2xs font-mono tracking-[0.25em] uppercase -mt-0.5">
               Kashi
             </span>
           </Link>
@@ -57,10 +57,10 @@ export function Navbar() {
                 key={l.href}
                 href={l.href}
                 className={cn(
-                  "text-xs tracking-widest uppercase font-medium transition-colors duration-200",
+                  "text-2xs tracking-[0.2em] uppercase font-bold transition-all duration-300 font-mono",
                   pathname === l.href
-                    ? "text-gold"
-                    : "text-text-muted hover:text-text-main"
+                    ? "text-primary"
+                    : "text-text-muted hover:text-foreground"
                 )}
               >
                 {l.label}
@@ -68,46 +68,52 @@ export function Navbar() {
             ))}
           </div>
 
-          <div className="hidden lg:flex items-center gap-6">
+          <div className="hidden lg:flex items-center gap-8">
             <Link
               href="/search"
-              className="text-text-muted hover:text-text-main transition-colors"
+              className="text-text-muted hover:text-primary transition-all duration-300"
             >
-              <Search size={20} />
+              <Search size={18} />
             </Link>
 
             <Link
               href="/wishlist"
               className={cn(
-                "text-text-muted hover:text-text-main transition-colors",
-                pathname === "/wishlist" && "text-gold"
+                "transition-all duration-300",
+                pathname === "/wishlist"
+                  ? "text-primary"
+                  : "text-text-muted hover:text-primary"
               )}
             >
-              <Heart size={20} />
+              <Heart size={18} />
             </Link>
 
             <Link
               href="/cart"
               className={cn(
-                "text-text-muted hover:text-text-main transition-colors",
-                pathname === "/cart" && "text-gold"
+                "transition-all duration-300",
+                pathname === "/cart"
+                  ? "text-primary"
+                  : "text-text-muted hover:text-primary"
               )}
             >
-              <ShoppingBag size={20} />
+              <ShoppingBag size={18} />
             </Link>
+
+            <div className="w-px h-4 bg-border mx-2" />
 
             {user ? (
               <Link
                 href="/dashboard"
-                className="text-gold hover:text-text-main transition-colors"
+                className="text-primary hover:text-foreground transition-all duration-300"
               >
-                <User size={24} />
+                <User size={20} />
               </Link>
             ) : (
               <>
                 <Link
                   href={loginHref}
-                  className="text-text-muted hover:text-text-main transition-colors text-xs tracking-widest uppercase font-medium"
+                  className="text-text-muted hover:text-primary transition-all duration-300 text-2xs tracking-[0.2em] uppercase font-bold font-mono"
                 >
                   Login
                 </Link>
@@ -120,16 +126,16 @@ export function Navbar() {
               <Link
                 href="/dashboard"
                 onClick={() => setMenuOpen(false)}
-                className="text-gold hover:text-text-main transition-colors"
+                className="text-primary hover:text-foreground transition-colors"
               >
-                <User size={24} />
+                <User size={22} />
               </Link>
             ) : null}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="text-text-main"
+              className="text-foreground p-1"
             >
-              {menuOpen ? <X size={22} /> : <Menu size={22} />}
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
@@ -138,41 +144,42 @@ export function Navbar() {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 bg-dark flex flex-col justify-center px-10 lg:hidden"
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed inset-0 z-40 bg-background flex flex-col justify-center px-12 lg:hidden"
           >
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-10">
               {links.map((l) => (
                 <Link
                   key={l.href}
                   href={l.href}
                   onClick={() => setMenuOpen(false)}
-                  className="text-4xl font-extrabold tracking-tight text-text-main text-left hover:text-gold transition-colors"
+                  className="text-5xl font-extrabold tracking-tighter text-foreground text-left hover:text-primary transition-colors italic uppercase"
                 >
                   {l.label}
                 </Link>
               ))}
+              <div className="h-px bg-border my-4" />
               <Link
                 href="/search"
                 onClick={() => setMenuOpen(false)}
-                className="text-4xl font-extrabold tracking-tight text-text-main text-left hover:text-gold transition-colors"
+                className="text-2xl font-bold tracking-widest text-text-muted hover:text-primary transition-colors uppercase font-mono"
               >
                 Search
               </Link>
               <Link
                 href="/wishlist"
                 onClick={() => setMenuOpen(false)}
-                className="text-4xl font-extrabold tracking-tight text-text-main text-left hover:text-gold transition-colors"
+                className="text-2xl font-bold tracking-widest text-text-muted hover:text-primary transition-colors uppercase font-mono"
               >
                 Wishlist
               </Link>
               <Link
                 href="/cart"
                 onClick={() => setMenuOpen(false)}
-                className="text-4xl font-extrabold tracking-tight text-text-main text-left hover:text-gold transition-colors"
+                className="text-2xl font-bold tracking-widest text-text-muted hover:text-primary transition-colors uppercase font-mono"
               >
                 Cart
               </Link>
@@ -180,7 +187,7 @@ export function Navbar() {
                 <Link
                   href={loginHref}
                   onClick={() => setMenuOpen(false)}
-                  className="text-4xl font-extrabold tracking-tight text-gold text-left hover:text-text-main transition-colors"
+                  className="text-2xl font-bold tracking-widest text-primary hover:text-foreground transition-colors uppercase font-mono"
                 >
                   Login
                 </Link>

@@ -58,3 +58,14 @@ export async function unwrapPaginated<TData>(
     pagination: body.pagination!,
   };
 }
+
+
+export async function unwrapVoid(
+  call: SdkCall<unknown>
+): Promise<void> {
+  const { data: body, error } = await call;
+
+  if (error || !body) {
+    throw error ?? new Error("Request failed");
+  }
+}

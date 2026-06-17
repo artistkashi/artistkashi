@@ -234,7 +234,10 @@ export type BasicHealthData = {
  * Body_ADMIN-create_product
  */
 export type BodyAdminCreateProduct = {
-    payload: ProductCreateRequest;
+    /**
+     * Payload
+     */
+    payload: string;
     /**
      * Files
      */
@@ -245,7 +248,10 @@ export type BodyAdminCreateProduct = {
  * Body_ADMIN-update_product
  */
 export type BodyAdminUpdateProduct = {
-    payload: ProductUpdateRequest;
+    /**
+     * Payload
+     */
+    payload: string;
     /**
      * Files
      */
@@ -893,6 +899,7 @@ export type ProductBase = {
     is_original_available?: boolean;
     medium?: ProductMediumRead | null;
     category?: ProductCategoryRead | null;
+    status?: ProductStatus;
     /**
      * Is Sold
      */
@@ -925,6 +932,7 @@ export type ProductCardRead = {
     is_original_available?: boolean;
     medium?: ProductMediumRead | null;
     category?: ProductCategoryRead | null;
+    status?: ProductStatus;
     /**
      * Price
      */
@@ -1100,11 +1108,11 @@ export type ProductCreateRequest = {
     /**
      * Variants
      */
-    variants?: Array<ProductVariantCreate>;
+    variants: Array<ProductVariantState>;
     /**
-     * External Images
+     * Images
      */
-    external_images?: Array<ProductImageInput>;
+    images: Array<ProductImageState>;
 };
 
 /**
@@ -1149,6 +1157,7 @@ export type ProductDetailRead = {
     is_original_available: boolean;
     medium?: ProductMediumRead | null;
     category?: ProductCategoryRead | null;
+    status: ProductStatus;
     /**
      * Description
      */
@@ -1177,7 +1186,6 @@ export type ProductDetailRead = {
      * Weight Grams
      */
     weight_grams?: number | null;
-    status: ProductStatus;
     /**
      * Is Featured
      */
@@ -1217,32 +1225,6 @@ export type ProductDetailRead = {
 };
 
 /**
- * ProductImageInput
- *
- * Represents one external image URL submitted in the product form.
- * Uploaded files are handled separately as multipart file fields
- * and never go through this schema.
- */
-export type ProductImageInput = {
-    /**
-     * Image Url
-     */
-    image_url?: string | null;
-    /**
-     * Alt Text
-     */
-    alt_text?: string | null;
-    /**
-     * Is Primary
-     */
-    is_primary?: boolean;
-    /**
-     * Sort Order
-     */
-    sort_order?: number;
-};
-
-/**
  * ProductImageRead
  */
 export type ProductImageRead = {
@@ -1279,6 +1261,36 @@ export type ProductImageRead = {
      */
     sort_order: number;
     source_type: ImageSourceType;
+};
+
+/**
+ * ProductImageState
+ */
+export type ProductImageState = {
+    /**
+     * Id
+     */
+    id?: number | null;
+    /**
+     * Image Url
+     */
+    image_url?: string | null;
+    /**
+     * File Index
+     */
+    file_index?: number | null;
+    /**
+     * Alt Text
+     */
+    alt_text?: string | null;
+    /**
+     * Is Primary
+     */
+    is_primary?: boolean;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
 };
 
 /**
@@ -1435,58 +1447,11 @@ export type ProductUpdateRequest = {
     /**
      * Variants
      */
-    variants?: Array<ProductVariantUpdate>;
+    variants: Array<ProductVariantState>;
     /**
-     * External Images
+     * Images
      */
-    external_images?: Array<ProductImageInput>;
-    /**
-     * Deleted Variant Ids
-     */
-    deleted_variant_ids?: Array<number>;
-    /**
-     * Deleted Image Ids
-     */
-    deleted_image_ids?: Array<number>;
-};
-
-/**
- * ProductVariantCreate
- */
-export type ProductVariantCreate = {
-    /**
-     * Variant Type Id
-     */
-    variant_type_id: number;
-    /**
-     * Width
-     */
-    width?: number | string | null;
-    /**
-     * Height
-     */
-    height?: number | string | null;
-    dimension_unit?: DimensionUnit | null;
-    /**
-     * Sku
-     */
-    sku?: string | null;
-    /**
-     * Price
-     */
-    price: number | string;
-    /**
-     * Stock Quantity
-     */
-    stock_quantity?: number;
-    /**
-     * Is Default
-     */
-    is_default?: boolean;
-    /**
-     * Is Available
-     */
-    is_available?: boolean;
+    images: Array<ProductImageState>;
 };
 
 /**
@@ -1553,9 +1518,9 @@ export type ProductVariantRead = {
 };
 
 /**
- * ProductVariantUpdate
+ * ProductVariantState
  */
-export type ProductVariantUpdate = {
+export type ProductVariantState = {
     /**
      * Id
      */
@@ -1563,7 +1528,11 @@ export type ProductVariantUpdate = {
     /**
      * Variant Type Id
      */
-    variant_type_id?: number | null;
+    variant_type_id: number;
+    /**
+     * Price
+     */
+    price: number | string;
     /**
      * Width
      */
@@ -1572,27 +1541,23 @@ export type ProductVariantUpdate = {
      * Height
      */
     height?: number | string | null;
-    dimension_unit?: DimensionUnit | null;
+    dimension_unit?: DimensionUnit;
+    /**
+     * Stock Quantity
+     */
+    stock_quantity?: number;
+    /**
+     * Is Default
+     */
+    is_default?: boolean;
+    /**
+     * Is Available
+     */
+    is_available?: boolean;
     /**
      * Sku
      */
     sku?: string | null;
-    /**
-     * Price
-     */
-    price?: number | string | null;
-    /**
-     * Stock Quantity
-     */
-    stock_quantity?: number | null;
-    /**
-     * Is Default
-     */
-    is_default?: boolean | null;
-    /**
-     * Is Available
-     */
-    is_available?: boolean | null;
 };
 
 /**
@@ -2882,6 +2847,7 @@ export type ProductBaseWritable = {
     is_original_available?: boolean;
     medium?: ProductMediumRead | null;
     category?: ProductCategoryRead | null;
+    status?: ProductStatus;
 };
 
 /**
@@ -2910,6 +2876,7 @@ export type ProductCardReadWritable = {
     is_original_available?: boolean;
     medium?: ProductMediumRead | null;
     category?: ProductCategoryRead | null;
+    status?: ProductStatus;
     /**
      * Price
      */
@@ -2962,6 +2929,7 @@ export type ProductDetailReadWritable = {
     is_original_available: boolean;
     medium?: ProductMediumRead | null;
     category?: ProductCategoryRead | null;
+    status: ProductStatus;
     /**
      * Description
      */
@@ -2990,7 +2958,6 @@ export type ProductDetailReadWritable = {
      * Weight Grams
      */
     weight_grams?: number | null;
-    status: ProductStatus;
     /**
      * Is Featured
      */

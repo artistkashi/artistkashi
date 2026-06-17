@@ -51,7 +51,7 @@ export function CustomCursor() {
         x: "-50%",
         y: "-50%",
         scale: isHovered ? 1.2 : 1,
-        backgroundColor: isHovered ? "rgba(184, 157, 92, 0.1)" : "transparent",
+        backgroundColor: isHovered ? "var(--color-gold-bg)" : "transparent",
       }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     />

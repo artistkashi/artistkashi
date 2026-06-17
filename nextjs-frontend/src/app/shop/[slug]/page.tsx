@@ -1,0 +1,661 @@
+"use client";
+
+import { unwrap, unwrapPaginated } from "@/api/client-service";
+import { listReviews, productsGetProduct } from "@/api/openapi-client";
+import {
+  ProductVariantRead,
+  ReviewReadPublic,
+} from "@/api/openapi-client/types.gen";
+import { GhostBtn, PrimaryBtn } from "@/components/ui/buttons";
+import { CircularGallery } from "@/components/ui/circular-gallery";
+import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
+import { Skeleton, SkeletonText } from "@/components/ui/Skeleton";
+import { useAuth } from "@/lib/auth-store";
+import { getSafeReturnTo } from "@/lib/auth-utils";
+import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  ArrowRight,
+  Award,
+  Eye,
+  Heart,
+  Image as ImageIcon,
+  MessageSquare,
+  RefreshCcw,
+  Ruler,
+  ShieldCheck,
+  Star,
+  X,
+} from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { use, useEffect, useState } from "react";
+import { toast } from "sonner";
+
+// ─── Custom Hooks ──────────────────────────────────────────────────────────
+
+function useProduct(slug: string) {
+  return useQuery({
+    queryKey: ["product", slug],
+    queryFn: () => unwrap(productsGetProduct({ path: { slug } })),
+    enabled: !!slug,
+    retry: false,
+  });
+}
+
+function useReviews(productId: number | null) {
+  return useQuery({
+    queryKey: ["reviews", productId],
+    queryFn: async () => {
+      const { data } = await unwrapPaginated(
+        listReviews({
+          query: {
+            entity_id: productId!,
+            review_type: "product",
+          },
+        })
+      );
+      return data;
+    },
+    enabled: !!productId,
+  });
+}
+
+// ─── Section Components ──────────────────────────────────────────────────────
+
+function ProductVisualsSection({
+  query,
+}: {
+  query: ReturnType<typeof useProduct>;
+}) {
+  const { data: product, isLoading, error, refetch } = query;
+  const [activeImage, setActiveImage] = useState<string | null>(null);
+  const [zoomed, setZoomed] = useState(false);
+
+  useEffect(() => {
+    if (product) {
+      setActiveImage(
+        product.primary_image || (product.images?.[0]?.image_url ?? null)
+      );
+    }
+  }, [product]);
+
+  // Prevent background scroll when zoomed
+  useEffect(() => {
+    if (zoomed) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [zoomed]);
+
+  const allImages = product?.images?.map((img) => img.image_url) || [];
+  const currentIndex = activeImage ? allImages.indexOf(activeImage) : 0;
+
+  if (isLoading) {
+    return (
+      <>
+        <div className="lg:col-span-1 flex lg:flex-col gap-4 order-2 lg:order-1 overflow-x-auto lg:overflow-x-visible no-scrollbar pb-4 lg:pb-0">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="w-16 h-20 shrink-0" />
+          ))}
+        </div>
+        <div className="lg:col-span-6 order-1 lg:order-2">
+          <div className="relative aspect-4/5 bg-muted-light/5 border border-border/40 overflow-hidden">
+            <Skeleton className="w-full h-full" />
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="lg:col-span-7">
+        <SectionError
+          message={(error as Error).message || "Failed to load visuals"}
+          onRetry={refetch}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Side Thumbnails */}
+      <div className="lg:col-span-1 flex lg:flex-col gap-4 order-2 lg:order-1 overflow-x-auto lg:overflow-x-visible no-scrollbar pb-4 lg:pb-0">
+        {product?.images?.map((img, i) => (
+          <button
+            key={img.id || i}
+            onClick={() => setActiveImage(img.image_url)}
+            className={cn(
+              "w-16 h-20 shrink-0 border transition-all duration-500 overflow-hidden relative rounded",
+              activeImage === img.image_url
+                ? "border-gold scale-105"
+                : "border-border/40 grayscale hover:grayscale-0"
+            )}
+          >
+            <ImageWithFallback
+              src={img.image_url}
+              alt=""
+              unoptimized
+              fill
+              className="object-cover"
+            />
+          </button>
+        ))}
+      </div>
+
+      {/* Main Preview Area */}
+      <div className="lg:col-span-6 order-1 lg:order-2">
+        <motion.div
+          layoutId="main-image"
+          className="relative aspect-4/5 bg-muted-light/5 border border-border/40 overflow-hidden group cursor-zoom-in rounded-sm"
+          onClick={() => activeImage && setZoomed(true)}
+        >
+          <ImageWithFallback
+            src={activeImage}
+            alt={product?.title || "Masterpiece"}
+            unoptimized
+            fill
+            className="object-cover transition-transform duration-1000 group-hover:scale-110"
+          />
+          {activeImage && (
+            <div className="absolute bottom-6 right-6 bg-dark/80 backdrop-blur-md px-4 py-2 border border-gold/20 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded">
+              <span className="text-2xs font-mono text-gold uppercase tracking-widest flex items-center gap-2">
+                <Eye size={12} /> Expand Vision
+              </span>
+            </div>
+          )}
+          {!activeImage && (
+            <div className="w-full h-full flex flex-col items-center justify-center text-text-muted/20 gap-4 bg-dark">
+              <ImageIcon size={48} strokeWidth={1} />
+              <span className="text-2xs font-mono uppercase tracking-widest">
+                Image under curation
+              </span>
+            </div>
+          )}
+        </motion.div>
+      </div>
+
+      {/* 3D Circular Gallery Modal */}
+      <AnimatePresence>
+        {zoomed && allImages.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-1000 bg-dark/98 backdrop-blur-2xl flex flex-col items-center justify-center p-4"
+          >
+            {/* Header / Close */}
+            <div className="absolute top-0 left-0 w-full p-8 flex justify-between items-center z-50">
+              <div className="space-y-1">
+                <h2 className="text-xl font-bold tracking-widest text-text-main uppercase">
+                  {product?.title}
+                </h2>
+                <p className="text-2xs font-mono uppercase tracking-[0.3em] text-gold/60">
+                  Visual Exploration
+                </p>
+              </div>
+              <button
+                onClick={() => setZoomed(false)}
+                className="w-10 h-10 flex items-center justify-center hover:text-gold transition-all text-text-muted"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* The Circulation Section */}
+            <div className="w-full max-w-7xl mt-12 flex-1 flex items-center justify-center">
+              <CircularGallery
+                images={allImages}
+                initialIndex={currentIndex}
+                onIndexChange={(idx) => setActiveImage(allImages[idx])}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+function ProductPurchaseSection({
+  query,
+}: {
+  query: ReturnType<typeof useProduct>;
+}) {
+  const { data: product, isLoading, error, refetch } = query;
+  const { user } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const returnTo = getSafeReturnTo(pathname) ?? "/";
+  const loginHref = `/login?returnTo=${encodeURIComponent(returnTo)}`;
+
+  const [selectedVariant, setSelectedVariant] =
+    useState<ProductVariantRead | null>(null);
+
+  useEffect(() => {
+    if (product?.variants) {
+      const defaultV =
+        product.variants.find((v) => v.is_default) || product.variants[0];
+      setSelectedVariant(defaultV || null);
+    }
+  }, [product]);
+
+  const handleInquire = () => {
+    if (!user) {
+      router.push(loginHref);
+      return;
+    }
+    toast.info("Purchase flow is being curated.");
+  };
+
+  if (isLoading) {
+    return (
+      <div className="lg:col-span-5 order-3 space-y-10">
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+        <Skeleton className="h-10 w-40" />
+        <SkeletonText lines={3} />
+        <div className="space-y-6 pt-6">
+          <div className="grid grid-cols-2 gap-6">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+          <div className="flex flex-col gap-3">
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="lg:col-span-5 order-3">
+        <SectionError
+          message={(error as Error).message || "Failed to load valuation data"}
+          onRetry={refetch}
+        />
+      </div>
+    );
+  }
+
+  if (!product) return null;
+
+  const displayPrice = selectedVariant
+    ? typeof selectedVariant.price === "string"
+      ? parseFloat(selectedVariant.price)
+      : selectedVariant.price
+    : typeof product.price === "string"
+      ? parseFloat(product.price)
+      : (product.price ?? 0);
+
+  return (
+    <div className="lg:col-span-5 order-3 space-y-10">
+      <div className="space-y-4">
+        <div className="inline-flex items-center gap-3 px-3 py-1 bg-gold/5 border border-gold/10 text-2xs font-mono text-gold uppercase tracking-[0.3em]">
+          {product.medium?.name || "Original Work"}
+        </div>
+        <h1 className="text-4xl md:text-5xl font-extrabold text-text-main uppercase tracking-tight leading-none">
+          {product.title}
+        </h1>
+        <div className="flex items-center gap-4 text-xs font-mono text-text-muted uppercase tracking-widest">
+          <span>{product.category?.name}</span>
+          {product.year_created && (
+            <>
+              <span className="w-1 h-1 bg-border/40 rounded-full" />
+              <span>{product.year_created}</span>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="text-4xl font-bold text-gold tracking-tighter">
+        ₹{displayPrice.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+      </div>
+
+      {/* Variant Selection */}
+      <div className="space-y-4">
+        <h3 className="text-2xs font-mono text-text-muted uppercase tracking-[0.2em]">
+          Select Format
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {product.variants?.map((variant) => (
+            <button
+              key={variant.id}
+              onClick={() => setSelectedVariant(variant)}
+              className={cn(
+                "p-4 border text-left transition-all duration-300 group rounded-sm relative overflow-hidden",
+                selectedVariant?.id === variant.id
+                  ? "border-gold bg-gold/5 shadow-[0_0_15px_rgba(212,175,55,0.1)]"
+                  : "border-border/30 hover:border-gold/50"
+              )}
+            >
+              <div className="flex flex-col gap-1 relative z-10">
+                <span
+                  className={cn(
+                    "text-xs font-bold uppercase tracking-widest transition-colors",
+                    selectedVariant?.id === variant.id
+                      ? "text-gold"
+                      : "text-text-main group-hover:text-gold"
+                  )}
+                >
+                  {variant.variant_type_name || "Standard"}
+                </span>
+                {variant.dimensions && (
+                  <span className="text-2xs font-mono text-text-muted uppercase">
+                    {variant.dimensions}
+                  </span>
+                )}
+              </div>
+              {selectedVariant?.id === variant.id && (
+                <motion.div
+                  layoutId="variant-active"
+                  className="absolute inset-0 bg-gold/5"
+                />
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <p className="text-text-muted text-sm leading-relaxed font-light">
+        {product.short_description}
+      </p>
+
+      <div className="space-y-6 pt-6">
+        <div className="grid grid-cols-2 gap-6">
+          <InfoItem
+            icon={<Ruler size={14} />}
+            label="Dimensions"
+            value={selectedVariant?.dimensions || "Inquire for details"}
+          />
+          <InfoItem
+            icon={<ShieldCheck size={14} />}
+            label="Authentication"
+            value={
+              product.certificate_of_authenticity
+                ? "Certified Original"
+                : "Standard Collection"
+            }
+          />
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <PrimaryBtn
+            onClick={handleInquire}
+            className="w-full justify-center py-5"
+          >
+            Inquire to Acquire <ArrowRight size={16} className="ml-2" />
+          </PrimaryBtn>
+          <GhostBtn className="w-full justify-center py-5 border-border/20">
+            <Heart size={16} className="mr-2" /> Preserve to Wishlist
+          </GhostBtn>
+        </div>
+      </div>
+
+      <div className="pt-10 border-t border-border/20 space-y-6">
+        <h3 className="text-xs font-bold text-text-main uppercase tracking-[0.2em]">
+          Archival Details
+        </h3>
+        <div className="grid grid-cols-1 gap-4">
+          {product.style && <DetailRow label="Style" value={product.style} />}
+          {product.subject && (
+            <DetailRow label="Subject" value={product.subject} />
+          )}
+          {product.medium?.name && (
+            <DetailRow label="Medium" value={product.medium.name} />
+          )}
+          <DetailRow
+            label="Availability"
+            value={
+              product.is_original_available
+                ? "Original Available"
+                : "Sold / Collection Only"
+            }
+          />
+          <DetailRow
+            label="Framing"
+            value={
+              product.is_framed
+                ? "Includes Bespoke Frame"
+                : "Unframed / Gallery Wrap"
+            }
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProductNarrativeSection({
+  query,
+}: {
+  query: ReturnType<typeof useProduct>;
+}) {
+  const { data: product, isLoading, error } = query;
+
+  if (isLoading) {
+    return (
+      <div className="mt-32 max-w-3xl mx-auto space-y-10">
+        <div className="h-px bg-gold/20" />
+        <div className="space-y-8">
+          <Skeleton className="h-8 w-64 mx-auto" />
+          <SkeletonText lines={6} />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product?.description) return null;
+
+  return (
+    <div className="mt-32 max-w-3xl mx-auto space-y-10">
+      <div className="flex items-center gap-6">
+        <div className="h-px flex-1 bg-gold/20" />
+        <Award className="text-gold opacity-40" size={24} />
+        <div className="h-px flex-1 bg-gold/20" />
+      </div>
+      <div className="space-y-8">
+        <h2 className="text-2xl font-bold text-text-main uppercase tracking-widest text-center">
+          Artist's Narrative
+        </h2>
+        <div className="text-text-muted leading-loose text-base font-light first-letter:text-5xl first-letter:font-bold first-letter:text-gold first-letter:mr-3 first-letter:float-left">
+          {product.description}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProductReviewsSection({
+  query,
+}: {
+  query: ReturnType<typeof useReviews>;
+}) {
+  const { data: reviews, isLoading, error, refetch } = query;
+
+  return (
+    <div className="mt-32 max-w-3xl mx-auto space-y-12">
+      <div className="flex justify-between items-center border-b border-gold/10 pb-4">
+        <h3 className="text-xl font-bold text-text-main uppercase tracking-widest flex items-center gap-3">
+          <MessageSquare size={20} className="text-gold" /> Archival Feedback
+        </h3>
+        <button
+          onClick={() => refetch()}
+          className="text-2xs font-mono uppercase tracking-widest text-text-muted hover:text-gold transition-colors flex items-center gap-2 group"
+        >
+          <RefreshCcw
+            size={12}
+            className="group-hover:rotate-180 transition-transform duration-500"
+          />{" "}
+          Refresh
+        </button>
+      </div>
+
+      <div className="space-y-8">
+        {isLoading ? (
+          Array.from({ length: 2 }).map((_, i) => (
+            <div
+              key={i}
+              className="p-8 border border-border/40 bg-dark/5 space-y-4"
+            >
+              <div className="flex justify-between">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-5 w-24" />
+              </div>
+              <SkeletonText lines={3} />
+            </div>
+          ))
+        ) : error ? (
+          <SectionError
+            message={(error as Error).message || "Failed to load reviews"}
+            onRetry={refetch}
+          />
+        ) : !reviews || reviews.length === 0 ? (
+          <div className="py-20 border border-dashed border-border/40 flex flex-col items-center justify-center gap-4 text-center">
+            <MessageSquare size={40} className="text-text-muted opacity-20" />
+            <p className="text-xs font-mono uppercase tracking-widest text-text-muted opacity-40">
+              No archival feedback recorded for this piece yet.
+            </p>
+          </div>
+        ) : (
+          reviews.map((review: ReviewReadPublic) => (
+            <div
+              key={review.id}
+              className="p-8 border border-border bg-dark/10 space-y-6 hover:border-gold/20 transition-all duration-500"
+            >
+              <div className="flex justify-between items-start">
+                <div className="space-y-2">
+                  <p className="text-sm font-bold text-text-main uppercase tracking-widest">
+                    Collector Response
+                  </p>
+                  <div className="flex gap-1">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        size={12}
+                        className={cn(
+                          i < review.rating
+                            ? "text-gold fill-gold"
+                            : "text-border"
+                        )}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <span className="text-2xs font-mono text-text-muted uppercase tracking-tighter">
+                  {review.created_at
+                    ? new Date(review.created_at).toLocaleDateString()
+                    : ""}
+                </span>
+              </div>
+              <p className="text-sm text-text-muted italic leading-loose font-light">
+                "{review.text}"
+              </p>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Shared Components ──────────────────────────────────────────────────────
+
+function SectionError({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry?: () => void;
+}) {
+  return (
+    <div className="py-12 border border-dashed border-red-500/20 flex flex-col items-center gap-4 bg-red-500/5">
+      <p className="text-xs text-red-500 font-mono tracking-widest uppercase">
+        {message}
+      </p>
+      {onRetry && (
+        <button
+          onClick={onRetry}
+          className="px-6 py-2 border border-gold/40 text-2xs font-mono uppercase tracking-[0.2em] text-gold hover:bg-gold hover:text-dark transition-all"
+        >
+          Attempt Re-Illumination
+        </button>
+      )}
+    </div>
+  );
+}
+
+function InfoItem({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 text-2xs font-mono text-gold/60 uppercase tracking-widest">
+        {icon} {label}
+      </div>
+      <div className="text-xs text-text-main font-medium">{value}</div>
+    </div>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between items-center py-3 border-b border-border/10 last:border-0">
+      <span className="text-2xs font-mono text-text-muted uppercase tracking-widest">
+        {label}
+      </span>
+      <span className="text-xs text-text-main font-medium">{value}</span>
+    </div>
+  );
+}
+
+// ─── Main Page Component ─────────────────────────────────────────────────────
+
+export default function ProductDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  console.log("SHOP PRODUCT LOADED");
+  const { slug } = use(params);
+  console.log(slug);
+  const productQuery = useProduct(slug);
+  const reviewsQuery = useReviews(productQuery.data?.id ?? null);
+
+  useEffect(() => {
+    if (productQuery.isError) {
+      console.error("Product query error:", productQuery.error);
+    }
+  }, [productQuery.isError, productQuery.error]);
+
+  return (
+    <main className="pt-20 min-h-screen pb-32">
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <ProductVisualsSection query={productQuery} />
+          <ProductPurchaseSection query={productQuery} />
+        </div>
+
+        <ProductNarrativeSection query={productQuery} />
+        <ProductReviewsSection query={reviewsQuery} />
+      </div>
+    </main>
+  );
+}

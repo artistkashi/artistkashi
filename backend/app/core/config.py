@@ -45,7 +45,7 @@ class Settings(BaseSettings):
 
     # ==================== REDIS ====================
 
-    REDIS_HOST: str = "localhost"
+    REDIS_HOST: str = "redis"
     REDIS_PORT: int = 6379
     REDIS_DB: int = 0
     REDIS_PASSWORD: str | None = None
@@ -114,8 +114,21 @@ class Settings(BaseSettings):
 
     # ==================== EXTERNAL ====================
 
-    CLOUDFLARE_ACCOUNT_ID: str = "localhost"
-    CLOUDFLARE_API_TOKEN: str = "localhost"
+    S3_ENDPOINT_URL: str
+    S3_ACCESS_KEY: str
+    S3_SECRET_KEY: str
+    S3_BUCKET_NAME: str
+    S3_REGION: str = "us-east-1"
+    S3_USE_SSL: bool = False
+    S3_PUBLIC_URL: str
+
+    S3_FOLDER_PRODUCTS: str = "products"
+    S3_FOLDER_PAINTINGS: str = "paintings"
+    S3_FOLDER_COURSES: str = "courses"
+    S3_FOLDER_AVATARS: str = "avatars"
+
+    RAZORPAY_KEY_ID: str | None = None
+    RAZORPAY_KEY_SECRET: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",

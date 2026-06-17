@@ -10,6 +10,8 @@ import {
 import { ReviewSubmitModal } from "./ReviewSubmitModal";
 import { useAuth } from "@/lib/auth-store";
 import { unwrapPaginated } from "@/api/client-service";
+import { cn } from "@/lib/utils";
+import { PrimaryBtn } from "./buttons";
 
 interface ReviewsDisplayProps {
   reviewType: ReviewType;
@@ -59,7 +61,6 @@ export function ReviewsDisplay({
 
   const handleReviewSubmitted = async () => {
     setShowModal(false);
-    // Reload reviews after submission
     const { data } = await unwrapPaginated(
       listReviews({
         query: {
@@ -75,55 +76,67 @@ export function ReviewsDisplay({
 
   if (loading) {
     return (
-      <div className="text-center py-8 text-gray-500">Loading reviews...</div>
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <div className="luxury-loader" />
+        <p className="text-2xs font-mono uppercase tracking-[0.2em] text-text-muted">Analyzing Chronicles...</p>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-12">
       {showSubmitButton && user && (
-        <button
+        <PrimaryBtn
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="px-10 py-3.5 text-xs"
         >
-          <Plus size={18} />
-          Add Your Review
-        </button>
+          <Plus size={16} />
+          <span>Chronicle Your Vision</span>
+        </PrimaryBtn>
       )}
 
       {!user && showSubmitButton && (
-        <p className="text-sm text-gray-600 italic">
-          Please log in to submit a review.
+        <p className="text-2xs font-mono uppercase tracking-widest text-text-muted opacity-60 italic border-l border-primary/20 pl-4 py-1">
+          Authentication required to leave a mark.
         </p>
       )}
 
       {reviews.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          No reviews yet. Be the first to review!
+        <div className="py-20 text-center card-luxury bg-gold-bg border-dashed border-primary/20">
+          <p className="text-2xs font-mono uppercase tracking-[0.3em] text-text-muted">
+            The archive is silent. Be the first to speak.
+          </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-6">
           {reviews.map((review) => (
-            <div key={review.id} className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex gap-1">
+            <div key={`review-${review.id}`} className="p-card card-luxury-hover group">
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex gap-1.5">
                   {[...Array(5)].map((_, i) => (
                     <Star
-                      key={i}
-                      size={16}
-                      className={
+                      key={`star-${review.id}-${i}`}
+                      size={14}
+                      className={cn(
+                        "transition-all duration-500",
                         i < review.rating
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-300"
-                      }
+                          ? "fill-primary text-primary gold-glow"
+                          : "text-border"
+                      )}
                     />
                   ))}
                 </div>
-                <span className="text-xs text-gray-500">
-                  {new Date(review.created_at).toLocaleDateString()}
+                <span className="text-2xs font-mono uppercase tracking-tighter text-text-muted group-hover:text-primary transition-colors">
+                  {new Date(review.created_at).toLocaleDateString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
                 </span>
               </div>
-              <p className="text-sm text-gray-700">{review.text}</p>
+              <p className="text-sm leading-relaxed text-foreground/90 font-medium tracking-wide">
+                "{review.text}"
+              </p>
             </div>
           ))}
         </div>

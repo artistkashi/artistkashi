@@ -20,11 +20,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-import { getRoleLabel } from "@/lib/auth-utils";
-import { getErrorMessage } from "@/lib/error-handler";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useAuth } from "@/lib/auth-store";
+import { getRoleLabel } from "@/lib/auth-utils";
 import { profileSchema, type ProfileFormValues } from "@/lib/auth-validation";
+import { getErrorMessage } from "@/lib/error-handler";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -323,21 +323,21 @@ export default function DashboardPage() {
                               item: "Oil Painting Fundamentals",
                               type: "Course",
                               date: "12 Apr 2026",
-                              amount: "€280",
+                              amount: "₹280",
                               status: "Active",
                             },
                             {
                               item: "Solitude in Ochre",
                               type: "Painting",
                               date: "03 Mar 2026",
-                              amount: "€4,800",
+                              amount: "₹4,800",
                               status: "Shipped",
                             },
                             {
                               item: "Abstract Expression Workshop",
                               type: "Course",
                               date: "18 Jan 2026",
-                              amount: "€195",
+                              amount: "₹195",
                               status: "Active",
                             },
                           ].map((r, i) => (

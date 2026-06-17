@@ -1,25 +1,25 @@
 "use client";
 
-import { useState, use } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { GhostBtn, PrimaryBtn } from "@/components/ui/buttons";
+import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
+import { RevealBlock } from "@/components/ui/misc";
+import { COURSES, CURRICULUM } from "@/data/constants";
+import { useAuth } from "@/lib/auth-store";
+import { getSafeReturnTo } from "@/lib/auth-utils";
 import {
-  Play,
   ArrowRight,
+  BookOpen,
   Check,
   Minus,
+  Play,
   Plus,
   Star,
   Users,
-  BookOpen,
 } from "lucide-react";
-import { RevealBlock } from "@/components/ui/misc";
-import { PrimaryBtn, GhostBtn } from "@/components/ui/buttons";
-import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
-import { COURSES, CURRICULUM } from "@/data/constants";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { notFound, usePathname, useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth-store";
-import { getSafeReturnTo } from "@/lib/auth-utils";
+import { use, useState } from "react";
 
 export default function CourseDetailPage({
   params,
@@ -50,7 +50,7 @@ export default function CourseDetailPage({
   return (
     <main className="pt-24 min-h-screen">
       {/* Banner */}
-      <div className="relative h-[55vh] min-h-[400px] overflow-hidden">
+      <div className="relative h-[55vh] min-h-100 overflow-hidden">
         <ImageWithFallback
           src={course.image_url || ""}
           alt={course.title}
@@ -234,7 +234,7 @@ export default function CourseDetailPage({
               </div>
               <div className="p-8">
                 <div className="text-text-main font-extrabold text-4xl mb-1">
-                  €{course.price}
+                  ₹{course.price}
                 </div>
                 <div className="text-label font-mono text-text-muted tracking-widest mb-8">
                   Lifetime access · All devices

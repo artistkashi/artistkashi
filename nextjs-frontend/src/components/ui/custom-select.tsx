@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { ChevronRight, Check } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Check, ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 interface Option {
   value: string | number;
@@ -17,6 +17,7 @@ interface CustomSelectProps {
   placeholder: string;
   className?: string;
   label?: string;
+  error?: string;
 }
 
 export function CustomSelect({
@@ -26,6 +27,7 @@ export function CustomSelect({
   placeholder,
   className,
   label,
+  error,
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -46,9 +48,9 @@ export function CustomSelect({
   }, []);
 
   return (
-    <div className={cn("space-y-1.5", className)} ref={containerRef}>
+    <div className={cn("space-y-1 w-full", className)} ref={containerRef}>
       {label && (
-        <label className="text-2xs font-mono tracking-widest uppercase text-text-muted block">
+        <label className="text-label! font-mono tracking-widest uppercase text-text-muted block mb-2">
           {label}
         </label>
       )}
@@ -57,14 +59,16 @@ export function CustomSelect({
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "w-full bg-dark/30 border border-border/60 px-4 py-2.5 text-xs text-text-main flex items-center justify-between transition-all duration-300 hover:border-gold/40 focus:outline-none focus:border-gold",
-            isOpen && "border-gold"
+            "w-full bg-surface border border-border px-4 py-3 text-sm text-foreground flex items-center justify-between rounded-sm transition-all duration-300 focus:outline-none focus:border-primary",
+            isOpen && "border-primary bg-surface",
+            error && "border-danger danger-glow"
           )}
         >
           <span
             className={cn(
+              "truncate",
               !selectedOption &&
-                "text-text-muted/40 uppercase font-mono text-2xs"
+              "text-text-muted/50 uppercase font-mono text-2xs"
             )}
           >
             {selectedOption ? selectedOption.label : placeholder}
@@ -72,8 +76,8 @@ export function CustomSelect({
           <ChevronRight
             size={12}
             className={cn(
-              "text-gold/40 transition-transform duration-300",
-              isOpen ? "rotate-270" : "rotate-90"
+              "text-primary/60 transition-transform duration-300",
+              isOpen ? "-rotate-90" : "rotate-90"
             )}
           />
         </button>
@@ -84,33 +88,40 @@ export function CustomSelect({
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute z-50 w-full mt-1 bg-dark/95 border border-gold/20 backdrop-blur-xl max-h-60 overflow-y-auto scrollbar-hide shadow-2xl shadow-black"
+              className="absolute z-50 w-full mt-1 bg-surface border border-border backdrop-blur-xl max-h-60 overflow-y-auto scrollbar-hide shadow-lg rounded card-luxury"
             >
               <div className="py-1">
-                {options.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => {
-                      onChange(option.value);
-                      setIsOpen(false);
-                    }}
-                    className={cn(
-                      "w-full px-4 py-2.5 text-left text-2xs uppercase font-mono tracking-wider transition-colors flex items-center justify-between",
-                      option.value === value
-                        ? "bg-gold/10 text-gold"
-                        : "text-text-muted hover:bg-white/5 hover:text-text-main"
-                    )}
-                  >
-                    {option.label}
-                    {option.value === value && <Check size={10} />}
-                  </button>
-                ))}
+                {options.length > 0 ? (
+                  options.map((option) => (
+                    <button
+                      key={`select-opt-${option.value}`}
+                      type="button"
+                      onClick={() => {
+                        onChange(option.value);
+                        setIsOpen(false);
+                      }}
+                      className={cn(
+                        "w-full px-4 py-2.5 text-left text-2xs uppercase font-mono tracking-wider transition-colors flex items-center justify-between",
+                        option.value === value
+                          ? "bg-gold-bg text-primary"
+                          : "text-text-muted hover:bg-gold-bg hover:text-foreground"
+                      )}
+                    >
+                      {option.label}
+                      {option.value === value && <Check size={10} />}
+                    </button>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-2xs uppercase font-mono tracking-wider text-text-muted opacity-50">
+                    No options available
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+      {error && <p className="text-xs text-danger font-mono mt-1">{error}</p>}
     </div>
   );
 }

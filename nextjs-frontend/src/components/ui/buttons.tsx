@@ -11,7 +11,7 @@ export function PrimaryBtn({ children, className, ...props }: ButtonProps) {
   return (
     <button
       className={cn(
-        "group relative inline-flex items-center gap-3 px-8 py-4 bg-text-main text-dark text-sm font-semibold tracking-[0.08em] uppercase overflow-hidden transition-all duration-300 hover:bg-gold hover:text-dark disabled:opacity-50 disabled:cursor-not-allowed",
+        "group relative inline-flex items-center justify-center gap-3 px-8 py-4 rounded bg-primary text-dark text-sm font-semibold tracking-[0.08em] uppercase overflow-hidden transition-all duration-300 enabled:hover:scale-[1.02] enabled:active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none gold-glow cursor-pointer",
         className
       )}
       {...props}
@@ -25,7 +25,7 @@ export function GhostBtn({ children, className, ...props }: ButtonProps) {
   return (
     <button
       className={cn(
-        "inline-flex items-center gap-3 px-8 py-4 border border-border text-text-main text-sm font-semibold tracking-[0.08em] uppercase transition-all duration-300 hover:border-gold hover:text-gold disabled:opacity-50 disabled:cursor-not-allowed",
+        "inline-flex items-center justify-center gap-3 rounded px-8 py-4 border border-border text-text-muted text-sm font-semibold tracking-[0.08em] uppercase transition-all duration-300 enabled:hover:border-primary enabled:hover:text-primary enabled:hover:bg-gold-bg enabled:hover:scale-[1.02] enabled:active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer",
         className
       )}
       {...props}
