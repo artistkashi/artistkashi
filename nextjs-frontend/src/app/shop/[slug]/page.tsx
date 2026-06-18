@@ -3,6 +3,7 @@
 import { unwrap, unwrapPaginated } from "@/api/client-service";
 import { listReviews, productsGetProduct } from "@/api/openapi-client";
 import {
+  ProductDetailRead,
   ProductVariantRead,
   ReviewReadPublic,
 } from "@/api/openapi-client/types.gen";
@@ -12,7 +13,8 @@ import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { Skeleton, SkeletonText } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/auth-store";
 import { getSafeReturnTo } from "@/lib/auth-utils";
-import { cn } from "@/lib/utils";
+import { useCheckoutStore } from "@/lib/checkout-store";
+import { cn, displayPrice } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -25,6 +27,7 @@ import {
   RefreshCcw,
   Ruler,
   ShieldCheck,
+  ShoppingBag,
   Star,
   X,
 } from "lucide-react";
@@ -63,10 +66,85 @@ function useReviews(productId: number | null) {
 
 // ─── Section Components ──────────────────────────────────────────────────────
 
+function VariantSelector({
+  product,
+  selectedVariant,
+  setSelectedVariant,
+  className,
+}: {
+  product: ProductDetailRead | undefined;
+  selectedVariant: ProductVariantRead | null;
+  setSelectedVariant: (v: ProductVariantRead | null) => void;
+  className?: string;
+}) {
+  return (
+    <div className={cn("space-y-4 pt-4 border-t border-border/10", className)}>
+      <h3 className="text-2xs font-mono text-text-muted uppercase tracking-[0.2em]">
+        Select Format & Valuation
+      </h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {product?.variants?.map((variant: ProductVariantRead) => (
+          <button
+            key={variant.id}
+            onClick={() => setSelectedVariant(variant)}
+            className={cn(
+              "px-4 py-3 border text-left transition-all duration-500 group rounded-sm relative overflow-hidden flex items-center justify-between gap-4",
+              selectedVariant?.id === variant.id
+                ? "border-primary bg-primary/5"
+                : "border-border/20 hover:border-primary/40 bg-surface/30"
+            )}
+          >
+            <div className="relative z-10 flex flex-col gap-0.5 min-w-0">
+              <span
+                className={cn(
+                  "text-xs font-bold uppercase tracking-widest transition-colors truncate",
+                  selectedVariant?.id === variant.id
+                    ? "text-primary"
+                    : "text-text-main group-hover:text-primary"
+                )}
+              >
+                {variant.variant_type_name || "Standard"}
+              </span>
+              {variant.dimensions && (
+                <span className="text-2xs font-mono text-text-muted uppercase tracking-tighter block truncate">
+                  {variant.dimensions}
+                </span>
+              )}
+            </div>
+
+            <div className="relative z-10 text-sm font-bold tracking-tighter text-right whitespace-nowrap">
+              <span
+                className={
+                  selectedVariant?.id === variant.id
+                    ? "text-primary"
+                    : "text-text-main"
+                }
+              >
+                {displayPrice(variant.price)}
+              </span>
+            </div>
+
+            {selectedVariant?.id === variant.id && (
+              <motion.div
+                layoutId="variant-active-bg"
+                className="absolute inset-0 bg-primary/5"
+              />
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ProductVisualsSection({
   query,
+  selectedVariant,
+  setSelectedVariant,
 }: {
   query: ReturnType<typeof useProduct>;
+  selectedVariant: ProductVariantRead | null;
+  setSelectedVariant: (v: ProductVariantRead | null) => void;
 }) {
   const { data: product, isLoading, error, refetch } = query;
   const [activeImage, setActiveImage] = useState<string | null>(null);
@@ -97,18 +175,22 @@ function ProductVisualsSection({
 
   if (isLoading) {
     return (
-      <>
+      <div className="lg:col-span-7 grid grid-cols-1 lg:grid-cols-7 gap-4">
         <div className="lg:col-span-1 flex lg:flex-col gap-4 order-2 lg:order-1 overflow-x-auto lg:overflow-x-visible no-scrollbar pb-4 lg:pb-0">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="w-16 h-20 shrink-0" />
           ))}
         </div>
-        <div className="lg:col-span-6 order-1 lg:order-2">
-          <div className="relative aspect-4/5 bg-muted-light/5 border border-border/40 overflow-hidden">
+        <div className="lg:col-span-6 order-1 lg:order-2 space-y-8">
+          <div className="relative aspect-4/5 bg-muted-light/5 border border-border/40 overflow-hidden rounded-sm">
             <Skeleton className="w-full h-full" />
           </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+          </div>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -124,7 +206,7 @@ function ProductVisualsSection({
   }
 
   return (
-    <>
+    <div className="lg:col-span-7 grid grid-cols-1 lg:grid-cols-7 gap-x-6 gap-y-8">
       {/* Side Thumbnails */}
       <div className="lg:col-span-1 flex lg:flex-col gap-4 order-2 lg:order-1 overflow-x-auto lg:overflow-x-visible no-scrollbar pb-4 lg:pb-0">
         {product?.images?.map((img, i) => (
@@ -150,35 +232,56 @@ function ProductVisualsSection({
       </div>
 
       {/* Main Preview Area */}
-      <div className="lg:col-span-6 order-1 lg:order-2">
-        <motion.div
-          layoutId="main-image"
-          className="relative aspect-4/5 bg-muted-light/5 border border-border/40 overflow-hidden group cursor-zoom-in rounded-sm"
-          onClick={() => activeImage && setZoomed(true)}
-        >
-          <ImageWithFallback
-            src={activeImage}
-            alt={product?.title || "Masterpiece"}
-            unoptimized
-            fill
-            className="object-cover transition-transform duration-1000 group-hover:scale-110"
-          />
-          {activeImage && (
-            <div className="absolute bottom-6 right-6 bg-dark/80 backdrop-blur-md px-4 py-2 border border-gold/20 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded">
-              <span className="text-2xs font-mono text-gold uppercase tracking-widest flex items-center gap-2">
-                <Eye size={12} /> Expand Vision
-              </span>
-            </div>
-          )}
-          {!activeImage && (
-            <div className="w-full h-full flex flex-col items-center justify-center text-text-muted/20 gap-4 bg-dark">
-              <ImageIcon size={48} strokeWidth={1} />
-              <span className="text-2xs font-mono uppercase tracking-widest">
-                Image under curation
-              </span>
-            </div>
-          )}
-        </motion.div>
+      <div className="lg:col-span-6 order-1 lg:order-2 space-y-8">
+        <div className="relative aspect-4/5 group rounded-sm overflow-hidden border border-border/40">
+          <motion.div
+            layoutId="main-image"
+            className="w-full h-full bg-muted-light/5 cursor-zoom-in"
+            onClick={() => activeImage && setZoomed(true)}
+          >
+            <ImageWithFallback
+              src={activeImage}
+              alt={product?.title || "Masterpiece"}
+              unoptimized
+              fill
+              className="object-cover transition-transform duration-1000 group-hover:scale-110"
+            />
+            {activeImage && (
+              <div className="absolute bottom-6 right-6 bg-dark/80 backdrop-blur-md px-4 py-2 border border-gold/20 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded">
+                <span className="text-2xs font-mono text-gold uppercase tracking-widest flex items-center gap-2">
+                  <Eye size={12} /> Expand Vision
+                </span>
+              </div>
+            )}
+            {!activeImage && (
+              <div className="w-full h-full flex flex-col items-center justify-center text-text-muted/20 gap-4 bg-dark">
+                <ImageIcon size={48} strokeWidth={1} />
+                <span className="text-2xs font-mono uppercase tracking-widest">
+                  Image under curation
+                </span>
+              </div>
+            )}
+          </motion.div>
+
+          {/* Floating Wishlist Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toast.info("Aesthetic preserved in wishlist.");
+            }}
+            className="absolute top-6 right-6 text-white/70 hover:text-primary transition-all duration-500 z-10 hover:scale-110 active:scale-90 group/heart drop-shadow-sm"
+          >
+            <Heart size={22} strokeWidth={1.5} className="transition-transform group-hover/heart:scale-110" />
+          </button>
+        </div>
+
+        {/* Variant Selection Hidden on Mobile here, shown only on Desktop */}
+        <VariantSelector
+          product={product}
+          selectedVariant={selectedVariant}
+          setSelectedVariant={setSelectedVariant}
+          className="hidden lg:block"
+        />
       </div>
 
       {/* 3D Circular Gallery Modal */}
@@ -219,14 +322,18 @@ function ProductVisualsSection({
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }
 
 function ProductPurchaseSection({
   query,
+  selectedVariant,
+  setSelectedVariant,
 }: {
   query: ReturnType<typeof useProduct>;
+  selectedVariant: ProductVariantRead | null;
+  setSelectedVariant: (v: ProductVariantRead | null) => void;
 }) {
   const { data: product, isLoading, error, refetch } = query;
   const { user } = useAuth();
@@ -235,23 +342,30 @@ function ProductPurchaseSection({
   const returnTo = getSafeReturnTo(pathname) ?? "/";
   const loginHref = `/login?returnTo=${encodeURIComponent(returnTo)}`;
 
-  const [selectedVariant, setSelectedVariant] =
-    useState<ProductVariantRead | null>(null);
+  const setCheckoutItems = useCheckoutStore((state) => state.setItems);
 
-  useEffect(() => {
-    if (product?.variants) {
-      const defaultV =
-        product.variants.find((v) => v.is_default) || product.variants[0];
-      setSelectedVariant(defaultV || null);
-    }
-  }, [product]);
-
-  const handleInquire = () => {
+  const handleAcquireNow = () => {
     if (!user) {
       router.push(loginHref);
       return;
     }
-    toast.info("Purchase flow is being curated.");
+
+    if (!product) return;
+
+    setCheckoutItems([
+      {
+        product_id: product.id,
+        variant_id: selectedVariant?.id ?? null,
+        course_id: null,
+        quantity: 1,
+        price: selectedVariant?.price ?? product.price ?? 0,
+        title: product.title,
+        variant_name: selectedVariant?.variant_type_name || "Standard",
+        image: product.primary_image || (product.images?.[0]?.image_url ?? undefined),
+      },
+    ]);
+
+    router.push("/checkout");
   };
 
   if (isLoading) {
@@ -291,14 +405,6 @@ function ProductPurchaseSection({
 
   if (!product) return null;
 
-  const displayPrice = selectedVariant
-    ? typeof selectedVariant.price === "string"
-      ? parseFloat(selectedVariant.price)
-      : selectedVariant.price
-    : typeof product.price === "string"
-      ? parseFloat(product.price)
-      : (product.price ?? 0);
-
   return (
     <div className="lg:col-span-5 order-3 space-y-10">
       <div className="space-y-4">
@@ -319,53 +425,25 @@ function ProductPurchaseSection({
         </div>
       </div>
 
-      <div className="text-4xl font-bold text-gold tracking-tighter">
-        ₹{displayPrice.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-      </div>
-
-      {/* Variant Selection */}
-      <div className="space-y-4">
-        <h3 className="text-2xs font-mono text-text-muted uppercase tracking-[0.2em]">
-          Select Format
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {product.variants?.map((variant) => (
-            <button
-              key={variant.id}
-              onClick={() => setSelectedVariant(variant)}
-              className={cn(
-                "p-4 border text-left transition-all duration-300 group rounded-sm relative overflow-hidden",
-                selectedVariant?.id === variant.id
-                  ? "border-gold bg-gold/5 shadow-[0_0_15px_rgba(212,175,55,0.1)]"
-                  : "border-border/30 hover:border-gold/50"
-              )}
-            >
-              <div className="flex flex-col gap-1 relative z-10">
-                <span
-                  className={cn(
-                    "text-xs font-bold uppercase tracking-widest transition-colors",
-                    selectedVariant?.id === variant.id
-                      ? "text-gold"
-                      : "text-text-main group-hover:text-gold"
-                  )}
-                >
-                  {variant.variant_type_name || "Standard"}
-                </span>
-                {variant.dimensions && (
-                  <span className="text-2xs font-mono text-text-muted uppercase">
-                    {variant.dimensions}
-                  </span>
-                )}
-              </div>
-              {selectedVariant?.id === variant.id && (
-                <motion.div
-                  layoutId="variant-active"
-                  className="absolute inset-0 bg-gold/5"
-                />
-              )}
-            </button>
-          ))}
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <span className="text-2xs font-mono text-text-muted uppercase tracking-[0.2em]">
+            Current Valuation
+          </span>
+          <div className="text-5xl font-bold text-primary tracking-tighter">
+            {displayPrice(
+              selectedVariant ? selectedVariant.price : product.price
+            )}
+          </div>
         </div>
+
+        {/* Variant Selection Shown on Mobile here, below price */}
+        <VariantSelector
+          product={product}
+          selectedVariant={selectedVariant}
+          setSelectedVariant={setSelectedVariant}
+          className="lg:hidden"
+        />
       </div>
 
       <p className="text-text-muted text-sm leading-relaxed font-light">
@@ -392,13 +470,16 @@ function ProductPurchaseSection({
 
         <div className="flex flex-col gap-3">
           <PrimaryBtn
-            onClick={handleInquire}
+            onClick={handleAcquireNow}
             className="w-full justify-center py-5"
           >
-            Inquire to Acquire <ArrowRight size={16} className="ml-2" />
+            Acquire Now <ArrowRight size={16} className="ml-2" />
           </PrimaryBtn>
-          <GhostBtn className="w-full justify-center py-5 border-border/20">
-            <Heart size={16} className="mr-2" /> Preserve to Wishlist
+          <GhostBtn 
+            onClick={() => toast.success("Added to your curated collection.")}
+            className="w-full justify-center py-5 border-border/20"
+          >
+            <ShoppingBag size={16} className="mr-2" /> Add to Collection
           </GhostBtn>
         </div>
       </div>
@@ -633,11 +714,21 @@ export default function ProductDetailPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  console.log("SHOP PRODUCT LOADED");
   const { slug } = use(params);
-  console.log(slug);
   const productQuery = useProduct(slug);
   const reviewsQuery = useReviews(productQuery.data?.id ?? null);
+
+  const [selectedVariant, setSelectedVariant] =
+    useState<ProductVariantRead | null>(null);
+
+  useEffect(() => {
+    if (productQuery.data?.variants) {
+      const defaultV =
+        productQuery.data.variants.find((v) => v.is_default) ||
+        productQuery.data.variants[0];
+      setSelectedVariant(defaultV || null);
+    }
+  }, [productQuery.data]);
 
   useEffect(() => {
     if (productQuery.isError) {
@@ -649,8 +740,16 @@ export default function ProductDetailPage({
     <main className="pt-20 min-h-screen pb-32">
       <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          <ProductVisualsSection query={productQuery} />
-          <ProductPurchaseSection query={productQuery} />
+          <ProductVisualsSection
+            query={productQuery}
+            selectedVariant={selectedVariant}
+            setSelectedVariant={setSelectedVariant}
+          />
+          <ProductPurchaseSection
+            query={productQuery}
+            selectedVariant={selectedVariant}
+            setSelectedVariant={setSelectedVariant}
+          />
         </div>
 
         <ProductNarrativeSection query={productQuery} />

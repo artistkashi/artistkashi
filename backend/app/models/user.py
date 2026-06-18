@@ -10,6 +10,7 @@ from app.models.base import Base, SoftDeleteMixin, TimestampMixin
 if TYPE_CHECKING:
     from app.models.address import Address
     from app.models.cart import CartItem
+    from app.models.order import Order
     from app.models.review import Review
     from app.models.user_session import UserSession
     from app.models.wishlist import Wishlist
@@ -92,6 +93,12 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
 
     wishlist_items: Mapped[list["Wishlist"]] = relationship(
         "Wishlist",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
+    orders: Mapped[list["Order"]] = relationship(
+        "Order",
         back_populates="user",
         cascade="all, delete-orphan",
     )

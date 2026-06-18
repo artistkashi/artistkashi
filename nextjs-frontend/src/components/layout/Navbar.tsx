@@ -29,6 +29,17 @@ export function Navbar() {
       : []),
   ];
 
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [menuOpen]);
+
   const loginHref = `/login?returnTo=${encodeURIComponent(getSafeReturnTo(pathname) ?? "/")}`;
 
   return (

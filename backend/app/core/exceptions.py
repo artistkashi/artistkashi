@@ -1,6 +1,5 @@
 """Custom exception classes for the application."""
 
-from datetime import UTC, datetime
 from enum import StrEnum
 from http import HTTPStatus
 
@@ -71,6 +70,9 @@ class ErrorCode(StrEnum):
     # Category
     PRODUCT_CATEGORY_NOT_FOUND = "PRODUCT_CATEGORY_NOT_FOUND"
     PRODUCT_CATEGORY_ALREADY_EXISTS = "PRODUCT_CATEGORY_ALREADY_EXISTS"
+
+    # Order
+    ORDER_NOT_FOUND = "ORDER_NOT_FOUND"
 
 
 class AppException(Exception):

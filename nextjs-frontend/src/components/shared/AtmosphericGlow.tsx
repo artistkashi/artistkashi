@@ -12,11 +12,11 @@ export const AtmosphericGlow = () => {
     <div className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">
       <motion.div
         style={{ top: y1, rotate }}
-        className="absolute -left-32 w-80 h-80 bg-primary/20 blur-[120px] rounded-full"
+        className="absolute -left-32 w-80 h-80 bg-gold/20 blur-[120px] rounded-full"
       />
       <motion.div
         style={{ top: y2, rotate: -rotate }}
-        className="absolute -right-32 w-80 h-80 bg-primary/10 blur-[120px] rounded-full"
+        className="absolute -right-32 w-80 h-80 bg-gold/10 blur-[120px] rounded-full"
       />
 
       {/* Mobile-only extra punch */}
@@ -27,7 +27,7 @@ export const AtmosphericGlow = () => {
             opacity: [0.1, 0.2, 0.1],
           }}
           transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary/5 blur-[150px] rounded-full"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gold/5 blur-[150px] rounded-full"
         />
       </div>
     </div>

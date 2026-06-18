@@ -5,6 +5,7 @@ from app.schemas.responses import SuccessResponse
 
 from . import courses as courses_module
 from . import dashboard as dashboard_module
+from . import orders as orders_module
 from . import reviews as reviews_module
 from . import site_config as site_config_module
 from . import users as users_module
@@ -28,4 +29,5 @@ router.include_router(users_module.router)
 router.include_router(products_router)
 router.include_router(courses_module.router)
 router.include_router(dashboard_module.router)
+router.include_router(orders_module.router)
 router.include_router(reviews_module.router)

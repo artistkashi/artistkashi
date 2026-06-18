@@ -49,6 +49,8 @@ class UserProfileRead(UserRead):
 
 class PublicUserRead(UUIDSchema, TimestampSchema):
     full_name: str | None = None
+    email: EmailStr | None = None
+    phone: str | None = None
     profile_picture: str | None = None
 
     model_config = ConfigDict(from_attributes=True)

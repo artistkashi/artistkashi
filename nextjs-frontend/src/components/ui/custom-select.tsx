@@ -18,6 +18,7 @@ interface CustomSelectProps {
   className?: string;
   label?: string;
   error?: string;
+  dropdownPosition?: "top" | "bottom";
 }
 
 export function CustomSelect({
@@ -28,6 +29,7 @@ export function CustomSelect({
   className,
   label,
   error,
+  dropdownPosition = "bottom",
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,7 +50,7 @@ export function CustomSelect({
   }, []);
 
   return (
-    <div className={cn("space-y-1 w-full", className)} ref={containerRef}>
+    <div className={cn("space-y-1 w-full flex flex-col justify-center", className)} ref={containerRef}>
       {label && (
         <label className="text-label! font-mono tracking-widest uppercase text-text-muted block mb-2">
           {label}
@@ -59,7 +61,7 @@ export function CustomSelect({
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "w-full bg-surface border border-border px-4 py-3 text-sm text-foreground flex items-center justify-between rounded-sm transition-all duration-300 focus:outline-none focus:border-primary",
+            "w-full bg-surface border border-border px-4 py-2 text-sm text-foreground flex items-center justify-between rounded-sm transition-all duration-300 focus:outline-none focus:border-primary",
             isOpen && "border-primary bg-surface",
             error && "border-danger danger-glow"
           )}
@@ -85,10 +87,13 @@ export function CustomSelect({
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: dropdownPosition === "top" ? 10 : -10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute z-50 w-full mt-1 bg-surface border border-border backdrop-blur-xl max-h-60 overflow-y-auto scrollbar-hide shadow-lg rounded card-luxury"
+              exit={{ opacity: 0, y: dropdownPosition === "top" ? 10 : -10 }}
+              className={cn(
+                "absolute z-50 w-full bg-surface border border-border backdrop-blur-xl max-h-60 overflow-y-auto scrollbar-hide shadow-lg rounded card-luxury",
+                dropdownPosition === "top" ? "bottom-full mb-1" : "top-full mt-1"
+              )}
             >
               <div className="py-1">
                 {options.length > 0 ? (

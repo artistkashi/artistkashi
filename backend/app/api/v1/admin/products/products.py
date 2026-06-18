@@ -41,6 +41,9 @@ async def list_products(
     page_size: int = Query(20, ge=1, le=100),
     search: str | None = None,
     category_id: int | None = None,
+    status: ProductStatus | None = None,
+    min_price: float | None = None,
+    max_price: float | None = None,
     is_featured: bool | None = None,
 ):
     products = await product_service.list_products(
@@ -48,8 +51,11 @@ async def list_products(
         page=page,
         page_size=page_size,
         category_id=category_id,
+        status=status,
         search=search,
         is_featured=is_featured,
+        min_price=min_price,
+        max_price=max_price,
     )
 
     return build_paginated_response(

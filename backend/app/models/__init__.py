@@ -2,6 +2,7 @@ from app.models.address import Address
 from app.models.base import Base
 from app.models.cart import CartItem
 from app.models.course import Course
+from app.models.order import Order, OrderItem
 from app.models.product import (
     Product,
     ProductCategory,
@@ -32,4 +33,6 @@ __all__ = [
     "VariantType",
     "CartItem",
     "Wishlist",
+    "Order",
+    "OrderItem",
 ]

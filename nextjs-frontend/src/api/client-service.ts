@@ -29,11 +29,7 @@ export async function unwrap<TData>(call: SdkCall<TData>): Promise<TData> {
     throw error ?? new Error("Request failed");
   }
 
-  if (body.data == null) {
-    throw new Error(body.message ?? "No data returned");
-  }
-
-  return body.data;
+  return body.data as TData;
 }
 
 /**

@@ -179,6 +179,55 @@ export type AddressUpdate = {
 };
 
 /**
+ * AdminOrderRead
+ */
+export type AdminOrderRead = {
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Shipping Address Id
+     */
+    shipping_address_id?: number | null;
+    /**
+     * Billing Address Id
+     */
+    billing_address_id?: number | null;
+    /**
+     * Payment Method
+     */
+    payment_method?: string;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    status: OrderStatus;
+    payment_status: PaymentStatus;
+    /**
+     * Razorpay Order Id
+     */
+    razorpay_order_id?: string | null;
+    /**
+     * Total Amount
+     */
+    total_amount: string;
+    /**
+     * Items
+     */
+    items?: Array<OrderItemRead>;
+    user?: PublicUserRead | null;
+};
+
+/**
  * BannerSection
  */
 export type BannerSection = {
@@ -652,6 +701,186 @@ export type Meta = {
 };
 
 /**
+ * OrderCreate
+ */
+export type OrderCreate = {
+    /**
+     * Shipping Address Id
+     */
+    shipping_address_id?: number | null;
+    /**
+     * Billing Address Id
+     */
+    billing_address_id?: number | null;
+    /**
+     * Payment Method
+     */
+    payment_method?: string;
+    /**
+     * Items
+     */
+    items: Array<OrderItemBase>;
+};
+
+/**
+ * OrderDashboardRead
+ */
+export type OrderDashboardRead = {
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    user?: PublicUserRead | null;
+    /**
+     * Total Amount
+     */
+    total_amount: string;
+    status: OrderStatus;
+    payment_status: PaymentStatus;
+    /**
+     * Item Count
+     */
+    item_count: number;
+};
+
+/**
+ * OrderItemBase
+ */
+export type OrderItemBase = {
+    /**
+     * Product Id
+     */
+    product_id?: number | null;
+    /**
+     * Variant Id
+     */
+    variant_id?: number | null;
+    /**
+     * Course Id
+     */
+    course_id?: number | null;
+    /**
+     * Quantity
+     */
+    quantity?: number;
+    /**
+     * Price
+     */
+    price: number | string;
+};
+
+/**
+ * OrderItemRead
+ */
+export type OrderItemRead = {
+    /**
+     * Product Id
+     */
+    product_id?: number | null;
+    /**
+     * Variant Id
+     */
+    variant_id?: number | null;
+    /**
+     * Course Id
+     */
+    course_id?: number | null;
+    /**
+     * Quantity
+     */
+    quantity?: number;
+    /**
+     * Price
+     */
+    price: string;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Order Id
+     */
+    order_id: string;
+};
+
+/**
+ * OrderRead
+ */
+export type OrderRead = {
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Shipping Address Id
+     */
+    shipping_address_id?: number | null;
+    /**
+     * Billing Address Id
+     */
+    billing_address_id?: number | null;
+    /**
+     * Payment Method
+     */
+    payment_method?: string;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    status: OrderStatus;
+    payment_status: PaymentStatus;
+    /**
+     * Razorpay Order Id
+     */
+    razorpay_order_id?: string | null;
+    /**
+     * Total Amount
+     */
+    total_amount: string;
+    /**
+     * Items
+     */
+    items?: Array<OrderItemRead>;
+};
+
+/**
+ * OrderStatus
+ */
+export type OrderStatus = 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+
+/**
+ * OrderUpdate
+ */
+export type OrderUpdate = {
+    status?: OrderStatus | null;
+    payment_status?: PaymentStatus | null;
+    /**
+     * Razorpay Payment Id
+     */
+    razorpay_payment_id?: string | null;
+    /**
+     * Razorpay Signature
+     */
+    razorpay_signature?: string | null;
+};
+
+/**
  * PaginatedResponse[AddressRead]
  */
 export type PaginatedResponseAddressRead = {
@@ -695,6 +924,54 @@ export type PaginatedResponseCourseRead = {
      * Data
      */
     data?: Array<CourseRead>;
+    pagination: Pagination;
+    meta?: Meta;
+};
+
+/**
+ * PaginatedResponse[OrderDashboardRead]
+ */
+export type PaginatedResponseOrderDashboardRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<OrderDashboardRead>;
+    pagination: Pagination;
+    meta?: Meta;
+};
+
+/**
+ * PaginatedResponse[OrderRead]
+ */
+export type PaginatedResponseOrderRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<OrderRead>;
     pagination: Pagination;
     meta?: Meta;
 };
@@ -871,6 +1148,29 @@ export type Pagination = {
      * Has Prev
      */
     has_prev: boolean;
+};
+
+/**
+ * PaymentStatus
+ */
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
+
+/**
+ * PaymentVerificationRequest
+ */
+export type PaymentVerificationRequest = {
+    /**
+     * Razorpay Order Id
+     */
+    razorpay_order_id: string;
+    /**
+     * Razorpay Payment Id
+     */
+    razorpay_payment_id: string;
+    /**
+     * Razorpay Signature
+     */
+    razorpay_signature: string;
 };
 
 /**
@@ -1581,6 +1881,14 @@ export type PublicUserRead = {
      */
     full_name?: string | null;
     /**
+     * Email
+     */
+    email?: string | null;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
      * Profile Picture
      */
     profile_picture?: string | null;
@@ -1774,6 +2082,26 @@ export type SuccessResponseAddressRead = {
 };
 
 /**
+ * SuccessResponse[AdminOrderRead]
+ */
+export type SuccessResponseAdminOrderRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: AdminOrderRead | null;
+    meta?: Meta;
+};
+
+/**
  * SuccessResponse[BasicHealthData]
  */
 export type SuccessResponseBasicHealthData = {
@@ -1893,6 +2221,26 @@ export type SuccessResponseNoneType = {
      * Data
      */
     data?: null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[OrderRead]
+ */
+export type SuccessResponseOrderRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: OrderRead | null;
     meta?: Meta;
 };
 
@@ -3876,6 +4224,18 @@ export type ListProductsData = {
          */
         category_id?: number | null;
         /**
+         * Status
+         */
+        status?: ProductStatus | null;
+        /**
+         * Min Price
+         */
+        min_price?: number | null;
+        /**
+         * Max Price
+         */
+        max_price?: number | null;
+        /**
          * Is Featured
          */
         is_featured?: boolean | null;
@@ -4381,6 +4741,128 @@ export type OverviewResponses = {
 };
 
 export type OverviewResponse = OverviewResponses[keyof OverviewResponses];
+
+export type ListOrdersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+        /**
+         * Search
+         */
+        search?: string | null;
+        /**
+         * Status
+         */
+        status?: OrderStatus | null;
+        /**
+         * Payment Status
+         */
+        payment_status?: PaymentStatus | null;
+        /**
+         * Date Start
+         */
+        date_start?: string | null;
+        /**
+         * Date End
+         */
+        date_end?: string | null;
+        /**
+         * Min Amount
+         */
+        min_amount?: number | string | null;
+        /**
+         * Max Amount
+         */
+        max_amount?: number | string | null;
+    };
+    url: '/api/admin/orders';
+};
+
+export type ListOrdersErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type ListOrdersError = ListOrdersErrors[keyof ListOrdersErrors];
+
+export type ListOrdersResponses = {
+    /**
+     * Successful Response
+     */
+    200: PaginatedResponseOrderDashboardRead;
+};
+
+export type ListOrdersResponse = ListOrdersResponses[keyof ListOrdersResponses];
+
+export type GetOrderDetailsData = {
+    body?: never;
+    path: {
+        /**
+         * Order Id
+         */
+        order_id: string;
+    };
+    query?: never;
+    url: '/api/admin/orders/{order_id}';
+};
+
+export type GetOrderDetailsErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetOrderDetailsError = GetOrderDetailsErrors[keyof GetOrderDetailsErrors];
+
+export type GetOrderDetailsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseAdminOrderRead;
+};
+
+export type GetOrderDetailsResponse = GetOrderDetailsResponses[keyof GetOrderDetailsResponses];
+
+export type UpdateOrderStatusData = {
+    body: OrderUpdate;
+    path: {
+        /**
+         * Order Id
+         */
+        order_id: string;
+    };
+    query?: never;
+    url: '/api/admin/orders/{order_id}';
+};
+
+export type UpdateOrderStatusErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type UpdateOrderStatusError = UpdateOrderStatusErrors[keyof UpdateOrderStatusErrors];
+
+export type UpdateOrderStatusResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseOrderRead;
+};
+
+export type UpdateOrderStatusResponse = UpdateOrderStatusResponses[keyof UpdateOrderStatusResponses];
 
 export type ListAllReviewsData = {
     body?: never;
@@ -5219,6 +5701,125 @@ export type ProductsGetProductResponses = {
 };
 
 export type ProductsGetProductResponse = ProductsGetProductResponses[keyof ProductsGetProductResponses];
+
+export type ListMyOrdersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+    };
+    url: '/api/orders';
+};
+
+export type ListMyOrdersErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type ListMyOrdersError = ListMyOrdersErrors[keyof ListMyOrdersErrors];
+
+export type ListMyOrdersResponses = {
+    /**
+     * Successful Response
+     */
+    200: PaginatedResponseOrderRead;
+};
+
+export type ListMyOrdersResponse = ListMyOrdersResponses[keyof ListMyOrdersResponses];
+
+export type CreateOrderData = {
+    body: OrderCreate;
+    path?: never;
+    query?: never;
+    url: '/api/orders';
+};
+
+export type CreateOrderErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type CreateOrderError = CreateOrderErrors[keyof CreateOrderErrors];
+
+export type CreateOrderResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseOrderRead;
+};
+
+export type CreateOrderResponse = CreateOrderResponses[keyof CreateOrderResponses];
+
+export type OrdersGetOrderDetailsData = {
+    body?: never;
+    path: {
+        /**
+         * Order Id
+         */
+        order_id: string;
+    };
+    query?: never;
+    url: '/api/orders/{order_id}';
+};
+
+export type OrdersGetOrderDetailsErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type OrdersGetOrderDetailsError = OrdersGetOrderDetailsErrors[keyof OrdersGetOrderDetailsErrors];
+
+export type OrdersGetOrderDetailsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseOrderRead;
+};
+
+export type OrdersGetOrderDetailsResponse = OrdersGetOrderDetailsResponses[keyof OrdersGetOrderDetailsResponses];
+
+export type VerifyPaymentData = {
+    body: PaymentVerificationRequest;
+    path: {
+        /**
+         * Order Id
+         */
+        order_id: string;
+    };
+    query?: never;
+    url: '/api/orders/{order_id}/verify-payment';
+};
+
+export type VerifyPaymentErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type VerifyPaymentError = VerifyPaymentErrors[keyof VerifyPaymentErrors];
+
+export type VerifyPaymentResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseOrderRead;
+};
+
+export type VerifyPaymentResponse = VerifyPaymentResponses[keyof VerifyPaymentResponses];
 
 export type GetMyCartData = {
     body?: never;

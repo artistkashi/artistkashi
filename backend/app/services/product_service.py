@@ -1,6 +1,6 @@
 from fastapi import UploadFile
 from fastcrud import compute_offset
-from fastcrud.types import GetMultiResponseModel
+from fastcrud.types import GetMultiResponseModel, SelectSchemaType
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -208,6 +208,8 @@ class ProductService:
         status: ProductStatus | None = None,
         is_featured: bool | None = None,
         search: str | None = None,
+        min_price: float | None = None,
+        max_price: float | None = None,
     ) -> GetMultiResponseModel[ProductCardRead]:
 
         filters = {}
@@ -223,6 +225,13 @@ class ProductService:
 
         if search:
             filters["title__ilike"] = f"%{search}%"
+
+        if min_price is not None:
+            filters["variant__price__gte"] = min_price
+
+        if max_price is not None:
+            filters["variant__price__lte"] = max_price
+
         result = await crud_product.get_multi_card(
             db=session,
             schema_to_select=ProductCardJoinRead,
@@ -765,8 +774,8 @@ class ProductVariantService:
         session: AsyncSession,
         filter: ProductVariantCheckDB,
         check: bool = False,
-        variant_schema: type[ProductVariantRead] = ProductVariantRead,
-    ):
+        variant_schema: type[SelectSchemaType] = ProductVariantRead,
+    ) -> SelectSchemaType | None:
         filters = filter.model_dump(exclude_none=True)
 
         if not filters:

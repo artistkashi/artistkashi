@@ -233,14 +233,15 @@ export default function AdminLayout({
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Top Header - Fixed */}
-          <header className="h-20 glass-luxury border-b border-gold/10 flex items-center justify-between px-4 lg:px-8 shrink-0 z-30">
+          {/* Top Header - Visible on both Desktop and Mobile */}
+          <header className="flex h-16 lg:h-20 glass-luxury border-b border-gold/10 items-center justify-between px-4 lg:px-8 shrink-0 z-30">
             <div className="flex items-center gap-4">
+              {/* Mobile Menu Button */}
               <button
-                className="lg:hidden text-text-muted hover:text-text-main"
+                className="lg:hidden p-2 bg-dark/40 border border-gold/20 text-text-muted hover:text-gold rounded-sm transition-all"
                 onClick={() => setSidebarOpen(true)}
               >
-                <Menu size={24} />
+                <Menu size={20} />
               </button>
 
               {/* Main Desktop Toggle in Header */}
@@ -255,6 +256,16 @@ export default function AdminLayout({
                   <PanelLeftClose size={22} />
                 )}
               </button>
+
+              {/* Mobile Logo */}
+              <div className="lg:hidden flex flex-col leading-none">
+                <span className="text-text-main text-sm font-extrabold tracking-widest uppercase">
+                  Artist
+                </span>
+                <span className="text-gold text-[8px] font-mono tracking-[0.25em] uppercase -mt-0.5">
+                  Kashi
+                </span>
+              </div>
 
               <div className="hidden md:flex items-center gap-2 glass-input px-4 py-2 border focus-within:border-gold transition-colors ml-2 rounded">
                 <Search size={16} className="text-text-muted" />

@@ -597,16 +597,16 @@ export default function ProductUploadModal({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="relative w-full h-full md:h-auto md:max-w-5xl bg-surface border border-border shadow-lg flex flex-col max-h-screen overflow-hidden card-luxury"
+            className="relative w-full h-full md:h-auto md:max-w-5xl bg-surface border border-border shadow-lg flex flex-col md:max-h-[90vh] overflow-hidden card-luxury"
           >
             {/* Header */}
-            <div className="p-card border-b border-border flex justify-between items-center bg-surface shrink-0">
+            <div className="p-4 md:p-6 border-b border-border flex justify-between items-center bg-surface shrink-0">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 border border-primary/20 flex items-center justify-center bg-gold-bg">
+                <div className="w-10 h-10 border border-primary/20 flex items-center justify-center bg-gold-bg shrink-0">
                   <Sparkles className="text-primary" size={20} />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold tracking-[0.2em] text-foreground uppercase">
+                  <h2 className="text-sm md:text-base font-bold tracking-[0.2em] text-foreground uppercase">
                     {product ? "Curate Piece" : "New Acquisition"}
                   </h2>
                   <p className="hidden md:block text-2xs text-text-muted font-mono tracking-[0.3em] uppercase mt-0.5">
@@ -628,25 +628,26 @@ export default function ProductUploadModal({
               onValueChange={handleTabChange}
               className="flex flex-col flex-1 overflow-hidden"
             >
-              <TabsList className="bg-surface border-b border-border h-auto p-0 flex shrink-0">
+              <TabsList className="bg-surface border-b border-border h-auto p-0 flex overflow-x-auto no-scrollbar shrink-0 w-full justify-start md:justify-around">
                 {TABS.map((tab) => (
                   <TabsTrigger
                     key={`tab-trigger-${tab.value}`}
                     value={tab.value}
-                    className="flex-1 gap-2.5 px-6 py-4 text-2xs font-mono uppercase border-r border-border last:border-r-0 data-[state=active]:bg-gold-bg data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-b-primary transition-all text-text-muted hover:text-primary"
+                    className="flex-1 min-w-[80px] md:min-w-0 gap-1 md:gap-2.5 px-3 md:px-6 py-3 md:py-4 text-2xs md:text-2xs font-mono uppercase border-r border-border last:border-r-0 data-[state=active]:bg-gold-bg data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-b-primary transition-all text-text-muted hover:text-primary whitespace-nowrap"
                   >
-                    {tab.icon} <span>{tab.label}</span>
+                    {tab.icon}{" "}
+                    <span className="hidden xs:inline">{tab.label}</span>
                   </TabsTrigger>
                 ))}
               </TabsList>
 
-              <div className="flex-1 overflow-y-auto modal-pad gap-stack scrollbar-hide">
+              <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 md:space-y-8 scrollbar-hide">
                 {/* ── General ── */}
                 <TabsContent
                   value="general"
-                  className="mt-0 space-y-8 animate-in fade-in duration-300"
+                  className="mt-0 space-y-6 md:space-y-8 animate-in fade-in duration-300"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                     <div className="space-y-2">
                       <Label>Piece Title</Label>
                       <Input
@@ -666,7 +667,7 @@ export default function ProductUploadModal({
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8">
                     <div className="space-y-0">
                       <Label>Collection</Label>
                       <div className="flex items-center gap-2">
@@ -693,7 +694,7 @@ export default function ProductUploadModal({
                         <button
                           type="button"
                           onClick={() => setQuickAddFor("category")}
-                          className="h-[44px] px-3 border border-border text-2xs bg-surface hover:border-primary transition-colors rounded hover:text-primary"
+                          className="h-[44px] px-3 border border-border text-2xs bg-surface hover:border-primary transition-colors rounded hover:text-primary shrink-0"
                         >
                           <Plus size={11} />
                         </button>
@@ -725,7 +726,7 @@ export default function ProductUploadModal({
                         <button
                           type="button"
                           onClick={() => setQuickAddFor("medium")}
-                          className="h-[44px] px-3 border border-border text-2xs bg-surface hover:border-primary transition-colors rounded hover:text-primary"
+                          className="h-[44px] px-3 border border-border text-2xs bg-surface hover:border-primary transition-colors rounded hover:text-primary shrink-0"
                         >
                           <Plus size={11} />
                         </button>
@@ -742,7 +743,7 @@ export default function ProductUploadModal({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 pt-2">
                     <div className="space-y-3">
                       <Label>Curatorial Status</Label>
                       <div className="flex flex-wrap gap-2">
@@ -757,7 +758,7 @@ export default function ProductUploadModal({
                                   type="button"
                                   onClick={() => field.onChange(status)}
                                   className={cn(
-                                    "px-4 py-2.5 text-2xs font-mono uppercase border transition-all duration-300 rounded",
+                                    "px-3 md:px-4 py-2 text-2xs font-mono uppercase border transition-all duration-300 rounded",
                                     field.value === status
                                       ? "bg-gold border-primary text-dark gold-glow"
                                       : "border-border text-text-muted hover:border-primary hover:text-primary"
@@ -771,7 +772,7 @@ export default function ProductUploadModal({
                         />
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 pt-6">
+                    <div className="flex items-center gap-4 pt-4 sm:pt-6">
                       <Controller
                         name="is_featured"
                         control={control}
@@ -795,7 +796,7 @@ export default function ProductUploadModal({
 
                 <TabsContent
                   value="description"
-                  className="mt-0 space-y-8 animate-in fade-in duration-300"
+                  className="mt-0 space-y-6 md:space-y-8 animate-in fade-in duration-300"
                 >
                   <div className="space-y-2">
                     <Label>Short Description</Label>
@@ -811,18 +812,20 @@ export default function ProductUploadModal({
                     <TextArea
                       {...register("description")}
                       placeholder="Detail the inspiration, technical process, and narrative depth..."
-                      rows={10}
+                      rows={6}
+                      md-rows={10}
                       error={errors.description?.message}
+                      className="min-h-37.5"
                     />
                   </div>
                 </TabsContent>
 
                 <TabsContent
                   value="variants"
-                  className="mt-0 space-y-8 animate-in fade-in duration-300"
+                  className="mt-0 space-y-6 md:space-y-8 animate-in fade-in duration-300"
                 >
                   <div className="flex justify-between items-center pb-4 border-b border-border">
-                    <h3 className="text-lg font-bold uppercase tracking-tight text-foreground">
+                    <h3 className="text-sm md:text-lg font-bold uppercase tracking-tight text-foreground">
                       Valuation & Dimensions
                     </h3>
                     <button
@@ -840,10 +843,10 @@ export default function ProductUploadModal({
                           sku: "",
                         })
                       }
-                      className="text-primary flex items-center gap-2.5 text-2xs uppercase tracking-widest hover:text-foreground transition-colors group"
+                      className="text-primary flex items-center gap-1.5 md:gap-2.5 text-2xs uppercase tracking-widest hover:text-foreground transition-colors group"
                     >
-                      <div className="w-6 h-6 border border-primary/40 flex items-center justify-center group-hover:border-primary transition-colors">
-                        <Plus size={12} />
+                      <div className="w-5 h-5 md:w-6 md:h-6 border border-primary/40 flex items-center justify-center group-hover:border-primary transition-colors">
+                        <Plus size={10} />
                       </div>
                       Add Format
                     </button>
@@ -851,9 +854,9 @@ export default function ProductUploadModal({
                   {variantFields.map((field, index) => (
                     <div
                       key={`variant-card-${field.id}`}
-                      className="p-6 card-luxury-hover space-y-6 relative group/v rounded"
+                      className="p-4 md:p-6 card-luxury-hover space-y-4 md:space-y-6 relative group/v rounded"
                     >
-                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 md:gap-8">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                         <div className="space-y-0">
                           <Label>Format</Label>
                           <div className="flex items-center gap-1.5">
@@ -863,7 +866,7 @@ export default function ProductUploadModal({
                                 control={control}
                                 render={({ field: f }) => (
                                   <CustomSelect
-                                    placeholder="Select Format"
+                                    placeholder="Format"
                                     options={variantTypes.map((vt) => ({
                                       value: vt.id,
                                       label: vt.name,
@@ -884,7 +887,7 @@ export default function ProductUploadModal({
                                 setQuickAddVariantIndex(index);
                                 setQuickAddFor("variantType");
                               }}
-                              className="h-[44px] px-3 border border-border text-2xs bg-surface hover:border-primary transition-colors rounded hover:text-primary"
+                              className="h-[44px] px-3 border border-border text-2xs bg-surface hover:border-primary transition-colors rounded hover:text-primary shrink-0"
                             >
                               <Plus size={11} />
                             </button>
@@ -918,34 +921,34 @@ export default function ProductUploadModal({
                           />
                         </div>
                       </div>
-                      <div className="flex flex-wrap items-end justify-between mt-6 md:mt-8 gap-6">
-                        <Controller
-                          name={`variants.${index}.dimension_unit`}
-                          control={control}
-                          render={({ field: f }) => (
-                            <CustomSelect
-                              label="Unit"
-                              placeholder="Unit"
-                              options={[
-                                { value: "cm", label: "cm" },
-                                { value: "inch", label: "inch" },
-                                { value: "mm", label: "mm" },
-                              ]}
-                              value={f.value}
-                              onChange={f.onChange}
-                              className="w-full sm:w-32"
-                            />
-                          )}
-                        />
-                        <div className="space-y-2 w-32">
-                          <Label>Stock</Label>
-                          <Input
-                            type="number"
-                            {...register(`variants.${index}.stock_quantity`)}
+                      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-2">
+                        <div className="flex flex-wrap items-end gap-4 w-full sm:w-auto">
+                          <Controller
+                            name={`variants.${index}.dimension_unit`}
+                            control={control}
+                            render={({ field: f }) => (
+                              <CustomSelect
+                                label="Unit"
+                                placeholder="Unit"
+                                options={[
+                                  { value: "cm", label: "cm" },
+                                  { value: "inch", label: "inch" },
+                                  { value: "mm", label: "mm" },
+                                ]}
+                                value={f.value}
+                                onChange={f.onChange}
+                                className="w-24 sm:w-28"
+                              />
+                            )}
                           />
-                        </div>
-                        <div className="py-4">
-                          <div className="flex items-center">
+                          <div className="space-y-2 w-24 sm:w-28">
+                            <Label>Stock</Label>
+                            <Input
+                              type="number"
+                              {...register(`variants.${index}.stock_quantity`)}
+                            />
+                          </div>
+                          <div className="flex items-center h-[44px] pl-2">
                             <Checkbox
                               id={`def-${index}`}
                               checked={watchedVariants[index]?.is_default}
@@ -961,20 +964,20 @@ export default function ProductUploadModal({
                             />
                             <label
                               htmlFor={`def-${index}`}
-                              className="text-2xs uppercase text-text-muted cursor-pointer hover:text-primary transition-colors ml-2"
+                              className="text-2xs uppercase text-text-muted cursor-pointer hover:text-primary transition-colors ml-2 font-mono"
                             >
                               Default
                             </label>
                           </div>
                         </div>
-                        <div className="flex items-center justify-end h-[44px] ml-auto pt-8">
+                        <div className="flex items-center justify-end sm:h-[44px]">
                           {variantFields.length > 1 && (
                             <button
                               type="button"
                               onClick={() => handleRemoveVariant(index)}
-                              className="w-10 h-10 flex items-center justify-center text-danger/60 hover:text-danger hover:bg-danger/5 transition-all rounded-full border border-transparent hover:border-danger/20"
+                              className="w-9 h-9 flex items-center justify-center text-danger/60 hover:text-danger hover:bg-danger/5 transition-all rounded-full border border-transparent hover:border-danger/20"
                             >
-                              <Trash2 size={18} />
+                              <Trash2 size={16} />
                             </button>
                           )}
                         </div>
@@ -985,7 +988,7 @@ export default function ProductUploadModal({
 
                 <TabsContent
                   value="media"
-                  className="mt-0 space-y-10 animate-in fade-in duration-300"
+                  className="mt-0 space-y-8 md:space-y-10 animate-in fade-in duration-300"
                 >
                   {errors.images?.message && (
                     <div className="p-4 bg-danger/5 border border-danger/20 rounded-sm">
@@ -994,7 +997,7 @@ export default function ProductUploadModal({
                       </p>
                     </div>
                   )}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                     {imageFields.map((field, i) => {
                       const img = watchedImages[i];
                       if (!img) return null;
@@ -1045,7 +1048,7 @@ export default function ProductUploadModal({
                     })}
                     <label className="aspect-4/5 border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-gold-bg transition-all rounded-md group">
                       <Plus
-                        size={24}
+                        size={20}
                         className="text-text-muted group-hover:text-primary transition-colors"
                       />
                       <span className="text-2xs uppercase tracking-widest mt-2 font-mono text-text-muted group-hover:text-primary transition-colors">
@@ -1061,18 +1064,18 @@ export default function ProductUploadModal({
                     </label>
                   </div>
 
-                  <div className="space-y-6 pt-6 border-t border-border">
+                  <div className="space-y-4 md:space-y-6 pt-6 border-t border-border">
                     <h4 className="text-2xs font-bold text-primary uppercase tracking-widest">
                       External Visions
                     </h4>
-                    <div className="grid grid-cols-1 gap-6">
+                    <div className="grid grid-cols-1 gap-4">
                       {imageFields.map((field, i) => {
                         const img = watchedImages[i];
                         if (!img || !img.is_external) return null;
                         return (
                           <div
                             key={`external-vision-${field.id}`}
-                            className="flex flex-col sm:flex-row gap-6 items-start sm:items-center p-card card-luxury group hover:border-primary transition-all"
+                            className="flex flex-col sm:flex-row gap-4 p-4 card-luxury group hover:border-primary transition-all rounded"
                           >
                             <div className="flex-1 w-full space-y-4">
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1093,12 +1096,12 @@ export default function ProductUploadModal({
                                 </div>
                               </div>
                             </div>
-                            <div className="flex items-center gap-4 shrink-0">
+                            <div className="flex items-center gap-3 shrink-0 pt-2 sm:pt-0 self-end sm:self-center">
                               <button
                                 type="button"
                                 onClick={() => setPrimaryImage(i)}
                                 className={cn(
-                                  "px-4 py-2 rounded-full border text-2xs uppercase tracking-widest transition-all",
+                                  "px-3 py-1.5 rounded border text-2xs uppercase tracking-widest transition-all font-mono",
                                   img.is_primary
                                     ? "bg-gold border-primary text-dark gold-glow"
                                     : "border-border text-text-muted hover:border-primary hover:text-primary"
@@ -1109,9 +1112,9 @@ export default function ProductUploadModal({
                               <button
                                 type="button"
                                 onClick={() => handleRemoveImage(i)}
-                                className="w-10 h-10 flex items-center justify-center text-danger/60 hover:text-danger hover:bg-danger/5 transition-all rounded-full"
+                                className="w-9 h-9 flex items-center justify-center text-danger/60 hover:text-danger hover:bg-danger/5 transition-all rounded-full"
                               >
-                                <Trash2 size={18} />
+                                <Trash2 size={16} />
                               </button>
                             </div>
                           </div>
@@ -1132,7 +1135,7 @@ export default function ProductUploadModal({
                         is_existing: false,
                       })
                     }
-                    className="text-primary text-2xs uppercase tracking-[0.2em] font-bold hover:text-foreground transition-all flex items-center gap-2 group"
+                    className="text-primary text-2xs uppercase tracking-[0.2em] font-bold hover:text-foreground transition-all flex items-center gap-2 group pt-2"
                   >
                     <Plus
                       size={14}
@@ -1144,14 +1147,14 @@ export default function ProductUploadModal({
 
                 <TabsContent
                   value="settings"
-                  className="mt-0 space-y-12 animate-in fade-in duration-300"
+                  className="mt-0 space-y-8 md:space-y-12 animate-in fade-in duration-300"
                 >
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                    <div className="space-y-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16">
+                    <div className="space-y-6 md:space-y-8">
                       <h4 className="text-2xs font-bold text-primary uppercase tracking-[0.3em] border-b border-primary/20 pb-2">
                         Tangible Detail
                       </h4>
-                      <div className="space-y-6">
+                      <div className="space-y-4 md:space-y-6">
                         <Controller
                           name="is_original_available"
                           control={control}
@@ -1185,7 +1188,7 @@ export default function ProductUploadModal({
                             />
                           )}
                         />
-                        <div className="pt-4">
+                        <div className="pt-2">
                           <Label>Total Mass (Grams)</Label>
                           <Input
                             type="number"
@@ -1196,11 +1199,11 @@ export default function ProductUploadModal({
                         </div>
                       </div>
                     </div>
-                    <div className="space-y-8">
+                    <div className="space-y-6 md:space-y-8">
                       <h4 className="text-2xs font-bold text-primary uppercase tracking-[0.3em] border-b border-primary/20 pb-2">
                         Archival Metadata
                       </h4>
-                      <div className="space-y-6">
+                      <div className="space-y-4 md:space-y-6">
                         <div className="space-y-2">
                           <Label>Search Title</Label>
                           <Input
@@ -1212,7 +1215,8 @@ export default function ProductUploadModal({
                           <Label>Archival Summary</Label>
                           <TextArea
                             {...register("meta_description")}
-                            rows={6}
+                            rows={4}
+                            md-rows={6}
                             placeholder="Detailed summary for the digital archive..."
                           />
                         </div>
@@ -1223,19 +1227,20 @@ export default function ProductUploadModal({
               </div>
 
               {/* Footer */}
-              <div className="p-card border-t border-border bg-surface flex justify-between items-center shrink-0 backdrop-blur-md">
+              <div className="p-4 md:p-6 border-t border-border bg-surface flex justify-between items-center shrink-0 backdrop-blur-md">
                 {!isFirstTab ? (
                   <button
                     type="button"
                     onClick={goPrev}
-                    className="text-2xs font-mono uppercase tracking-[0.3em] text-text-muted hover:text-primary transition-all flex items-center gap-3"
+                    className="text-2xs font-mono uppercase tracking-[0.3em] text-text-muted hover:text-primary transition-all flex items-center gap-1.5 md:gap-3"
                   >
-                    <ChevronLeft size={16} /> Preceding
+                    <ChevronLeft size={16} />{" "}
+                    <span className="hidden xs:inline">Preceding</span>
                   </button>
                 ) : (
-                  <div className="w-20" />
+                  <div className="w-10" />
                 )}
-                <div className="flex gap-6 items-center">
+                <div className="flex gap-4 md:gap-6 items-center">
                   <button
                     type="button"
                     onClick={onClose}
@@ -1247,7 +1252,7 @@ export default function ProductUploadModal({
                     <PrimaryBtn
                       type="button"
                       onClick={goNext}
-                      className="px-12 py-3.5"
+                      className="px-6 md:px-12 py-3 md:py-3.5 text-2xs"
                     >
                       Proceed
                     </PrimaryBtn>
@@ -1256,15 +1261,15 @@ export default function ProductUploadModal({
                       type="button"
                       disabled={submitting}
                       onClick={handleSubmit(onSubmit, onInvalid)}
-                      className="w-full px-12 py-3.5 gold-glow-lg"
+                      className="w-full px-6 md:px-12 py-3 md:py-3.5 text-2xs gold-glow-lg"
                     >
                       {submitting ? (
                         <div className="luxury-loader luxury-loader-dark loader-sm" />
                       ) : (
-                        <>
-                          <Save className="mr-3" size={18} />
-                          {product ? "Preserve Piece" : "Archive Piece"}
-                        </>
+                        <span className="flex items-center gap-2">
+                          <Save size={14} />
+                          {product ? "Preserve" : "Archive"}
+                        </span>
                       )}
                     </PrimaryBtn>
                   )}
@@ -1447,7 +1452,7 @@ function SwitchField({
             "w-10 h-5 rounded-full relative transition-all duration-500 border",
             checked
               ? "bg-gold/20 border-primary gold-glow"
-              : "bg-surface border-border"
+              : "bg-surface border-text-muted/50 hover:border-primary"
           )}
         >
           <motion.div
@@ -1455,7 +1460,7 @@ function SwitchField({
             transition={{ type: "spring", stiffness: 500, damping: 30 }}
             className={cn(
               "absolute top-0.5 w-3.5 h-3.5 rounded-full transition-all duration-300",
-              checked ? "bg-gold gold-glow" : "bg-muted"
+              checked ? "bg-gold gold-glow" : "bg-text-muted"
             )}
           />
         </button>

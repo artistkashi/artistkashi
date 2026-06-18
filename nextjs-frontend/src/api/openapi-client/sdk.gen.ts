@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { AddToCartData, AddToCartErrors, AddToCartResponses, AddToWishlistData, AddToWishlistErrors, AddToWishlistResponses, AdminStatsData, AdminStatsErrors, AdminStatsResponses, ArchiveProductData, ArchiveProductErrors, ArchiveProductResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, CoursesGetCourseData, CoursesGetCourseErrors, CoursesGetCourseResponses, CoursesListCoursesData, CoursesListCoursesErrors, CoursesListCoursesResponses, CreateAddressData, CreateAddressErrors, CreateAddressResponses, CreateCategoryData, CreateCategoryErrors, CreateCategoryResponses, CreateMediumData, CreateMediumErrors, CreateMediumResponses, CreateProductData, CreateProductErrors, CreateProductResponses, CreateReviewData, CreateReviewErrors, CreateReviewResponses, CreateVariantTypeData, CreateVariantTypeErrors, CreateVariantTypeResponses, DeleteAddressData, DeleteAddressErrors, DeleteAddressResponses, DeleteCategoryData, DeleteCategoryErrors, DeleteCategoryResponses, DeleteMediumData, DeleteMediumErrors, DeleteMediumResponses, DeleteProductData, DeleteProductErrors, DeleteProductResponses, DeleteReviewData, DeleteReviewErrors, DeleteReviewResponses, DeleteVariantTypeData, DeleteVariantTypeErrors, DeleteVariantTypeResponses, FeaturedProductsData, FeaturedProductsErrors, FeaturedProductsResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetCategoryData, GetCategoryErrors, GetCategoryResponses, GetCourseData, GetCourseErrors, GetCourseResponses, GetHomePageSettingsData, GetHomePageSettingsErrors, GetHomePageSettingsResponses, GetImageData, GetImageErrors, GetImageResponses, GetMediumData, GetMediumErrors, GetMediumResponses, GetMyCartData, GetMyCartErrors, GetMyCartResponses, GetMyReviewsData, GetMyReviewsErrors, GetMyReviewsResponses, GetMyWishlistData, GetMyWishlistErrors, GetMyWishlistResponses, GetProductBySlugData, GetProductBySlugErrors, GetProductBySlugResponses, GetProductData, GetProductErrors, GetProductImagesData, GetProductImagesErrors, GetProductImagesResponses, GetProductResponses, GetReviewDetailData, GetReviewDetailErrors, GetReviewDetailResponses, GetUserData, GetUserErrors, GetUserResponses, GetVariantData, GetVariantErrors, GetVariantResponses, GetVariantTypeData, GetVariantTypeErrors, GetVariantTypeResponses, HealthCheckData, HealthCheckDetailedData, HealthCheckDetailedErrors, HealthCheckDetailedResponses, HealthCheckErrors, HealthCheckResponses, ListAddressesData, ListAddressesErrors, ListAddressesResponses, ListAllReviewsData, ListAllReviewsErrors, ListAllReviewsResponses, ListCategoriesData, ListCategoriesErrors, ListCategoriesResponses, ListCoursesData, ListCoursesErrors, ListCoursesResponses, ListMediumsData, ListMediumsErrors, ListMediumsResponses, ListProductsData, ListProductsErrors, ListProductsResponses, ListProfilesData, ListProfilesErrors, ListProfilesResponses, ListReviewsData, ListReviewsErrors, ListReviewsResponses, ListUsersData, ListUsersErrors, ListUsersResponses, ListVariantsData, ListVariantsErrors, ListVariantsResponses, ListVariantTypesData, ListVariantTypesErrors, ListVariantTypesResponses, LoginData, LoginErrors, LoginResponses, LogoutAllData, LogoutAllErrors, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, MeData, MeErrors, MeResponses, OverviewData, OverviewErrors, OverviewResponses, ProductsGetProductData, ProductsGetProductErrors, ProductsGetProductResponses, ProductsListProductsData, ProductsListProductsErrors, ProductsListProductsResponses, PublishProductData, PublishProductErrors, PublishProductResponses, ReadMyAddressesData, ReadMyAddressesErrors, ReadMyAddressesResponses, ReadOwnProfileData, ReadOwnProfileErrors, ReadOwnProfileResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, RemoveFromCartData, RemoveFromCartErrors, RemoveFromCartResponses, RemoveFromWishlistData, RemoveFromWishlistErrors, RemoveFromWishlistResponses, RequestVerificationData, RequestVerificationErrors, RequestVerificationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, SearchProductsData, SearchProductsErrors, SearchProductsResponses, UpdateAddressData, UpdateAddressErrors, UpdateAddressResponses, UpdateCartItemData, UpdateCartItemErrors, UpdateCartItemResponses, UpdateCategoryData, UpdateCategoryErrors, UpdateCategoryResponses, UpdateHomePageSettingsData, UpdateHomePageSettingsErrors, UpdateHomePageSettingsResponses, UpdateMediumData, UpdateMediumErrors, UpdateMediumResponses, UpdateProductData, UpdateProductErrors, UpdateProductResponses, UpdateReviewData, UpdateReviewErrors, UpdateReviewResponses, UpdateVariantTypeData, UpdateVariantTypeErrors, UpdateVariantTypeResponses, VerifyEmailData, VerifyEmailErrors, VerifyEmailResponses } from './types.gen';
+import type { AddToCartData, AddToCartErrors, AddToCartResponses, AddToWishlistData, AddToWishlistErrors, AddToWishlistResponses, AdminStatsData, AdminStatsErrors, AdminStatsResponses, ArchiveProductData, ArchiveProductErrors, ArchiveProductResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, CoursesGetCourseData, CoursesGetCourseErrors, CoursesGetCourseResponses, CoursesListCoursesData, CoursesListCoursesErrors, CoursesListCoursesResponses, CreateAddressData, CreateAddressErrors, CreateAddressResponses, CreateCategoryData, CreateCategoryErrors, CreateCategoryResponses, CreateMediumData, CreateMediumErrors, CreateMediumResponses, CreateOrderData, CreateOrderErrors, CreateOrderResponses, CreateProductData, CreateProductErrors, CreateProductResponses, CreateReviewData, CreateReviewErrors, CreateReviewResponses, CreateVariantTypeData, CreateVariantTypeErrors, CreateVariantTypeResponses, DeleteAddressData, DeleteAddressErrors, DeleteAddressResponses, DeleteCategoryData, DeleteCategoryErrors, DeleteCategoryResponses, DeleteMediumData, DeleteMediumErrors, DeleteMediumResponses, DeleteProductData, DeleteProductErrors, DeleteProductResponses, DeleteReviewData, DeleteReviewErrors, DeleteReviewResponses, DeleteVariantTypeData, DeleteVariantTypeErrors, DeleteVariantTypeResponses, FeaturedProductsData, FeaturedProductsErrors, FeaturedProductsResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetCategoryData, GetCategoryErrors, GetCategoryResponses, GetCourseData, GetCourseErrors, GetCourseResponses, GetHomePageSettingsData, GetHomePageSettingsErrors, GetHomePageSettingsResponses, GetImageData, GetImageErrors, GetImageResponses, GetMediumData, GetMediumErrors, GetMediumResponses, GetMyCartData, GetMyCartErrors, GetMyCartResponses, GetMyReviewsData, GetMyReviewsErrors, GetMyReviewsResponses, GetMyWishlistData, GetMyWishlistErrors, GetMyWishlistResponses, GetOrderDetailsData, GetOrderDetailsErrors, GetOrderDetailsResponses, GetProductBySlugData, GetProductBySlugErrors, GetProductBySlugResponses, GetProductData, GetProductErrors, GetProductImagesData, GetProductImagesErrors, GetProductImagesResponses, GetProductResponses, GetReviewDetailData, GetReviewDetailErrors, GetReviewDetailResponses, GetUserData, GetUserErrors, GetUserResponses, GetVariantData, GetVariantErrors, GetVariantResponses, GetVariantTypeData, GetVariantTypeErrors, GetVariantTypeResponses, HealthCheckData, HealthCheckDetailedData, HealthCheckDetailedErrors, HealthCheckDetailedResponses, HealthCheckErrors, HealthCheckResponses, ListAddressesData, ListAddressesErrors, ListAddressesResponses, ListAllReviewsData, ListAllReviewsErrors, ListAllReviewsResponses, ListCategoriesData, ListCategoriesErrors, ListCategoriesResponses, ListCoursesData, ListCoursesErrors, ListCoursesResponses, ListMediumsData, ListMediumsErrors, ListMediumsResponses, ListMyOrdersData, ListMyOrdersErrors, ListMyOrdersResponses, ListOrdersData, ListOrdersErrors, ListOrdersResponses, ListProductsData, ListProductsErrors, ListProductsResponses, ListProfilesData, ListProfilesErrors, ListProfilesResponses, ListReviewsData, ListReviewsErrors, ListReviewsResponses, ListUsersData, ListUsersErrors, ListUsersResponses, ListVariantsData, ListVariantsErrors, ListVariantsResponses, ListVariantTypesData, ListVariantTypesErrors, ListVariantTypesResponses, LoginData, LoginErrors, LoginResponses, LogoutAllData, LogoutAllErrors, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, MeData, MeErrors, MeResponses, OrdersGetOrderDetailsData, OrdersGetOrderDetailsErrors, OrdersGetOrderDetailsResponses, OverviewData, OverviewErrors, OverviewResponses, ProductsGetProductData, ProductsGetProductErrors, ProductsGetProductResponses, ProductsListProductsData, ProductsListProductsErrors, ProductsListProductsResponses, PublishProductData, PublishProductErrors, PublishProductResponses, ReadMyAddressesData, ReadMyAddressesErrors, ReadMyAddressesResponses, ReadOwnProfileData, ReadOwnProfileErrors, ReadOwnProfileResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, RemoveFromCartData, RemoveFromCartErrors, RemoveFromCartResponses, RemoveFromWishlistData, RemoveFromWishlistErrors, RemoveFromWishlistResponses, RequestVerificationData, RequestVerificationErrors, RequestVerificationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, SearchProductsData, SearchProductsErrors, SearchProductsResponses, UpdateAddressData, UpdateAddressErrors, UpdateAddressResponses, UpdateCartItemData, UpdateCartItemErrors, UpdateCartItemResponses, UpdateCategoryData, UpdateCategoryErrors, UpdateCategoryResponses, UpdateHomePageSettingsData, UpdateHomePageSettingsErrors, UpdateHomePageSettingsResponses, UpdateMediumData, UpdateMediumErrors, UpdateMediumResponses, UpdateOrderStatusData, UpdateOrderStatusErrors, UpdateOrderStatusResponses, UpdateProductData, UpdateProductErrors, UpdateProductResponses, UpdateReviewData, UpdateReviewErrors, UpdateReviewResponses, UpdateVariantTypeData, UpdateVariantTypeErrors, UpdateVariantTypeResponses, VerifyEmailData, VerifyEmailErrors, VerifyEmailResponses, VerifyPaymentData, VerifyPaymentErrors, VerifyPaymentResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -449,6 +449,40 @@ export const overview = <ThrowOnError extends boolean = false>(options?: Options
 });
 
 /**
+ * List Orders
+ */
+export const listOrders = <ThrowOnError extends boolean = false>(options?: Options<ListOrdersData, ThrowOnError>) => (options?.client ?? client).get<ListOrdersResponses, ListOrdersErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/orders',
+    ...options
+});
+
+/**
+ * Get Order Details
+ */
+export const getOrderDetails = <ThrowOnError extends boolean = false>(options: Options<GetOrderDetailsData, ThrowOnError>) => (options.client ?? client).get<GetOrderDetailsResponses, GetOrderDetailsErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/orders/{order_id}',
+    ...options
+});
+
+/**
+ * Update Order Status
+ */
+export const updateOrderStatus = <ThrowOnError extends boolean = false>(options: Options<UpdateOrderStatusData, ThrowOnError>) => (options.client ?? client).patch<UpdateOrderStatusResponses, UpdateOrderStatusErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/orders/{order_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * List All Reviews
  *
  * List all reviews (admin only).
@@ -789,6 +823,54 @@ export const productsGetProduct = <ThrowOnError extends boolean = false>(options
     responseType: 'json',
     url: '/api/products/{slug}',
     ...options
+});
+
+/**
+ * List My Orders
+ */
+export const listMyOrders = <ThrowOnError extends boolean = false>(options?: Options<ListMyOrdersData, ThrowOnError>) => (options?.client ?? client).get<ListMyOrdersResponses, ListMyOrdersErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/orders',
+    ...options
+});
+
+/**
+ * Create Order
+ */
+export const createOrder = <ThrowOnError extends boolean = false>(options: Options<CreateOrderData, ThrowOnError>) => (options.client ?? client).post<CreateOrderResponses, CreateOrderErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/orders',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get Order Details
+ */
+export const ordersGetOrderDetails = <ThrowOnError extends boolean = false>(options: Options<OrdersGetOrderDetailsData, ThrowOnError>) => (options.client ?? client).get<OrdersGetOrderDetailsResponses, OrdersGetOrderDetailsErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/orders/{order_id}',
+    ...options
+});
+
+/**
+ * Verify Payment
+ */
+export const verifyPayment = <ThrowOnError extends boolean = false>(options: Options<VerifyPaymentData, ThrowOnError>) => (options.client ?? client).post<VerifyPaymentResponses, VerifyPaymentErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/orders/{order_id}/verify-payment',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**

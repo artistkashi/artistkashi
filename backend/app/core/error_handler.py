@@ -1,12 +1,10 @@
 """Exception handlers and middleware."""
 
 import logging
-from collections.abc import Awaitable, Callable
 
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from starlette.responses import Response
 
 from app.core.exceptions import AppException, ErrorCode
 from app.schemas.responses import ErrorResponse, Meta
@@ -49,6 +47,7 @@ HTTP_ERROR_MESSAGES = {
     ErrorCode.PRODUCT_IMAGE_NOT_FOUND.value: "Product image not found",
     ErrorCode.PRODUCT_CATEGORY_NOT_FOUND.value: "Product category not found",
     ErrorCode.PRODUCT_CATEGORY_ALREADY_EXISTS.value: "Product category already exists",
+    ErrorCode.ORDER_NOT_FOUND.value: "Order not found",
 }
 
 missing_error_messages = set(ErrorCode) - {

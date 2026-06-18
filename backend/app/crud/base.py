@@ -2,7 +2,7 @@ from typing import Any
 
 from fastcrud import FastCRUD
 from pydantic import BaseModel
-from sqlalchemy import and_, func, select
+from sqlalchemy import and_, func, inspect, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.inspection import inspect as sa_inspect
 from sqlalchemy.orm import Load, selectinload
@@ -244,3 +244,52 @@ class BaseCRUD(FastCRUD):
             return_total_count=True,
             **filters,
         )
+
+    async def create_multi(
+        self,
+        db: AsyncSession,
+        *,
+        objects: list[BaseModel | dict],
+        commit: bool = True,
+        schema_to_select: type[BaseModel] | None = None,
+        return_as_model: bool = False,
+    ):
+        if not objects:
+            return []
+
+        db_objects = []
+
+        for obj in objects:
+            if isinstance(obj, dict):
+                db_obj = self.model(**obj)
+            else:
+                db_obj = self.model(**obj.model_dump())
+
+            db_objects.append(db_obj)
+
+        db.add_all(db_objects)
+
+        if commit:
+            await db.commit()
+        else:
+            await db.flush()
+
+        for db_obj in db_objects:
+            await db.refresh(db_obj)
+
+        if not schema_to_select:
+            return db_objects
+
+        results = []
+
+        for db_obj in db_objects:
+            mapper = inspect(db_obj.__class__)
+
+            data = {attr.key: getattr(db_obj, attr.key) for attr in mapper.column_attrs}
+
+            if return_as_model:
+                results.append(schema_to_select.model_validate(data))
+            else:
+                results.append(data)
+
+        return results
