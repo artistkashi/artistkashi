@@ -3,6 +3,7 @@ from fastapi import status
 from sqlalchemy import select
 
 from app.core.exceptions import ErrorCode
+from app.core.config import settings
 from app.models import User
 
 
@@ -81,7 +82,7 @@ class TestPasswordValidation:
     ):
         """Test user registration with password validation."""
         json = {"email": email, "password": password}
-        response = await test_client.post("/auth/register", json=json)
+        response = await test_client.post(f"{settings.API_V1_PREFIX}/auth/register", json=json)
 
         assert response.status_code == expected_status
 
@@ -92,7 +93,7 @@ class TestPasswordValidation:
             "email": "user@1.com",
             "password": "Sppecialchar1#",
         }
-        response = await test_client.post("/auth/register", json=json)
+        response = await test_client.post(f"{settings.API_V1_PREFIX}/auth/register", json=json)
 
         row = await db_session.execute(select(User))
 

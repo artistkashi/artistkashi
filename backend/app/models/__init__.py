@@ -14,12 +14,14 @@ from app.models.product import (
 from app.models.review import Review
 from app.models.site_config import SiteConfig
 from app.models.user import User
+from app.models.user_auth_provider import UserAuthProvider
 from app.models.user_session import UserSession
 from app.models.wishlist import Wishlist
 
 __all__ = [
     "Base",
     "User",
+    "UserAuthProvider",
     "UserSession",
     "Address",
     "SiteConfig",

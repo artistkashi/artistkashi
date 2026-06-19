@@ -1167,6 +1167,54 @@
             }
           },
           {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ProductStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "min_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Price"
+            }
+          },
+          {
+            "name": "max_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Price"
+            }
+          },
+          {
             "name": "is_featured",
             "in": "query",
             "required": false,
@@ -2006,9 +2054,8 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 100,
               "minimum": 1,
-              "default": 20,
+              "default": 10,
               "title": "Page Size"
             }
           },
@@ -2614,6 +2661,129 @@
             }
           }
         }
+      }
+    },
+    "/api/auth/google": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Google Auth",
+        "operationId": "google_auth",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleAuthRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_TokenResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/set-password": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Set Password",
+        "operationId": "set_password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/auth/providers": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Get Auth Providers",
+        "operationId": "get_auth_providers",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_AuthProvidersResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/auth/refresh": {
@@ -4672,6 +4842,27 @@
         ],
         "title": "AdminOrderRead"
       },
+      "AuthProvidersResponse": {
+        "properties": {
+          "providers": {
+            "items": {
+              "$ref": "#/components/schemas/UserAuthProviderRead"
+            },
+            "type": "array",
+            "title": "Providers"
+          },
+          "has_password": {
+            "type": "boolean",
+            "title": "Has Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "providers",
+          "has_password"
+        ],
+        "title": "AuthProvidersResponse"
+      },
       "BannerSection": {
         "properties": {
           "label": {
@@ -5278,6 +5469,20 @@
           "email"
         ],
         "title": "ForgotPasswordRequest"
+      },
+      "GoogleAuthRequest": {
+        "properties": {
+          "credential": {
+            "type": "string",
+            "title": "Credential",
+            "description": "Google ID token from the client"
+          }
+        },
+        "type": "object",
+        "required": [
+          "credential"
+        ],
+        "title": "GoogleAuthRequest"
       },
       "HTTPValidationError": {
         "properties": {
@@ -7825,6 +8030,14 @@
         ],
         "title": "ProductVariantState"
       },
+      "ProviderType": {
+        "type": "string",
+        "enum": [
+          "password",
+          "google"
+        ],
+        "title": "ProviderType"
+      },
       "PublicUserRead": {
         "properties": {
           "created_at": {
@@ -8210,6 +8423,21 @@
         ],
         "title": "ServiceHealth"
       },
+      "SetPasswordRequest": {
+        "properties": {
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "title": "Password",
+            "description": "New password for the user account"
+          }
+        },
+        "type": "object",
+        "required": [
+          "password"
+        ],
+        "title": "SetPasswordRequest"
+      },
       "SuccessResponse_AddressRead_": {
         "properties": {
           "success": {
@@ -8281,6 +8509,42 @@
           "message"
         ],
         "title": "SuccessResponse[AdminOrderRead]"
+      },
+      "SuccessResponse_AuthProvidersResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthProvidersResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[AuthProvidersResponse]"
       },
       "SuccessResponse_BasicHealthData_": {
         "properties": {
@@ -9503,6 +9767,63 @@
           "refresh_token"
         ],
         "title": "TokenResponse"
+      },
+      "UserAuthProviderRead": {
+        "properties": {
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "provider_user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider User Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "provider"
+        ],
+        "title": "UserAuthProviderRead"
       },
       "UserCreate": {
         "properties": {

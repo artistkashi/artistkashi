@@ -4224,18 +4224,6 @@ export type ListProductsData = {
          */
         category_id?: number | null;
         /**
-         * Status
-         */
-        status?: ProductStatus | null;
-        /**
-         * Min Price
-         */
-        min_price?: number | null;
-        /**
-         * Max Price
-         */
-        max_price?: number | null;
-        /**
          * Is Featured
          */
         is_featured?: boolean | null;

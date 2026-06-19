@@ -15,6 +15,7 @@ const dmMono = DM_Mono({
 
 import "@/api/config";
 import { AppShell } from "@/components/layout/AppShell";
+import { GoogleOAuthWrapper } from "@/components/auth/GoogleOAuthWrapper";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { AuthProvider } from "@/lib/auth-store";
 import { QueryProvider } from "@/lib/QueryProvider";
@@ -53,6 +54,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const googleClientId =
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
   return (
     <html lang="en" className={`${inter.variable} ${dmMono.variable}`}>
       <head>
@@ -86,7 +90,9 @@ export default function RootLayout({
         />
         <AuthProvider>
           <QueryProvider>
-            <AppShell>{children}</AppShell>
+            <GoogleOAuthWrapper>
+              <AppShell>{children}</AppShell>
+            </GoogleOAuthWrapper>
           </QueryProvider>
         </AuthProvider>
       </body>

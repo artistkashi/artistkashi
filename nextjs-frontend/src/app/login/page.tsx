@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PrimaryBtn } from "@/components/ui/buttons";
 import { RevealBlock } from "@/components/ui/misc";
+import { GoogleLoginButton } from "@/components/auth/google-login-button";
 import { useAuth } from "@/lib/auth-store";
 import { getSafeReturnTo } from "@/lib/auth-utils";
 import { loginSchema, type LoginFormValues } from "@/lib/auth-validation";
@@ -24,7 +25,7 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = getSafeReturnTo(searchParams.get("returnTo"));
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const {
     register,
     handleSubmit,
@@ -33,6 +34,14 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
     mode: "onBlur",
   });
+
+  const redirectUser = (user: { role: string }) => {
+    if (user.role === "admin") {
+      router.push("/admin");
+    } else {
+      router.push(returnTo ?? "/dashboard");
+    }
+  };
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsSubmitting(true);
@@ -44,13 +53,25 @@ export default function LoginPage() {
             ? "Logged in as Administrator"
             : "Logged in successfully",
       });
+      redirectUser(user);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-      // Admin goes to admin panel, users go to returnTo or dashboard
-      if (user.role === "admin") {
-        router.push("/admin");
-      } else {
-        router.push(returnTo ?? "/dashboard");
-      }
+  const handleGoogleSuccess = async (credential: string) => {
+    setIsSubmitting(true);
+    try {
+      const user = await googleLogin(credential);
+      toast.success(`Welcome back, ${user.full_name}!`, {
+        description:
+          user.role === "admin"
+            ? "Logged in as Administrator"
+            : "Logged in successfully",
+      });
+      redirectUser(user);
     } catch (error) {
       toast.error(getErrorMessage(error));
     } finally {
@@ -131,6 +152,14 @@ export default function LoginPage() {
                   </p>
                 )}
               </div>
+              <div className="flex justify-end -mt-2">
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-text-muted font-mono tracking-widest uppercase hover:text-gold transition-colors"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
               <PrimaryBtn
                 type="submit"
                 className="w-full justify-center"
@@ -145,6 +174,22 @@ export default function LoginPage() {
                 )}
               </PrimaryBtn>
             </form>
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-dark px-2 text-text-muted font-mono tracking-widest">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+            <div className="mb-6">
+              <GoogleLoginButton
+                onSuccess={handleGoogleSuccess}
+                isSubmitting={isSubmitting}
+              />
+            </div>
             <div className="mt-6 text-center text-sm text-text-muted sm:mt-8">
               Don't have an account?{" "}
               <Link

@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from app.models.cart import CartItem
     from app.models.order import Order
     from app.models.review import Review
+    from app.models.user_auth_provider import UserAuthProvider
     from app.models.user_session import UserSession
     from app.models.wishlist import Wishlist
 
@@ -33,7 +34,10 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
         index=True,
     )
 
-    hashed_password: Mapped[str] = mapped_column(String(255))
+    hashed_password: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+    )
 
     full_name: Mapped[str] = mapped_column(String(255))
 
@@ -65,6 +69,12 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
     is_superuser: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
+    )
+
+    auth_providers: Mapped[list["UserAuthProvider"]] = relationship(
+        "UserAuthProvider",
+        back_populates="user",
+        cascade="all, delete-orphan",
     )
 
     addresses: Mapped[list["Address"]] = relationship(

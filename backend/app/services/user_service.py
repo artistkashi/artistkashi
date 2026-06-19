@@ -44,5 +44,30 @@ class UserService:
             db=session, id=user_id, object={"is_active": False}
         )
 
+    async def soft_delete_user(self, session: AsyncSession, user_id: UUID):
+        from datetime import UTC, datetime
+
+        return await crud_user.update(
+            db=session,
+            id=user_id,
+            object={
+                "is_deleted": True,
+                "deleted_at": datetime.now(UTC),
+                "is_active": False,
+            },
+        )
+
+    async def update_profile(
+        self,
+        session: AsyncSession,
+        user_id: UUID,
+        update_data: dict,
+    ):
+        return await crud_user.update(
+            db=session,
+            id=user_id,
+            object=update_data,
+        )
+
 
 user_service = UserService()

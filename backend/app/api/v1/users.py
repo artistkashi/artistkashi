@@ -8,8 +8,11 @@ from app.core.pagination import build_paginated_response
 from app.crud.user import crud_user
 from app.schemas.address import AddressRead
 from app.schemas.responses import PaginatedResponse, SuccessResponse
-from app.schemas.user import PublicUserRead, UserProfileRead
+from app.schemas.user import PublicUserRead, UserProfileRead, UserUpdate, DeleteAccountRequest
 from app.services.address_service import address_service
+from app.services.user_service import user_service
+from app.core.exceptions import UnauthorizedException
+from app.core.auth.security import verify_password
 
 router = APIRouter(tags=["users"])
 
@@ -56,3 +59,59 @@ async def list_profiles(
         page_size=page_size,
         message="Users retrieved successfully",
     )
+
+
+@router.patch("/profiles/me", response_model=SuccessResponse[UserProfileRead])
+async def update_own_profile(
+    payload: UserUpdate,
+    user: CurrentUserDep,
+    session: DatabaseDep,
+):
+    update_data = payload.model_dump(exclude_unset=True)
+    if not update_data:
+        return SuccessResponse(
+            message="No fields to update",
+            data=await crud_user.get_with_relations(
+                db=session,
+                id=user.id,
+                relationships=["addresses"],
+                schema_to_select=UserProfileRead,
+            ),
+        )
+
+    await user_service.update_profile(
+        session=session,
+        user_id=user.id,
+        update_data=update_data,
+    )
+
+    updated = await crud_user.get_with_relations(
+        db=session,
+        id=user.id,
+        relationships=["addresses"],
+        schema_to_select=UserProfileRead,
+    )
+
+    return SuccessResponse(message="Profile updated successfully", data=updated)
+
+
+@router.delete("/profiles/me", response_model=SuccessResponse[None])
+async def delete_own_account(
+    user: CurrentUserDep,
+    session: DatabaseDep,
+    payload: DeleteAccountRequest,
+):
+    if not payload.password:
+        raise UnauthorizedException("Password is required to delete your account")
+
+    if not user.hashed_password:
+        raise UnauthorizedException(
+            "This account uses Google Sign-In. Please set a password first or contact support."
+        )
+
+    if not verify_password(payload.password, user.hashed_password):
+        raise UnauthorizedException("Incorrect password")
+
+    await user_service.soft_delete_user(session=session, user_id=user.id)
+
+    return SuccessResponse(message="Account deleted successfully")

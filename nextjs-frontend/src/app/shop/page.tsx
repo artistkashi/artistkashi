@@ -1,19 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { Grid, List, ArrowRight } from "lucide-react";
-import { RevealBlock } from "@/components/ui/misc";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { PrimaryBtn } from "@/components/ui/buttons";
+import { RevealBlock } from "@/components/ui/misc";
 import { PAINTINGS } from "@/data/constants";
 import { cn } from "@/lib/utils";
+import { ArrowRight, Grid, List } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 
 export default function ShopPage() {
   const [view, setView] = useState<"grid" | "list">("grid");
 
   return (
-    <main className="pt-32 min-h-screen bg-background">
+    <main className="pt-32 min-h-screen ">
       <div className="max-w-360 mx-auto px-8 lg:px-16">
         <RevealBlock>
           <div className="border-b border-border pb-16 mb-12">
@@ -55,14 +55,19 @@ export default function ShopPage() {
 
         <div
           className={cn(
-            "gap-px bg-border",
+            "gap-px ",
             view === "grid"
               ? "grid grid-cols-2 lg:grid-cols-4"
               : "grid grid-cols-1 md:grid-cols-2"
           )}
         >
           {PAINTINGS.map((p, i) => (
-            <ProductCard key={`shop-product-${p.id}`} product={p} delay={i * 0.08} view={view} />
+            <ProductCard
+              key={`shop-product-${p.id}`}
+              product={p}
+              delay={i * 0.08}
+              view={view}
+            />
           ))}
         </div>
 

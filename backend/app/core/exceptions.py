@@ -74,13 +74,20 @@ class ErrorCode(StrEnum):
     # Order
     ORDER_NOT_FOUND = "ORDER_NOT_FOUND"
 
+    # Auth Provider
+    GOOGLE_AUTH_ERROR = "GOOGLE_AUTH_ERROR"
+    PROVIDER_ALREADY_LINKED = "PROVIDER_ALREADY_LINKED"
+    ACCOUNT_EXISTS_WITH_GOOGLE = "ACCOUNT_EXISTS_WITH_GOOGLE"
+    ACCOUNT_EXISTS_WITH_PASSWORD = "ACCOUNT_EXISTS_WITH_PASSWORD"
+    PASSWORD_PROVIDER_EXISTS = "PASSWORD_PROVIDER_EXISTS"
+
 
 class AppException(Exception):
     """Base application exception."""
 
     def __init__(
         self,
-        message: str,
+        message: str | None = None,
         status_code: int = 400,
         error_code: ErrorCode | str | None = None,
         details: ErrorDetails | None = None,
@@ -90,7 +97,7 @@ class AppException(Exception):
         self.error_code = error_code or ErrorCode.INTERNAL_ERROR
         self.details = details or HTTPStatus(status_code).description
 
-        super().__init__(message)
+        super().__init__(message or "")
 
 
 class ValidationException(AppException):
@@ -111,13 +118,15 @@ class NotFoundException(AppException):
     def __init__(
         self,
         resource: str,
+        message: str | None = None,
         identifier: str | int | None = None,
         error_code: ErrorCode | str = ErrorCode.RESOURCE_NOT_FOUND,
     ) -> None:
-        message = f"{resource} not found"
+        if message is None:
+            message = f"{resource} not found"
 
-        if identifier is not None:
-            message += f" (ID: {identifier})"
+            if identifier is not None:
+                message += f" (ID: {identifier})"
 
         super().__init__(message=message, status_code=404, error_code=error_code)
 
@@ -127,7 +136,7 @@ class UnauthorizedException(AppException):
 
     def __init__(
         self,
-        message: str = "Unauthorized",
+        message: str | None = None,
         error_code: ErrorCode = ErrorCode.INVALID_CREDENTIALS,
     ) -> None:
         super().__init__(message=message, status_code=401, error_code=error_code)
@@ -138,7 +147,7 @@ class ForbiddenException(AppException):
 
     def __init__(
         self,
-        message: str = "Forbidden",
+        message: str | None = None,
         error_code: ErrorCode = ErrorCode.FORBIDDEN_ACCESS,
     ) -> None:
         super().__init__(
@@ -153,7 +162,7 @@ class ConflictException(AppException):
 
     def __init__(
         self,
-        message: str,
+        message: str | None = None,
         error_code: ErrorCode | str = ErrorCode.CONFLICT,
         details: ErrorDetails | None = None,
     ) -> None:
@@ -165,7 +174,7 @@ class ConflictException(AppException):
 class RateLimitException(AppException):
     """Raised when rate limits are exceeded."""
 
-    def __init__(self, message: str = "Rate limit exceeded") -> None:
+    def __init__(self, message: str | None = None) -> None:
         super().__init__(
             message=message, status_code=429, error_code=ErrorCode.RATE_LIMIT_EXCEEDED
         )
@@ -174,7 +183,9 @@ class RateLimitException(AppException):
 class DatabaseException(AppException):
     """Raised when database operations fail."""
 
-    def __init__(self, message: str, details: ErrorDetails | None = None) -> None:
+    def __init__(
+        self, message: str | None = None, details: ErrorDetails | None = None
+    ) -> None:
         super().__init__(
             message=message,
             status_code=500,

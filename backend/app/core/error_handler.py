@@ -43,11 +43,24 @@ HTTP_ERROR_MESSAGES = {
     ErrorCode.VARIANT_TYPE_IN_USE.value: "Variant type is used by products",
     ErrorCode.PRODUCT_VARIANT_NOT_FOUND.value: "Product variant not found",
     ErrorCode.PRODUCT_VARIANT_ALREADY_EXISTS.value: "Product variant already exists",
-    ErrorCode.PRODUCT_VARIANT_SKU_ALREADY_EXISTS.value: "Product variant SKU already exists",
+    ErrorCode.PRODUCT_VARIANT_SKU_ALREADY_EXISTS.value: (
+        "Product variant SKU already exists"
+    ),
     ErrorCode.PRODUCT_IMAGE_NOT_FOUND.value: "Product image not found",
     ErrorCode.PRODUCT_CATEGORY_NOT_FOUND.value: "Product category not found",
     ErrorCode.PRODUCT_CATEGORY_ALREADY_EXISTS.value: "Product category already exists",
     ErrorCode.ORDER_NOT_FOUND.value: "Order not found",
+    ErrorCode.GOOGLE_AUTH_ERROR.value: "Google authentication failed",
+    ErrorCode.PROVIDER_ALREADY_LINKED.value: "Provider already linked",
+    ErrorCode.ACCOUNT_EXISTS_WITH_GOOGLE.value: (
+        "Account already exists. Please sign in with Google."
+    ),
+    ErrorCode.ACCOUNT_EXISTS_WITH_PASSWORD.value: (
+        "This email is registered with a password. Please sign in."
+    ),
+    ErrorCode.PASSWORD_PROVIDER_EXISTS.value: (
+        "Password login is already set up for this account"
+    ),
 }
 
 missing_error_messages = set(ErrorCode) - {
@@ -144,10 +157,18 @@ def setup_exception_handlers(app: FastAPI) -> None:
         request: Request,
         exc: AppException,
     ):
+        message = exc.message
+
+        if not message:
+            message = HTTP_ERROR_MESSAGES.get(
+                exc.error_code.value,
+                exc.error_code.value.replace("_", " ").title(),
+            )
+
         logger.warning(
             "%s - %s",
             exc.error_code,
-            exc.message,
+            message,
             extra={
                 "path": request.url.path,
                 "method": request.method,
@@ -157,7 +178,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
 
         response = build_error_response(
             status_code=exc.status_code,
-            message=exc.message,
+            message=message,
             error_code=exc.error_code,
             errors=exc.details if isinstance(exc.details, dict) else None,
         )

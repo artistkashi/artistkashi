@@ -46,7 +46,7 @@ async def test_symbolic_http_exception_uses_code_and_readable_message():
 
     @app.get("/existing-user")
     async def existing_user():
-        raise HTTPException(status_code=400, detail="REGISTER_USER_ALREADY_EXISTS")
+        raise HTTPException(status_code=400, detail="USER_ALREADY_EXISTS")
 
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
@@ -58,7 +58,7 @@ async def test_symbolic_http_exception_uses_code_and_readable_message():
         "success": False,
         "status": 400,
         "message": "User already exists",
-        "error_code": "REGISTER_USER_ALREADY_EXISTS",
+        "error_code": "USER_ALREADY_EXISTS",
         "errors": None,
         "meta": response.json()["meta"],
     }

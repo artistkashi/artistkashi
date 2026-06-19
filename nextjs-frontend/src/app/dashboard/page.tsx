@@ -1,28 +1,35 @@
 "use client";
 
-import { PrimaryBtn } from "@/components/ui/buttons";
+import { GhostBtn, PrimaryBtn } from "@/components/ui/buttons";
 import { COURSES } from "@/data/constants";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 import {
-  ArrowUpRight,
   BookOpen,
+  Calendar,
+  Camera,
   Check,
-  ChevronRight,
   Clock,
+  Eye,
+  EyeOff,
+  Globe,
+  KeyRound,
   LayoutDashboard,
+  Loader2,
   LogOut,
   Package,
-  Play,
   Settings,
+  Shield,
   ShoppingBag,
+  User,
+  X,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import { client } from "@/api/openapi-client/client.gen";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useAuth } from "@/lib/auth-store";
-import { getRoleLabel } from "@/lib/auth-utils";
 import { profileSchema, type ProfileFormValues } from "@/lib/auth-validation";
 import { getErrorMessage } from "@/lib/error-handler";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,16 +37,60 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { ContinueWatching } from "@/components/dashboard/ContinueWatching";
+import { CourseCard } from "@/components/dashboard/CourseCard";
+import { DangerZone } from "@/components/dashboard/DangerZone";
+import { OrderCard } from "@/components/dashboard/OrderCard";
+import { ProviderCard } from "@/components/dashboard/ProviderCard";
+import { StatsCard } from "@/components/dashboard/StatsCard";
+
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [greeting, setGreeting] = useState("Welcome");
-  const { user, logout } = useAuth();
+  const { user, logout, getAuthProviders, setPassword, changePassword } =
+    useAuth();
   const router = useRouter();
+
+  const [providers, setProviders] = useState<{
+    providers: Array<{
+      id: string;
+      user_id: string;
+      provider: "password" | "google";
+      provider_user_id: string | null;
+    }>;
+    has_password: boolean;
+  } | null>(null);
+  const [showSetPassword, setShowSetPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [isSettingPassword, setIsSettingPassword] = useState(false);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profilePicture, setProfilePicture] = useState<string | null>(
+    user?.profile_picture || null
+  );
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [cpCurrent, setCpCurrent] = useState("");
+  const [cpNew, setCpNew] = useState("");
+  const [cpConfirm, setCpConfirm] = useState("");
+  const [showCpCurrent, setShowCpCurrent] = useState(false);
+  const [showCpNew, setShowCpNew] = useState(false);
+  const [showCpConfirm, setShowCpConfirm] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [cpErrors, setCpErrors] = useState<string[]>([]);
+
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
+    watch,
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     mode: "onBlur",
@@ -50,419 +101,955 @@ export default function DashboardPage() {
     },
   });
 
-  const onProfileSubmit = async () => {
-    toast.info("Profile update coming soon.", {
-      description:
-        "This feature is currently being integrated with the backend.",
-    });
+  const watchedFullName = watch(
+    "fullName",
+    user?.full_name || user?.email || ""
+  );
+
+  useEffect(() => {
+    if (user) {
+      reset({
+        fullName: user.full_name || user.email || "",
+        email: user.email || "",
+        phone: user.phone || "",
+      });
+      setProfilePicture(user.profile_picture || null);
+    }
+  }, [user, reset]);
+
+  const onProfileSubmit = async (data: ProfileFormValues) => {
+    setIsSavingProfile(true);
+    try {
+      const body: Record<string, string | undefined> = {};
+      if (data.fullName !== user?.full_name) body.full_name = data.fullName;
+      if (data.email !== user?.email) body.email = data.email;
+      if (data.phone !== (user?.phone || ""))
+        body.phone = data.phone || undefined;
+
+      if (Object.keys(body).length > 0) {
+        const response = (await client.patch({
+          url: "/api/profiles/me",
+          body,
+        })) as unknown as { data?: { data?: unknown; message?: string } };
+        if (!response.data) throw new Error("Failed to update profile");
+      }
+
+      toast.success("Profile updated successfully");
+      setIsEditing(false);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
+
+  const handleImageUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setProfilePicture(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = (await client.post({
+        url: "/api/profiles/me/picture",
+        body: formData,
+        headers: { "Content-Type": "multipart/form-data" },
+      })) as unknown as {
+        data?: { data?: { profile_picture?: string }; message?: string };
+      };
+      if (response.data?.data?.profile_picture) {
+        setProfilePicture(response.data.data.profile_picture);
+      }
+      toast.success("Profile picture updated");
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    }
+  };
+
+  const loadProviders = useCallback(async () => {
+    try {
+      const result = await getAuthProviders();
+      setProviders(result);
+    } catch {
+      // Silently fail
+    }
+  }, [getAuthProviders]);
+
+  useEffect(() => {
+    if (activeTab === "settings") {
+      void loadProviders();
+    }
+  }, [activeTab, loadProviders]);
 
   useEffect(() => {
     const hour = new Date().getHours();
-
-    if (hour < 12) {
-      setGreeting("Good morning");
-      return;
-    }
-
-    if (hour < 18) {
-      setGreeting("Good afternoon");
-      return;
-    }
-
-    setGreeting("Good evening");
+    if (hour < 12) setGreeting("Good morning");
+    else if (hour < 18) setGreeting("Good afternoon");
+    else setGreeting("Good evening");
   }, []);
 
-  const greetingLabel = useMemo(() => greeting, [greeting]);
+  const handleSetPassword = async () => {
+    if (!newPassword || newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+    setIsSettingPassword(true);
+    try {
+      await setPassword(newPassword);
+      toast.success("Password set successfully");
+      setShowSetPassword(false);
+      setNewPassword("");
+      await loadProviders();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsSettingPassword(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    const errorsList: string[] = [];
+    if (!cpCurrent) errorsList.push("Current password is required");
+    if (!cpNew || cpNew.length < 8)
+      errorsList.push("New password must be at least 8 characters");
+    if (cpNew !== cpConfirm) errorsList.push("Passwords do not match");
+    if (errorsList.length) {
+      setCpErrors(errorsList);
+      return;
+    }
+    setCpErrors([]);
+    setIsChangingPassword(true);
+    try {
+      await changePassword(cpCurrent, cpNew);
+      toast.success("Password changed successfully");
+      setShowChangePassword(false);
+      setCpCurrent("");
+      setCpNew("");
+      setCpConfirm("");
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await logout();
+      router.push("/");
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+      router.push("/");
+    } finally {
+      setIsSigningOut(false);
+      setShowSignOutModal(false);
+    }
+  };
 
   if (!user) return null;
+
+  const sidebarItems = [
+    { id: "overview", label: "Overview", icon: LayoutDashboard },
+    { id: "courses", label: "My Courses", icon: BookOpen },
+    { id: "orders", label: "Orders", icon: Package },
+    { id: "settings", label: "Settings", icon: Settings },
+  ];
+
+  const orders = [
+    {
+      item: "Oil Painting Fundamentals",
+      type: "Course",
+      date: "12 Apr 2026",
+      amount: "₹280",
+      status: "Active",
+    },
+    {
+      item: "Solitude in Ochre",
+      type: "Painting",
+      date: "03 Mar 2026",
+      amount: "₹4,800",
+      status: "Shipped",
+    },
+    {
+      item: "Abstract Expression Workshop",
+      type: "Course",
+      date: "18 Jan 2026",
+      amount: "₹195",
+      status: "Active",
+    },
+  ];
+
+  const statusStyles: Record<string, string> = {
+    Active: "bg-green/10 text-green border border-green/30",
+    Shipped: "bg-blue/10 text-blue border border-blue/30",
+    Delivered: "bg-green/10 text-green border border-green/30",
+    Cancelled: "bg-red/10 text-red border border-red/30",
+    Pending: "bg-gold/10 text-gold border border-gold/30",
+  };
+
+  const joinedDate = user.created_at
+    ? format(new Date(user.created_at), "MMM yyyy")
+    : null;
+
+  const initials = (user?.full_name ?? "User")
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
     <AuthGuard allowedRoles={["user", "admin"]}>
       <main className="pt-20 min-h-screen">
-        <div className="max-w-360 mx-auto px-8 lg:px-16 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-16 py-8 md:py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
             {/* Sidebar */}
             <div className="lg:col-span-3">
-              <div className="border border-border bg-muted-light p-6 mb-6">
-                <div className="w-14 h-14 bg-muted border border-border flex items-center justify-center text-gold font-bold text-xl mb-4">
-                  {(user?.full_name ?? "Admin")
-                    .split(" ")
-                    .filter(Boolean)
-                    .map((word) => word[0])
-                    .slice(0, 2)
-                    .join("")
-                    .toUpperCase()}
-                </div>
-                <div className="text-text-main font-bold text-lg">
-                  {user?.full_name}
-                </div>
-                <div className="text-text-muted text-sm font-mono">
-                  {user.email}
-                </div>
-                <div className="mt-4 flex items-center gap-2">
-                  <span
-                    className={cn(
-                      "border text-tiny font-mono tracking-widest uppercase px-2.5 py-1",
-                      user.role === "admin"
-                        ? "bg-red-500/10 border-red-500/30 text-red-500"
-                        : "bg-gold/10 border-gold/30 text-gold"
+              <div className="border border-border bg-surface rounded overflow-hidden">
+                <div className="p-6 border-b border-border">
+                  <div className="w-14 h-14 rounded-full overflow-hidden bg-gold-bg border border-gold/20 flex items-center justify-center mb-4">
+                    {profilePicture ? (
+                      <img
+                        src={profilePicture}
+                        alt={user?.full_name || ""}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-gold font-bold text-xl">
+                        {initials}
+                      </span>
                     )}
-                  >
-                    {getRoleLabel(user)}
-                  </span>
+                  </div>
+                  <div className="text-text-main font-bold text-lg">
+                    {user?.full_name}
+                  </div>
+                  <div className="text-text-muted text-sm font-mono mt-0.5">
+                    {user.email}
+                  </div>
                 </div>
-              </div>
-
-              <div className="border border-border bg-muted-light overflow-hidden">
-                {[
-                  { id: "overview", label: "Overview", icon: LayoutDashboard },
-                  { id: "courses", label: "My Courses", icon: BookOpen },
-                  { id: "orders", label: "Orders", icon: Package },
-                  { id: "settings", label: "Settings", icon: Settings },
-                ].map((item) => (
+                <div>
+                  {sidebarItems.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      className={cn(
+                        "w-full flex items-center gap-4 px-6 py-4 text-sm text-left border-b border-border last:border-b-0 transition-all duration-200",
+                        activeTab === item.id
+                          ? "bg-gold-bg text-text-main border-l-2 border-l-gold"
+                          : "text-text-muted hover:text-text-main hover:bg-muted/50 border-l-2 border-l-transparent"
+                      )}
+                    >
+                      <item.icon
+                        size={16}
+                        className={activeTab === item.id ? "text-gold" : ""}
+                      />
+                      {item.label}
+                    </button>
+                  ))}
+                  {user.role === "admin" && (
+                    <Link
+                      href="/admin"
+                      className="w-full flex items-center gap-4 px-6 py-4 text-sm text-text-muted hover:text-red hover:bg-muted/50 transition-colors border-b border-border border-l-2 border-l-transparent"
+                    >
+                      <Shield size={16} /> Instructor Panel
+                    </Link>
+                  )}
                   <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={cn(
-                      "w-full flex items-center gap-4 px-6 py-4 text-sm text-left border-b border-border last:border-b-0 transition-colors",
-                      activeTab === item.id
-                        ? "bg-border-soft text-text-main"
-                        : "text-text-muted hover:text-text-main hover:bg-muted"
-                    )}
+                    onClick={() => setShowSignOutModal(true)}
+                    className="w-full flex items-center gap-4 px-6 py-4 text-sm text-left border-b border-border last:border-b-0 transition-all duration-200 text-text-muted hover:text-red hover:bg-red/5 border-l-2 border-l-transparent"
                   >
-                    <item.icon
-                      size={16}
-                      className={activeTab === item.id ? "text-gold" : ""}
-                    />
-                    {item.label}
+                    <LogOut size={16} /> Sign Out
                   </button>
-                ))}
-                {user.role === "admin" && (
-                  <Link
-                    href="/admin"
-                    className="w-full flex items-center gap-4 px-6 py-4 text-sm text-text-muted hover:text-red-500 hover:bg-muted transition-colors border-t border-border"
-                  >
-                    <Settings size={16} /> Instructor Panel
-                  </Link>
-                )}
-                <button
-                  onClick={async () => {
-                    try {
-                      await logout();
-                      router.push("/");
-                    } catch (error) {
-                      toast.error(getErrorMessage(error));
-                      router.push("/");
-                    }
-                  }}
-                  className="w-full flex items-center gap-4 px-6 py-4 text-sm text-text-muted hover:text-text-main transition-colors"
-                >
-                  <LogOut size={16} /> Sign Out
-                </button>
+                </div>
               </div>
             </div>
 
             {/* Main Content */}
-            <div className="lg:col-span-9">
+            <div className="lg:col-span-9 space-y-6 md:space-y-8">
+              {/* ==================== OVERVIEW TAB ==================== */}
               {activeTab === "overview" && (
-                <div>
-                  <div className="mb-8">
-                    <div className="text-label font-mono text-gold tracking-widest uppercase mb-2">
-                      Student Portal
-                    </div>
-                    <h1 className="text-h3 font-extrabold tracking-tight text-text-main">
-                      {greetingLabel}, {user.full_name}.
-                    </h1>
-                  </div>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border mb-8">
-                    {[
-                      { label: "Enrolled Courses", value: "3", icon: BookOpen },
-                      { label: "Hours Watched", value: "47h", icon: Clock },
-                      { label: "Lessons Done", value: "84", icon: Check },
-                      { label: "Art Purchases", value: "2", icon: ShoppingBag },
-                    ].map((s) => (
-                      <div key={s.label} className="bg-muted-light p-6">
-                        <s.icon size={18} className="text-gold mb-3" />
-                        <div className="text-text-main font-extrabold text-3xl">
-                          {s.value}
+                <div className="space-y-6 md:space-y-8">
+                  {/* Hero Section */}
+                  <div className="border border-border bg-surface rounded overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-bl-full pointer-events-none" />
+                    <div className="p-6 md:p-8 lg:p-10 relative z-10">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                        <div>
+                          <h1 className="text-xl md:text-2xl font-bold tracking-tight text-text-main">
+                            {greeting},{" "}
+                            {user.full_name?.split(" ")[0] || "there"}.
+                          </h1>
+                          <p className="text-text-muted text-sm mt-1.5 max-w-xl">
+                            Track your progress, continue learning, and manage
+                            your collection.
+                          </p>
                         </div>
-                        <div className="text-text-muted text-label font-mono mt-1 uppercase tracking-widest">
-                          {s.label}
+                        <div className="flex items-center gap-3 text-text-muted text-xs font-mono shrink-0">
+                          <Calendar size={14} />
+                          <span>Joined {joinedDate || "Recently"}</span>
                         </div>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Stats Cards */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    {[
+                      { label: "Enrolled Courses", value: 3, icon: BookOpen },
+                      {
+                        label: "Hours Watched",
+                        value: 47,
+                        suffix: "h",
+                        icon: Clock,
+                      },
+                      { label: "Lessons Done", value: 84, icon: Check },
+                      { label: "Art Purchases", value: 2, icon: ShoppingBag },
+                    ].map((s) => (
+                      <StatsCard
+                        key={s.label}
+                        label={s.label}
+                        value={s.value}
+                        suffix={s.suffix || ""}
+                        icon={s.icon}
+                      />
                     ))}
                   </div>
 
                   {/* Continue Watching */}
-                  <div className="border border-border bg-muted-light mb-6">
-                    <div className="px-8 py-6 border-b border-border flex items-center justify-between">
-                      <h2 className="text-text-main font-bold text-xl">
-                        Continue Watching
-                      </h2>
-                      <Link
-                        href="/lesson-player"
-                        className="text-gold text-xs font-mono tracking-widest uppercase hover:text-text-main transition-colors flex items-center gap-1"
-                      >
-                        Open <ArrowUpRight size={12} />
-                      </Link>
-                    </div>
-                    <Link
-                      href="/lesson-player"
-                      className="group w-full flex items-center gap-6 p-6 hover:bg-muted transition-colors"
-                    >
-                      <div className="w-28 h-16 shrink-0 overflow-hidden relative bg-dark">
-                        <Image
-                          src={COURSES[0].image_url || ""}
-                          alt={COURSES[0].title}
-                          fill
-                          sizes="112px"
-                          className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Play
-                            size={18}
-                            fill="white"
-                            className="text-white ml-0.5 drop-shadow-md"
-                          />
-                        </div>
-                      </div>
-                      <div className="flex-1 text-left">
-                        <div className="text-tiny font-mono text-text-muted uppercase tracking-widest mb-1">
-                          Lesson 3 of 42
-                        </div>
-                        <div className="text-text-main font-semibold mb-2">
-                          Color theory for oil painters
-                        </div>
-                        <div className="w-full h-1 bg-border">
-                          <div className="h-full bg-gold w-[34%]" />
-                        </div>
-                        <div className="text-label font-mono text-text-muted mt-1">
-                          34% complete · 14 min remaining
-                        </div>
-                      </div>
-                    </Link>
-                  </div>
+                  <ContinueWatching />
                 </div>
               )}
 
+              {/* ==================== COURSES TAB ==================== */}
               {activeTab === "courses" && (
-                <div>
-                  <h2 className="text-text-main font-bold text-3xl mb-8">
-                    My Courses
-                  </h2>
-                  <div className="space-y-px bg-border">
+                <div className="space-y-6 md:space-y-8">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-text-main font-bold text-2xl md:text-3xl">
+                      My Courses
+                    </h2>
+                    <span className="text-label font-mono text-text-muted">
+                      {COURSES.length} enrolled
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-3">
                     {COURSES.map((c) => (
-                      <Link
+                      <CourseCard
                         key={c.id}
-                        href="/lesson-player"
-                        className="group w-full bg-muted-light flex items-center gap-6 p-6 text-left hover:bg-muted transition-colors"
-                      >
-                        <div className="w-20 h-14 shrink-0 overflow-hidden relative bg-dark">
-                          <Image
-                            src={c.image_url || ""}
-                            alt={c.title}
-                            fill
-                            sizes="80px"
-                            className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-text-main font-semibold truncate">
-                            {c.title}
-                          </div>
-                          <div className="text-text-muted text-xs font-mono mt-1">
-                            {c.instructor}
-                          </div>
-                          <div className="flex items-center gap-3 mt-2">
-                            <div className="w-32 h-1 bg-border">
-                              <div className="h-full bg-gold w-[45%]" />
-                            </div>
-                            <span className="text-tiny font-mono text-text-muted">
-                              45%
-                            </span>
-                          </div>
-                        </div>
-                        <ChevronRight
-                          size={16}
-                          className="text-text-muted group-hover:text-text-main transition-colors shrink-0"
-                        />
-                      </Link>
+                        course={c}
+                        completedLessons={Math.floor(
+                          (c.lessons_count || 42) * (c.id === 1 ? 0.34 : 0.15)
+                        )}
+                        totalLessons={c.lessons_count || 42}
+                      />
                     ))}
                   </div>
                 </div>
               )}
 
+              {/* ==================== ORDERS TAB ==================== */}
               {activeTab === "orders" && (
-                <div>
-                  <h2 className="text-text-main font-bold text-3xl mb-8">
+                <div className="space-y-6 md:space-y-8">
+                  <h2 className="text-text-main font-bold text-2xl md:text-3xl">
                     Purchase History
                   </h2>
-                  <div className="border border-border overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-border">
-                            {["Item", "Type", "Date", "Amount", "Status"].map(
-                              (h) => (
-                                <th
-                                  key={h}
-                                  className="text-left px-6 py-4 text-label font-mono text-text-muted tracking-widest uppercase bg-dark-soft"
-                                >
-                                  {h}
-                                </th>
-                              )
-                            )}
+
+                  {/* Mobile Cards */}
+                  <div className="space-y-px bg-border md:hidden">
+                    {orders.map((r, i) => (
+                      <div key={i} className="bg-surface">
+                        <OrderCard order={r} />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop Table */}
+                  <div className="hidden md:block border border-border rounded overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border">
+                          {["Item", "Type", "Date", "Amount", "Status"].map(
+                            (h) => (
+                              <th
+                                key={h}
+                                className="text-left px-6 py-4 text-label font-mono text-text-muted tracking-widest uppercase bg-dark-soft"
+                              >
+                                {h}
+                              </th>
+                            )
+                          )}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {orders.map((r, i) => (
+                          <tr
+                            key={i}
+                            className="hover:bg-muted/30 transition-colors"
+                          >
+                            <td className="px-6 py-4 text-text-main font-medium">
+                              {r.item}
+                            </td>
+                            <td className="px-6 py-4 text-text-muted font-mono text-xs">
+                              {r.type}
+                            </td>
+                            <td className="px-6 py-4 text-text-muted font-mono text-xs">
+                              {r.date}
+                            </td>
+                            <td className="px-6 py-4 text-text-main font-semibold">
+                              {r.amount}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span
+                                className={cn(
+                                  "text-tiny font-mono tracking-widest uppercase px-2.5 py-1",
+                                  statusStyles[r.status] ||
+                                    "bg-text-muted/10 text-text-muted border border-text-muted/20"
+                                )}
+                              >
+                                {r.status}
+                              </span>
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border">
-                          {[
-                            {
-                              item: "Oil Painting Fundamentals",
-                              type: "Course",
-                              date: "12 Apr 2026",
-                              amount: "₹280",
-                              status: "Active",
-                            },
-                            {
-                              item: "Solitude in Ochre",
-                              type: "Painting",
-                              date: "03 Mar 2026",
-                              amount: "₹4,800",
-                              status: "Shipped",
-                            },
-                            {
-                              item: "Abstract Expression Workshop",
-                              type: "Course",
-                              date: "18 Jan 2026",
-                              amount: "₹195",
-                              status: "Active",
-                            },
-                          ].map((r, i) => (
-                            <tr
-                              key={i}
-                              className="hover:bg-muted-light transition-colors"
-                            >
-                              <td className="px-6 py-4 text-text-main">
-                                {r.item}
-                              </td>
-                              <td className="px-6 py-4 text-text-muted font-mono text-xs">
-                                {r.type}
-                              </td>
-                              <td className="px-6 py-4 text-text-muted font-mono text-xs">
-                                {r.date}
-                              </td>
-                              <td className="px-6 py-4 text-text-main font-semibold">
-                                {r.amount}
-                              </td>
-                              <td className="px-6 py-4">
-                                <span
-                                  className={cn(
-                                    "text-tiny font-mono tracking-widest uppercase px-2.5 py-1",
-                                    r.status === "Active"
-                                      ? "bg-gold/10 text-gold border border-gold/30"
-                                      : "bg-text-muted/10 text-text-muted border border-text-muted/20"
-                                  )}
-                                >
-                                  {r.status}
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )}
 
+              {/* ==================== SETTINGS TAB ==================== */}
               {activeTab === "settings" && (
-                <div>
-                  <h2 className="text-text-main font-bold text-3xl mb-8">
-                    Profile Settings
-                  </h2>
-                  <form onSubmit={handleSubmit(onProfileSubmit)}>
-                    <div className="border border-border bg-muted-light divide-y divide-border">
-                      <div className="px-8 py-6 flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
-                        <label className="text-label font-mono text-text-muted tracking-widest uppercase md:w-32 shrink-0">
-                          Full Name
-                        </label>
-                        <div className="flex-1">
-                          <input
-                            {...register("fullName")}
-                            type="text"
-                            className={cn(
-                              "w-full bg-transparent text-text-main text-sm outline-none border-b transition-colors pb-1",
-                              errors.fullName
-                                ? "border-red-500"
-                                : "border-border focus:border-gold"
+                <div className="space-y-8 md:space-y-10">
+                  {/* Profile Section */}
+                  <div>
+                    <h2 className="text-text-main font-bold text-2xl md:text-3xl mb-6">
+                      Profile Settings
+                    </h2>
+                    <form onSubmit={handleSubmit(onProfileSubmit)}>
+                      <div className="border border-border bg-surface rounded divide-y divide-border overflow-hidden">
+                        {/* Avatar */}
+                        <div className="px-6 md:px-8 py-6 md:py-8 flex flex-col md:flex-row md:items-center gap-5 md:gap-8">
+                          <label className="text-label font-mono text-text-muted tracking-widest uppercase md:w-32 shrink-0">
+                            Avatar
+                          </label>
+                          <div className="flex items-center gap-5">
+                            <div className="w-20 h-20 rounded-full overflow-hidden bg-gold-bg border border-gold/20 flex items-center justify-center shrink-0">
+                              {profilePicture ? (
+                                <img
+                                  src={profilePicture}
+                                  alt={watchedFullName || "Avatar"}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <span className="text-gold font-bold text-2xl">
+                                  {initials}
+                                </span>
+                              )}
+                            </div>
+                            {isEditing && (
+                              <div>
+                                <button
+                                  type="button"
+                                  onClick={handleImageUpload}
+                                  className="inline-flex items-center gap-2 px-4 py-2 border border-border text-text-muted text-xs font-mono tracking-widest uppercase hover:border-gold hover:text-gold hover:bg-gold-bg transition-colors rounded"
+                                >
+                                  <Camera size={14} /> Upload Photo
+                                </button>
+                                <input
+                                  ref={fileInputRef}
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={handleFileChange}
+                                />
+                                <p className="text-tiny font-mono text-text-muted mt-1.5">
+                                  JPG, PNG or WebP. Max 5MB.
+                                </p>
+                              </div>
                             )}
-                          />
-                          {errors.fullName && (
-                            <p className="mt-1 text-xs text-red-500 font-mono">
-                              {errors.fullName.message}
-                            </p>
-                          )}
+                          </div>
+                        </div>
+
+                        {/* Full Name */}
+                        <div className="px-6 md:px-8 py-5 md:py-6 flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
+                          <label className="text-label font-mono text-text-muted tracking-widest uppercase md:w-32 shrink-0">
+                            Full Name
+                          </label>
+                          <div className="flex-1">
+                            {isEditing ? (
+                              <input
+                                {...register("fullName")}
+                                type="text"
+                                className={cn(
+                                  "w-full glass-input rounded text-text-main px-4 py-3 text-sm focus:border-gold transition-colors",
+                                  errors.fullName
+                                    ? "border-red"
+                                    : "border-border"
+                                )}
+                              />
+                            ) : (
+                              <div className="text-text-main text-sm py-3">
+                                {user?.full_name}
+                              </div>
+                            )}
+                            {errors.fullName && (
+                              <p className="mt-1 text-xs text-red font-mono">
+                                {errors.fullName.message}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Email */}
+                        <div className="px-6 md:px-8 py-5 md:py-6 flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
+                          <label className="text-label font-mono text-text-muted tracking-widest uppercase md:w-32 shrink-0">
+                            Email
+                          </label>
+                          <div className="flex-1">
+                            {isEditing ? (
+                              <input
+                                {...register("email")}
+                                type="email"
+                                className={cn(
+                                  "w-full glass-input rounded text-text-main px-4 py-3 text-sm focus:border-gold transition-colors",
+                                  errors.email ? "border-red" : "border-border"
+                                )}
+                              />
+                            ) : (
+                              <div className="text-text-main text-sm py-3">
+                                {user?.email}
+                              </div>
+                            )}
+                            {errors.email && (
+                              <p className="mt-1 text-xs text-red font-mono">
+                                {errors.email.message}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Phone */}
+                        <div className="px-6 md:px-8 py-5 md:py-6 flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
+                          <label className="text-label font-mono text-text-muted tracking-widest uppercase md:w-32 shrink-0">
+                            Phone
+                          </label>
+                          <div className="flex-1">
+                            {isEditing ? (
+                              <input
+                                {...register("phone")}
+                                type="text"
+                                className={cn(
+                                  "w-full glass-input rounded text-text-main px-4 py-3 text-sm focus:border-gold transition-colors",
+                                  errors.phone ? "border-red" : "border-border"
+                                )}
+                              />
+                            ) : (
+                              <div className="text-text-main text-sm py-3">
+                                {user?.phone || ""}
+                              </div>
+                            )}
+                            {errors.phone && (
+                              <p className="mt-1 text-xs text-red font-mono">
+                                {errors.phone.message}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <div className="px-8 py-6 flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
-                        <label className="text-label font-mono text-text-muted tracking-widest uppercase md:w-32 shrink-0">
-                          Email
-                        </label>
-                        <div className="flex-1">
-                          <input
-                            {...register("email")}
-                            type="email"
-                            className={cn(
-                              "w-full bg-transparent text-text-main text-sm outline-none border-b transition-colors pb-1",
-                              errors.email
-                                ? "border-red-500"
-                                : "border-border focus:border-gold"
+                      <div className="mt-6 flex items-center justify-end gap-3">
+                        {isEditing ? (
+                          <>
+                            <GhostBtn
+                              type="button"
+                              onClick={() => {
+                                setIsEditing(false);
+                                setProfilePicture(
+                                  user?.profile_picture || null
+                                );
+                                reset({
+                                  fullName:
+                                    user?.full_name || user?.email || "",
+                                  email: user?.email || "",
+                                  phone: user?.phone || "",
+                                });
+                              }}
+                              disabled={isSavingProfile}
+                              className="shrink-0 px-6! text-xs! py-3!"
+                            >
+                              Cancel
+                            </GhostBtn>
+                            <PrimaryBtn
+                              type="submit"
+                              disabled={isSavingProfile}
+                              className="shrink-0 px-6! text-xs! py-3!"
+                            >
+                              {isSavingProfile ? (
+                                <Loader2 size={16} className="animate-spin" />
+                              ) : (
+                                <>
+                                  Save Changes <Check size={16} />
+                                </>
+                              )}
+                            </PrimaryBtn>
+                          </>
+                        ) : (
+                          <PrimaryBtn
+                            type="button"
+                            onClick={() => setIsEditing(true)}
+                            className="shrink-0 px-6! text-xs! py-3!"
+                          >
+                            <User size={16} /> Edit Profile
+                          </PrimaryBtn>
+                        )}
+                      </div>
+                    </form>
+                  </div>
+
+                  {/* Connected Sign-In Methods */}
+                  <div>
+                    <h2 className="text-text-main font-bold text-2xl md:text-3xl mb-6">
+                      Connected Sign-In Methods
+                    </h2>
+                    <div className="border border-border bg-surface rounded overflow-hidden divide-y divide-border">
+                      <ProviderCard
+                        name="Google"
+                        description="Sign in with your Google account"
+                        icon={<Globe size={18} className="text-gold" />}
+                        isConnected={
+                          providers?.providers.some(
+                            (p) => p.provider === "google"
+                          ) ?? false
+                        }
+                      />
+                      <ProviderCard
+                        name="Password"
+                        description="Sign in with your email and password"
+                        icon={<KeyRound size={18} className="text-gold" />}
+                        isConnected={providers?.has_password ?? false}
+                        action={
+                          !providers?.has_password ? (
+                            <button
+                              onClick={() => setShowSetPassword(true)}
+                              className="text-gold text-xs font-mono tracking-widest uppercase hover:text-text-main transition-colors"
+                            >
+                              Set Password
+                            </button>
+                          ) : undefined
+                        }
+                      />
+                    </div>
+
+                    {/* Set Password Form */}
+                    {showSetPassword && (
+                      <div className="mt-3 border border-border bg-surface rounded p-5">
+                        <h2 className="text-text-main font-semibold text-lg mb-1">
+                          Set a Password
+                        </h2>
+                        <p className="text-text-muted text-tiny font-mono mb-3">
+                          Add password-based login to your account so you can
+                          sign in without Google.
+                        </p>
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                          <div className="relative flex-1">
+                            <input
+                              type={showNewPassword ? "text" : "password"}
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              placeholder="Enter new password"
+                              className="w-full glass-input rounded text-text-main px-3 py-2.5 pr-10 text-sm focus:border-gold transition-colors"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowNewPassword((v) => !v)}
+                              className="absolute inset-y-0 right-0 flex items-center px-3 text-text-muted hover:text-text-main transition-colors"
+                              aria-label={
+                                showNewPassword
+                                  ? "Hide password"
+                                  : "Show password"
+                              }
+                            >
+                              {showNewPassword ? (
+                                <EyeOff size={14} />
+                              ) : (
+                                <Eye size={14} />
+                              )}
+                            </button>
+                          </div>
+                          <PrimaryBtn
+                            onClick={handleSetPassword}
+                            disabled={isSettingPassword}
+                            className="shrink-0 px-6! text-xs! py-3!"
+                          >
+                            {isSettingPassword ? (
+                              <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                              "Set Password"
                             )}
-                          />
-                          {errors.email && (
-                            <p className="mt-1 text-xs text-red-500 font-mono">
-                              {errors.email.message}
-                            </p>
-                          )}
+                          </PrimaryBtn>
+                          <button
+                            onClick={() => {
+                              setShowSetPassword(false);
+                              setNewPassword("");
+                            }}
+                            className="text-text-muted text-xs font-mono tracking-widest uppercase hover:text-text-main transition-colors shrink-0"
+                          >
+                            Cancel
+                          </button>
                         </div>
                       </div>
-                      <div className="px-8 py-6 flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
-                        <label className="text-label font-mono text-text-muted tracking-widest uppercase md:w-32 shrink-0">
-                          Phone
-                        </label>
-                        <div className="flex-1">
-                          <input
-                            {...register("phone")}
-                            type="text"
-                            className={cn(
-                              "w-full bg-transparent text-text-main text-sm outline-none border-b transition-colors pb-1",
-                              errors.phone
-                                ? "border-red-500"
-                                : "border-border focus:border-gold"
-                            )}
-                          />
-                          {errors.phone && (
-                            <p className="mt-1 text-xs text-red-500 font-mono">
-                              {errors.phone.message}
-                            </p>
-                          )}
+                    )}
+                  </div>
+
+                  {/* Change Password */}
+
+                  {providers?.has_password && (
+                    <div>
+                      <div className="border border-border bg-surface rounded overflow-hidden">
+                        <div className="px-5 md:px-6 py-4 border-b border-border">
+                          <h2 className="text-text-main font-semibold text-lg">
+                            Change Password
+                          </h2>
+                          <p className="text-text-muted text-tiny font-mono mt-0.5">
+                            Use 8+ characters with one uppercase letter and one
+                            special character.
+                          </p>
                         </div>
+                        {showChangePassword ? (
+                          <div className="p-5 space-y-4">
+                            <div>
+                              <label className="block text-label font-mono text-text-muted tracking-widest uppercase mb-1">
+                                Current Password
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type={showCpCurrent ? "text" : "password"}
+                                  value={cpCurrent}
+                                  onChange={(e) => setCpCurrent(e.target.value)}
+                                  className="w-full glass-input rounded text-text-main px-3 py-2.5 pr-10 text-sm focus:border-gold transition-colors"
+                                  placeholder="Enter current password"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowCpCurrent((v) => !v)}
+                                  className="absolute inset-y-0 right-0 flex items-center px-3 text-text-muted hover:text-text-main transition-colors"
+                                  aria-label={
+                                    showCpCurrent
+                                      ? "Hide password"
+                                      : "Show password"
+                                  }
+                                >
+                                  {showCpCurrent ? (
+                                    <EyeOff size={14} />
+                                  ) : (
+                                    <Eye size={14} />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-label font-mono text-text-muted tracking-widest uppercase mb-1">
+                                New Password
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type={showCpNew ? "text" : "password"}
+                                  value={cpNew}
+                                  onChange={(e) => setCpNew(e.target.value)}
+                                  className="w-full glass-input rounded text-text-main px-3 py-2.5 pr-10 text-sm focus:border-gold transition-colors"
+                                  placeholder="Enter new password"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowCpNew((v) => !v)}
+                                  className="absolute inset-y-0 right-0 flex items-center px-3 text-text-muted hover:text-text-main transition-colors"
+                                  aria-label={
+                                    showCpNew
+                                      ? "Hide password"
+                                      : "Show password"
+                                  }
+                                >
+                                  {showCpNew ? (
+                                    <EyeOff size={14} />
+                                  ) : (
+                                    <Eye size={14} />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-label font-mono text-text-muted tracking-widest uppercase mb-1">
+                                Confirm New Password
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type={showCpConfirm ? "text" : "password"}
+                                  value={cpConfirm}
+                                  onChange={(e) => setCpConfirm(e.target.value)}
+                                  className="w-full glass-input rounded text-text-main px-3 py-2.5 pr-10 text-sm focus:border-gold transition-colors"
+                                  placeholder="Confirm new password"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowCpConfirm((v) => !v)}
+                                  className="absolute inset-y-0 right-0 flex items-center px-3 text-text-muted hover:text-text-main transition-colors"
+                                  aria-label={
+                                    showCpConfirm
+                                      ? "Hide password"
+                                      : "Show password"
+                                  }
+                                >
+                                  {showCpConfirm ? (
+                                    <EyeOff size={14} />
+                                  ) : (
+                                    <Eye size={14} />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                            {cpErrors.length > 0 && (
+                              <div className="p-2.5 bg-red/5 border border-red/20 rounded">
+                                <ul className="space-y-0.5">
+                                  {cpErrors.map((err, i) => (
+                                    <li
+                                      key={i}
+                                      className="text-tiny text-red font-mono flex items-start gap-1.5"
+                                    >
+                                      <span className="mt-0.5 shrink-0">•</span>
+                                      {err}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            <div className="flex items-center justify-end gap-3 pt-1">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setShowChangePassword(false);
+                                  setCpCurrent("");
+                                  setCpNew("");
+                                  setCpConfirm("");
+                                  setCpErrors([]);
+                                }}
+                                disabled={isChangingPassword}
+                                className="text-text-muted text-xs font-mono tracking-widest uppercase hover:text-text-main transition-colors disabled:opacity-50"
+                              >
+                                Cancel
+                              </button>
+                              <PrimaryBtn
+                                onClick={handleChangePassword}
+                                disabled={isChangingPassword}
+                                className="px-6! text-xs! py-3!"
+                              >
+                                {isChangingPassword ? (
+                                  <Loader2 size={14} className="animate-spin" />
+                                ) : (
+                                  "Save Password"
+                                )}
+                              </PrimaryBtn>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-5">
+                            <div className="flex items-center justify-between gap-4">
+                              <p className="text-text-muted text-xs font-mono">
+                                Use a strong, unique password.
+                              </p>
+                              <PrimaryBtn
+                                type="button"
+                                onClick={() => setShowChangePassword(true)}
+                                className="shrink-0 px-6! text-xs! py-3!"
+                              >
+                                <KeyRound size={14} /> Change Password
+                              </PrimaryBtn>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <div className="mt-6">
-                      <PrimaryBtn type="submit">
-                        Save Changes <Check size={16} />
-                      </PrimaryBtn>
-                    </div>
-                  </form>
+                  )}
+
+                  {/* Danger Zone */}
+                  <DangerZone />
                 </div>
               )}
             </div>
           </div>
         </div>
+
+        {/* Sign Out Confirmation Modal */}
+        {showSignOutModal && (
+          <div
+            className="fixed inset-0 z-modal flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowSignOutModal(false);
+              }
+            }}
+          >
+            <div className="w-full max-w-sm bg-surface border border-border shadow-lg">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+                <div className="flex items-center gap-3">
+                  <LogOut size={18} className="text-red" />
+                  <h3 className="text-text-main font-bold text-base">
+                    Sign Out
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setShowSignOutModal(false)}
+                  className="text-text-muted hover:text-text-main transition-colors"
+                  aria-label="Close"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="p-6">
+                <p className="text-text-muted text-sm">
+                  Are you sure you want to sign out? You will need to sign in
+                  again to access your dashboard.
+                </p>
+              </div>
+              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
+                <button
+                  type="button"
+                  onClick={() => setShowSignOutModal(false)}
+                  disabled={isSigningOut}
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-border text-text-muted text-xs font-mono tracking-widest uppercase hover:text-text-main hover:border-gold/50 transition-colors rounded disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  disabled={isSigningOut}
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-red/10 border border-red/30 text-red text-xs font-mono tracking-widest uppercase hover:bg-red/20 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSigningOut ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <LogOut size={14} />
+                  )}
+                  {isSigningOut ? "Signing out..." : "Sign Out"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </AuthGuard>
   );

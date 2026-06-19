@@ -27,7 +27,7 @@ class User(UserBase, UUIDSchema, TimestampSchema):
     is_superuser: bool = False
     role: Role = Role.USER
 
-    hashed_password: str
+    hashed_password: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -66,10 +66,11 @@ class UserCreate(BaseModel):
 
 class UserCreateDB(BaseModel):
     email: EmailStr
-    hashed_password: str
+    hashed_password: str | None = None
 
     full_name: str
     phone: str | None = None
+    profile_picture: str | None = None
 
 
 class UserUpdate(BaseModel):
@@ -119,6 +120,10 @@ class UserForgotPasswordRequest(BaseModel):
             raise ValueError("Passwords do not match")
 
         return value
+
+
+class DeleteAccountRequest(BaseModel):
+    password: str
 
 
 class AdminUserUpdate(BaseModel):

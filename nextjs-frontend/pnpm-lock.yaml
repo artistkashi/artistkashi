@@ -92,6 +92,9 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.8
         version: 1.2.8(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@react-oauth/google':
+        specifier: ^0.12.2
+        version: 0.12.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@tanstack/react-query':
         specifier: ^5.101.0
         version: 5.101.0(react@19.2.6)
@@ -1366,6 +1369,12 @@ packages:
 
   '@radix-ui/rect@1.1.1':
     resolution: {integrity: sha512-HPwpGIzkl28mWyZqG52jiqDJ12waP11Pa1lGoiyUkIEuMLBP0oeK/C89esbXrxsky5we7dfd8U58nm0SgAWpVw==}
+
+  '@react-oauth/google@0.12.2':
+    resolution: {integrity: sha512-d1GVm2uD4E44EJft2RbKtp8Z1fp/gK8Lb6KHgs3pHlM0PxCXGLaq8LLYQYENnN4xPWO1gkL4apBtlPKzpLvZwg==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   '@reduxjs/toolkit@2.12.0':
     resolution: {integrity: sha512-KiT+RzZbp6mQET+Mg+h2c97+9j1sNflUxQkIHI7Yuzf6Peu+OYpmkn6nbHWmLLWj+1ZODUJFwGZ7gx3L9R9EOw==}
@@ -5075,6 +5084,11 @@ snapshots:
       '@types/react-dom': 19.2.3(@types/react@19.2.15)
 
   '@radix-ui/rect@1.1.1': {}
+
+  '@react-oauth/google@0.12.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
+    dependencies:
+      react: 19.2.6
+      react-dom: 19.2.6(react@19.2.6)
 
   '@reduxjs/toolkit@2.12.0(react-redux@9.3.0(@types/react@19.2.15)(react@19.2.6)(redux@5.0.1))(react@19.2.6)':
     dependencies:

@@ -23,10 +23,20 @@ from app.core.exceptions import (
     UnauthorizedException,
     ValidationException,
 )
+from app.crud.auth_provider import crud_auth_provider
 from app.crud.user import crud_user, crud_user_session
+from app.models.user_auth_provider import ProviderType
 from app.schemas.auth import ChangePasswordRequest, LoginRequest, TokenResponse
+from app.schemas.auth_provider import (
+    AuthProvidersResponse,
+    SetPasswordRequest,
+    UserAuthProviderCreate,
+    UserAuthProviderRead,
+)
 from app.schemas.user import (
-    User,
+    User as UserSchema,
+)
+from app.schemas.user import (
     UserCreate,
     UserCreateDB,
     UserRead,
@@ -37,6 +47,7 @@ from app.services.email.email import (
     send_verification_email,
     send_welcome_email,
 )
+from app.services.google_auth_service import verify_google_token
 from app.services.user_service import user_service
 
 
@@ -45,7 +56,7 @@ class AuthService:
         self,
         session: AsyncSession,
         payload: UserCreate,
-    ) -> TokenResponse:
+    ) -> TokenResponse | None:
 
         errors = validate_password_rules(
             payload.email,
@@ -61,8 +72,7 @@ class AuthService:
             )
 
         existing = await user_service.get_by_email(
-            session=session,
-            email=payload.email,
+            session=session, email=payload.email, user_schema=UserSchema
         )
 
         if existing:
@@ -78,8 +88,10 @@ class AuthService:
 
                 return None
             raise ConflictException(
-                message="User already exists",
-                error_code=ErrorCode.USER_ALREADY_EXISTS,
+                message="",
+                error_code=ErrorCode.ACCOUNT_EXISTS_WITH_GOOGLE
+                if not existing.hashed_password
+                else ErrorCode.USER_ALREADY_EXISTS,
             )
 
         user = await crud_user.create(
@@ -92,6 +104,16 @@ class AuthService:
             ),
             schema_to_select=UserRead,
             return_as_model=True,
+        )
+
+        # Create password auth provider for the new user
+        await crud_auth_provider.create(
+            db=session,
+            object=UserAuthProviderCreate(
+                user_id=user.id,
+                provider=ProviderType.PASSWORD,
+                provider_user_id=None,
+            ),
         )
 
         verification_token = create_email_verification_token(
@@ -114,11 +136,16 @@ class AuthService:
         user = await user_service.get_by_email(
             session=session,
             email=payload.email,
-            user_schema=User,
+            user_schema=UserSchema,
         )
 
         if not user:
             raise UnauthorizedException("Invalid email or password")
+
+        if not user.hashed_password:
+            raise UnauthorizedException(
+                "This account uses Google Sign-In. Please sign in with Google."
+            )
 
         if not verify_password(
             payload.password,
@@ -130,8 +157,19 @@ class AuthService:
             raise UnauthorizedException("Please verify your email address first")
 
         if not user.is_active:
-            raise UnauthorizedException("User account is Blocked")
+            raise UnauthorizedException("User account is blocked")
 
+        if getattr(user, "is_deleted", False):
+            raise UnauthorizedException("This account has been deleted")
+
+        return await self._issue_tokens(session=session, user=user)
+
+    async def _issue_tokens(
+        self,
+        *,
+        session: AsyncSession,
+        user: UserSchema,
+    ) -> TokenResponse:
         access_token = create_access_token(
             user_id=user.id,
         )
@@ -160,7 +198,190 @@ class AuthService:
             token_type="bearer",
         )
 
-    async def refresh(self, refresh_token: str, session: AsyncSession) -> TokenResponse:
+    async def google_auth(
+        self,
+        *,
+        session: AsyncSession,
+        credential: str,
+    ) -> TokenResponse:
+        # SECURITY: Verify the Google ID token server-side.
+        # The email is extracted from the verified token, NOT from the client.
+        google_user = verify_google_token(credential)
+
+        # CASE 2: Check if Google provider already exists
+        existing_provider = await crud_auth_provider.get(
+            db=session,
+            provider=ProviderType.GOOGLE,
+            provider_user_id=google_user.sub,
+            return_as_model=True,
+            schema_to_select=UserAuthProviderRead,
+        )
+
+        if existing_provider:
+            user = await user_service.get_by_id(
+                session=session,
+                user_id=existing_provider.user_id,
+                user_schema=UserSchema,
+            )
+            if not user:
+                raise UnauthorizedException("User not found")
+            return await self._issue_tokens(session=session, user=user)
+
+        # CASE 3: User exists by email but no Google provider linked
+        existing_user = await user_service.get_by_email(
+            session=session,
+            email=google_user.email,
+            user_schema=UserSchema,
+        )
+
+        if existing_user:
+            # Link Google provider to existing account
+            await crud_auth_provider.create(
+                db=session,
+                object=UserAuthProviderCreate(
+                    user_id=existing_user.id,
+                    provider=ProviderType.GOOGLE,
+                    provider_user_id=google_user.sub,
+                ),
+            )
+
+            if not existing_user.is_verified and google_user.email_verified:
+                await user_service.verify_user(
+                    session=session,
+                    user_id=existing_user.id,
+                )
+
+            # Update profile info from Google if missing
+            update_data = {}
+            if not existing_user.full_name and google_user.name:
+                update_data["full_name"] = google_user.name
+            if not existing_user.profile_picture and google_user.picture:
+                update_data["profile_picture"] = google_user.picture
+            if update_data:
+                await crud_user.update(
+                    db=session,
+                    id=existing_user.id,
+                    object=update_data,
+                )
+
+            return await self._issue_tokens(session=session, user=existing_user)
+
+        # CASE 1: New user - create account with Google provider
+        user = await crud_user.create(
+            db=session,
+            object=UserCreateDB(
+                email=google_user.email,
+                full_name=google_user.name,
+                hashed_password=None,
+                profile_picture=google_user.picture,
+            ),
+            schema_to_select=UserRead,
+            return_as_model=True,
+        )
+
+        await crud_auth_provider.create(
+            db=session,
+            object=UserAuthProviderCreate(
+                user_id=user.id,
+                provider=ProviderType.GOOGLE,
+                provider_user_id=google_user.sub,
+            ),
+        )
+
+        if google_user.email_verified:
+            await user_service.verify_user(
+                session=session,
+                user_id=user.id,
+            )
+
+        user_model = await user_service.get_by_id(
+            session=session,
+            user_id=user.id,
+            user_schema=UserSchema,
+        )
+        if not user_model:
+            raise UnauthorizedException("Failed to create user")
+
+        return await self._issue_tokens(session=session, user=user_model)
+
+    async def set_password(
+        self,
+        *,
+        session: AsyncSession,
+        user: UserSchema,
+        payload: SetPasswordRequest,
+    ) -> None:
+        # Check that user doesn't already have a password provider
+        existing_password_provider = await crud_auth_provider.get(
+            db=session,
+            user_id=user.id,
+            provider=ProviderType.PASSWORD,
+        )
+
+        if existing_password_provider:
+            raise ConflictException(
+                message="Password login is already set up for this account",
+                error_code=ErrorCode.PASSWORD_PROVIDER_EXISTS,
+            )
+
+        errors = validate_password_rules(
+            user.email,
+            payload.password,
+        )
+
+        if errors:
+            raise ValidationException(
+                message="Password validation failed",
+                details={
+                    "password": errors,
+                },
+            )
+
+        hashed = hash_password(payload.password)
+        await crud_user.update(
+            db=session,
+            id=user.id,
+            object={"hashed_password": hashed},
+        )
+
+        await crud_auth_provider.create(
+            db=session,
+            object=UserAuthProviderCreate(
+                user_id=user.id,
+                provider=ProviderType.PASSWORD,
+                provider_user_id=None,
+            ),
+        )
+
+    async def get_auth_providers(
+        self, *, session: AsyncSession, user_id: UUID
+    ) -> AuthProvidersResponse:
+
+        result = await crud_auth_provider.get_multi(
+            db=session,
+            user_id=user_id,
+            schema_to_select=UserAuthProviderRead,
+            return_as_model=True,
+            return_total_count=False,
+        )
+        print(result)
+
+        providers = result["data"]
+
+        has_password = any(
+            provider.provider == ProviderType.PASSWORD for provider in providers
+        )
+
+        return AuthProvidersResponse(
+            providers=providers,
+            has_password=has_password,
+        )
+
+    async def refresh(
+        self,
+        refresh_token: str,
+        session: AsyncSession,
+    ) -> TokenResponse:
 
         payload = decode_refresh_token(refresh_token)
 
@@ -201,15 +422,11 @@ class AuthService:
 
         await crud_user_session.create(
             db=session,
-            object={
-                "user_id": user_id,
-                "refresh_token_jti": get_token_jti(
-                    new_payload,
-                ),
-                "expires_at": get_token_expiry(
-                    new_payload,
-                ),
-            },
+            object=UserSessionCreate(
+                user_id=user_id,
+                refresh_token_jti=get_token_jti(new_payload),
+                expires_at=get_token_expiry(new_payload),
+            ),
         )
         return TokenResponse(
             access_token=create_access_token(
@@ -361,8 +578,17 @@ class AuthService:
         )
 
     async def change_password(
-        self, *, session: AsyncSession, user: User, payload: ChangePasswordRequest
+        self,
+        *,
+        session: AsyncSession,
+        user: UserSchema,
+        payload: ChangePasswordRequest,
     ) -> None:
+        if not user.hashed_password:
+            raise UnauthorizedException(
+                "This account uses Google Sign-In. Set a password first."
+            )
+
         if not verify_password(
             payload.current_password,
             user.hashed_password,

@@ -130,6 +130,10 @@ class Settings(BaseSettings):
     RAZORPAY_KEY_ID: str | None = None
     RAZORPAY_KEY_SECRET: str | None = None
 
+    # ==================== GOOGLE OAUTH ====================
+
+    GOOGLE_CLIENT_ID: str | None = None
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

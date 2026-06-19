@@ -40,7 +40,7 @@ export function ProductCard({
               alt={product.title}
               className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000"
             />
-            <div className="absolute inset-0 bg-linear-to-t from-dark/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-card backdrop-blur-[2px]">
+            <div className="absolute inset-0 bg-linear-to-t from-dark/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-card">
               <span className="text-foreground text-xs font-mono tracking-widest uppercase flex items-center gap-2">
                 View Artwork <ArrowUpRight size={12} className="text-primary" />
               </span>
@@ -52,10 +52,10 @@ export function ProductCard({
             e.preventDefault();
             setWishlisted(!wishlisted);
           }}
-          className="absolute top-4 right-4 w-10 h-10 bg-background/60 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-10 rounded-full border border-border hover:border-primary"
+          className="absolute top-4 right-4 w-10 h-10  flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-10  hover:border-primary"
         >
           <Heart
-            size={16}
+            size={18}
             fill={wishlisted ? "var(--color-gold)" : "none"}
             className={wishlisted ? "text-primary" : "text-text-muted"}
           />
