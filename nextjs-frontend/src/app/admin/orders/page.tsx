@@ -2,16 +2,14 @@
 
 import { unwrap, unwrapPaginated } from "@/api/client-service";
 import {
+  AdminOrderRead,
   getOrderDetails,
   listOrders,
-  updateOrderStatus,
-} from "@/api/openapi-client";
-import {
-  AdminOrderRead,
   OrderDashboardRead,
   OrderStatus,
   PaymentStatus,
-} from "@/api/openapi-client/types.gen";
+  updateOrderStatus,
+} from "@/api/openapi-client";
 import { GhostBtn, PrimaryBtn } from "@/components/ui/buttons";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { DataTable } from "@/components/ui/data-table";

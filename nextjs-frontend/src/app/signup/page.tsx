@@ -2,14 +2,14 @@
 
 export const dynamic = "force-dynamic";
 
-import { getSafeReturnTo } from "@/lib/auth-utils";
-import { getErrorMessage } from "@/lib/error-handler";
+import { GoogleLoginButton } from "@/components/auth/google-login-button";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PrimaryBtn } from "@/components/ui/buttons";
 import { RevealBlock } from "@/components/ui/misc";
-import { GoogleLoginButton } from "@/components/auth/google-login-button";
 import { useAuth } from "@/lib/auth-store";
+import { getSafeReturnTo } from "@/lib/auth-utils";
 import { signupSchema, type SignupFormValues } from "@/lib/auth-validation";
+import { getErrorMessage } from "@/lib/error-handler";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
@@ -179,7 +179,7 @@ export default function SignupPage() {
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
-                  <div className="luxury-loader scale-75" />
+                  <div className="luxury-loader scale-75 luxury-loader-dark" />
                 ) : (
                   <>
                     Sign Up <ArrowRight size={16} />

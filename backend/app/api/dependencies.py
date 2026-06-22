@@ -6,9 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth.dependencies import (
     get_current_admin,
     get_current_user,
+    get_current_user_optional,
 )
 from app.core.db import get_async_session
-from app.schemas.user import User
+from app.schemas.user import UserReadDB
 
 type DatabaseDep = Annotated[
     AsyncSession,
@@ -16,12 +17,17 @@ type DatabaseDep = Annotated[
 ]
 
 type CurrentUserDep = Annotated[
-    User,
+    UserReadDB,
     Depends(get_current_user),
 ]
 
 
 type CurrentAdminDep = Annotated[
-    User,
+    UserReadDB,
     Depends(get_current_admin),
+]
+
+type CurrentUserOptionalDep = Annotated[
+    UserReadDB | None,
+    Depends(get_current_user_optional),
 ]

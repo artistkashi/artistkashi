@@ -1,14 +1,10 @@
-import enum
-from decimal import Decimal
-from uuid import UUID, uuid4
+from __future__ import annotations
 
-from sqlalchemy import (
-    Enum,
-    ForeignKey,
-    Integer,
-    Numeric,
-    String,
-)
+import enum
+import uuid
+from decimal import Decimal
+
+from sqlalchemy import Enum, ForeignKey, Integer, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -32,9 +28,9 @@ class PaymentStatus(enum.StrEnum):
 class Order(Base, TimestampMixin):
     __tablename__ = "orders"
 
-    id: Mapped[UUID] = mapped_column(default=uuid4, primary_key=True)
+    id: Mapped[uuid.UUID] = mapped_column(default=uuid.uuid4, primary_key=True)
 
-    user_id: Mapped[UUID] = mapped_column(
+    user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey(
             "users.id",
             ondelete="CASCADE",
@@ -90,18 +86,18 @@ class OrderItem(Base):
     __tablename__ = "order_items"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    order_id: Mapped[UUID] = mapped_column(
+    order_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("orders.id", ondelete="CASCADE"), index=True
     )
 
-    product_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("products.id", ondelete="SET NULL"), nullable=True
+    product_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("products.id", ondelete="SET NULL"), nullable=True
     )
-    variant_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("product_variants.id", ondelete="SET NULL"), nullable=True
+    variant_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("product_variants.id", ondelete="SET NULL"), nullable=True
     )
-    course_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("courses.id", ondelete="SET NULL"), nullable=True
+    course_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("courses.id", ondelete="SET NULL"), nullable=True
     )
 
     quantity: Mapped[int] = mapped_column(Integer, default=1)

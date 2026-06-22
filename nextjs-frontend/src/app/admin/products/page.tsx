@@ -1,12 +1,14 @@
 "use client";
 
 import { unwrap, unwrapPaginated, unwrapVoid } from "@/api/client-service";
-import { deleteProduct, getProduct, listProducts } from "@/api/openapi-client";
 import {
+  deleteProduct,
+  getProduct,
+  listProducts,
   ProductCardRead,
   ProductDetailRead,
   ProductStatus,
-} from "@/api/openapi-client/types.gen";
+} from "@/api/openapi-client";
 import { PrimaryBtn } from "@/components/ui/buttons";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { DataTable } from "@/components/ui/data-table";
@@ -129,7 +131,7 @@ function AdminProductsContent() {
     queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
   };
 
-  const handleEditProduct = async (id: number) => {
+  const handleEditProduct = async (id: string) => {
     try {
       const data = await unwrap(getProduct({ path: { product_id: id } }));
       setEditingProduct(data);
@@ -139,7 +141,7 @@ function AdminProductsContent() {
     }
   };
 
-  const handleDeleteProduct = async (id: number) => {
+  const handleDeleteProduct = async (id: string) => {
     const confirmed = window.confirm(
       "Are you certain you wish to remove this masterpiece from the archival records?"
     );
@@ -267,7 +269,7 @@ function AdminProductsContent() {
                 className="object-cover w-full h-full"
               />
             </div>
-            <span className="text-[11px] font-bold text-foreground uppercase tracking-widest line-clamp-1">
+            <span className="text-label font-bold text-foreground uppercase tracking-widest line-clamp-1">
               {row.original.title}
             </span>
           </div>
@@ -804,7 +806,7 @@ function ProductGridCard({
         <div className="p-3 flex-1 flex flex-col justify-between bg-surface/50 relative z-0">
           <div className="space-y-1">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="text-[11px] font-black text-text-main uppercase tracking-tight line-clamp-1 leading-tight">
+              <h3 className="text-label font-black text-text-main uppercase tracking-tight line-clamp-1 leading-tight">
                 {product.title}
               </h3>
               <div className="shrink-0 mt-0.5">
@@ -825,7 +827,7 @@ function ProductGridCard({
             </p>
           </div>
           <div className="mt-4 pt-2 border-t border-border/10 flex justify-between items-center">
-            <span className="text-[11px] font-mono text-gold font-black">
+            <span className="text-label font-mono text-gold font-black">
               {displayPrice(product.price)}
             </span>
             <StatusBadge status={product.status} />

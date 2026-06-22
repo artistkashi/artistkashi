@@ -1,10 +1,10 @@
 "use client";
 
-import type {
+import {
   ProductCategoryRead,
   ProductMediumRead,
   VariantTypeRead,
-} from "@/api/openapi-client/types.gen";
+} from "@/api/openapi-client";
 import {
   useCreateCategory,
   useCreateMedium,
@@ -163,7 +163,10 @@ export function QuickAddEntityModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div key="quick-add-wrapper" className="fixed inset-0 z-60 flex items-center justify-center p-4">
+        <div
+          key="quick-add-wrapper"
+          className="fixed inset-0 z-60 flex items-center justify-center p-4"
+        >
           {/* Backdrop */}
           <motion.div
             key="backdrop"
@@ -212,7 +215,10 @@ export function QuickAddEntityModal({
             </div>
 
             {/* Form */}
-            <form onSubmit={handleRHFSubmit(onSubmit)} className="p-6 space-y-5">
+            <form
+              onSubmit={handleRHFSubmit(onSubmit)}
+              className="p-6 space-y-5"
+            >
               {/* Name field */}
               <div className="space-y-2">
                 <label className="text-label font-mono tracking-widest uppercase text-text-muted block">

@@ -7971,7 +7971,7 @@ export type DeleteReviewResponses = {
     /**
      * Successful Response
      */
-    200: SuccessResponseDict;
+    200: SuccessResponseNoneType;
 };
 
 export type DeleteReviewResponse = DeleteReviewResponses[keyof DeleteReviewResponses];
@@ -8608,7 +8608,7 @@ export type DeleteAddressResponses = {
     /**
      * Successful Response
      */
-    200: SuccessResponseDict;
+    200: SuccessResponseNoneType;
 };
 
 export type DeleteAddressResponse = DeleteAddressResponses[keyof DeleteAddressResponses];
@@ -8713,36 +8713,6 @@ export type CoursesListCoursesResponses = {
 };
 
 export type CoursesListCoursesResponse = CoursesListCoursesResponses[keyof CoursesListCoursesResponses];
-
-export type GetCourseBySlugData = {
-    body?: never;
-    path: {
-        /**
-         * Slug
-         */
-        slug: string;
-    };
-    query?: never;
-    url: '/api/courses/by-slug/{slug}';
-};
-
-export type GetCourseBySlugErrors = {
-    /**
-     * Validation Error
-     */
-    422: ErrorResponse;
-};
-
-export type GetCourseBySlugError = GetCourseBySlugErrors[keyof GetCourseBySlugErrors];
-
-export type GetCourseBySlugResponses = {
-    /**
-     * Successful Response
-     */
-    200: SuccessResponseCourseRead;
-};
-
-export type GetCourseBySlugResponse = GetCourseBySlugResponses[keyof GetCourseBySlugResponses];
 
 export type CoursesGetCourseData = {
     body?: never;

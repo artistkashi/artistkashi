@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { COURSES, PAINTINGS } from "@/data/constants";
+import { PAINTINGS } from "@/data/constants";
 import { siteUrl } from "@/lib/seo";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -38,12 +38,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  const courseRoutes: MetadataRoute.Sitemap = COURSES.map((course) => ({
-    url: `${siteUrl}/courses/${course.id}`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: 0.8,
-  }));
-
-  return [...staticRoutes, ...shopRoutes, ...courseRoutes];
+  return [...staticRoutes, ...shopRoutes];
 }

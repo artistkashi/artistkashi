@@ -20,7 +20,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const isAuthRoute = authRoutes.has(pathname);
   const isAdminRoute = pathname.startsWith("/admin");
-  const hideNavFooter = isAuthRoute || isAdminRoute;
+  const isLessonRoute = pathname.match(/\/courses\/.+\/lessons\//) !== null;
+  const hideNavFooter = isAuthRoute || isAdminRoute || isLessonRoute;
 
   return (
     <>

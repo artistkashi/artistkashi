@@ -2,16 +2,27 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { unwrap } from "@/api/client-service";
+import { unwrap, unwrapVoid } from "@/api/client-service";
 import { setAuthToken } from "@/api/config";
+import type {
+  AuthProvidersResponse,
+  UserCreate,
+  UserRead,
+} from "@/api/openapi-client";
 import {
+  changePassword as changePasswordSdk,
+  forgotPassword as forgotPasswordSdk,
+  getAuthProviders as getAuthProvidersSdk,
+  googleAuth,
   login as loginSdk,
   logout as logoutSdk,
   me as meSdk,
   register as registerSdk,
+  requestVerification as requestVerificationSdk,
+  resetPassword as resetPasswordSdk,
+  setPassword as setPasswordSdk,
+  verifyEmail as verifyEmailSdk,
 } from "@/api/openapi-client";
-import { client } from "@/api/openapi-client/client.gen";
-import type { UserCreate, UserRead } from "@/api/openapi-client";
 import {
   getItem,
   getJSON,
@@ -27,18 +38,13 @@ interface AuthContextType {
   signup: (input: UserCreate) => Promise<UserRead>;
   googleLogin: (credential: string) => Promise<UserRead>;
   setPassword: (password: string) => Promise<void>;
-  getAuthProviders: () => Promise<{
-    providers: Array<{
-      id: string;
-      user_id: string;
-      provider: "password" | "google";
-      provider_user_id: string | null;
-    }>;
-    has_password: boolean;
-  }>;
+  getAuthProviders: () => Promise<AuthProvidersResponse>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string) => Promise<void>;
-  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  changePassword: (
+    currentPassword: string,
+    newPassword: string
+  ) => Promise<void>;
   requestVerification: (email: string) => Promise<void>;
   verifyEmail: (token: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -130,9 +136,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const afterLogin = async (
-    tokenData: { access_token: string; refresh_token: string }
-  ): Promise<UserRead> => {
+  const afterLogin = async (tokenData: {
+    access_token: string;
+    refresh_token: string;
+  }): Promise<UserRead> => {
     if (!tokenData.access_token || !tokenData.refresh_token)
       throw new Error("Login failed");
 
@@ -157,13 +164,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const googleLogin = async (credential: string) => {
-    const response = await client.post({
-      url: "/api/auth/google",
-      body: { credential },
-      headers: { "Content-Type": "application/json" },
-    }) as unknown as { data: { data: { access_token: string; refresh_token: string } } };
+    const tokenData = await unwrap(googleAuth({ body: { credential } }));
 
-    const tokenData = response.data?.data;
     if (!tokenData?.access_token || !tokenData?.refresh_token) {
       throw new Error("Google login failed");
     }
@@ -172,91 +174,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const setPassword = async (password: string) => {
-    const response = await client.post({
-      url: "/api/auth/set-password",
-      body: { password },
-    }) as unknown as { data: { success: boolean; message?: string } };
-
-    if (!response.data?.success) {
-      throw new Error(response.data?.message ?? "Failed to set password");
-    }
+    await unwrap(setPasswordSdk({ body: { password } }));
   };
 
   const getAuthProviders = async () => {
-    const response = await client.get({
-      url: "/api/auth/providers",
-    }) as unknown as {
-      data: {
-        data: {
-          providers: Array<{
-            id: string;
-            user_id: string;
-            provider: "password" | "google";
-            provider_user_id: string | null;
-          }>;
-          has_password: boolean;
-        };
-      };
-    };
+    const response = await unwrap(getAuthProvidersSdk());
 
-    return (
-      response.data?.data ?? { providers: [], has_password: false }
-    );
+    return response ?? { providers: [], has_password: false };
   };
 
   const forgotPassword = async (email: string) => {
-    const response = await client.post({
-      url: "/api/auth/forgot-password",
-      body: { email },
-    }) as unknown as { data: { message?: string } };
-
-    if (!response.data) {
-      throw new Error("Failed to send reset email");
-    }
+    await unwrap(forgotPasswordSdk({ body: { email } }));
   };
 
   const resetPassword = async (token: string, password: string) => {
-    const response = await client.post({
-      url: "/api/auth/reset-password",
-      body: { token, password },
-    }) as unknown as { data: { message?: string } };
-
-    if (!response.data) {
-      throw new Error("Failed to reset password");
-    }
+    await unwrapVoid(resetPasswordSdk({ body: { token, password } }));
   };
 
-  const changePassword = async (currentPassword: string, newPassword: string) => {
-    const response = await client.post({
-      url: "/api/auth/change-password",
-      body: { current_password: currentPassword, new_password: newPassword },
-    }) as unknown as { data: { message?: string } };
-
-    if (!response.data) {
-      throw new Error("Failed to change password");
-    }
+  const changePassword = async (
+    currentPassword: string,
+    newPassword: string
+  ) => {
+    await unwrapVoid(
+      changePasswordSdk({
+        body: { current_password: currentPassword, new_password: newPassword },
+      })
+    );
   };
 
   const requestVerification = async (email: string) => {
-    const response = await client.post({
-      url: "/api/auth/request-verification",
-      body: { email },
-    }) as unknown as { data: { message?: string } };
-
-    if (!response.data) {
-      throw new Error("Failed to request verification");
-    }
+    await unwrapVoid(requestVerificationSdk({ body: { email } }));
   };
 
   const verifyEmail = async (token: string) => {
-    const response = await client.post({
-      url: "/api/auth/verify",
-      body: { token },
-    }) as unknown as { data: { message?: string } };
-
-    if (!response.data) {
-      throw new Error("Failed to verify email");
-    }
+    await unwrapVoid(verifyEmailSdk({ body: { token } }));
   };
 
   const signup = async (input: UserCreate) => {

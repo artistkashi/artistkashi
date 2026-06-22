@@ -2,10 +2,10 @@
 
 export const dynamic = "force-dynamic";
 
+import { GoogleLoginButton } from "@/components/auth/google-login-button";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { PrimaryBtn } from "@/components/ui/buttons";
 import { RevealBlock } from "@/components/ui/misc";
-import { GoogleLoginButton } from "@/components/auth/google-login-button";
 import { useAuth } from "@/lib/auth-store";
 import { getSafeReturnTo } from "@/lib/auth-utils";
 import { loginSchema, type LoginFormValues } from "@/lib/auth-validation";
@@ -166,7 +166,7 @@ export default function LoginPage() {
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
-                  <div className="luxury-loader scale-75" />
+                  <div className="luxury-loader scale-75 luxury-loader-dark" />
                 ) : (
                   <>
                     Sign In <ArrowRight size={16} />

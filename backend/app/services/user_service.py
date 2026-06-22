@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.user import crud_user
-from app.schemas.user import User, UserRead
+from app.schemas.user import UserRead, UserReadDB
 
 
 class UserService:
@@ -11,7 +11,7 @@ class UserService:
         self,
         session: AsyncSession,
         user_id: UUID,
-        user_schema: type[UserRead | User] = UserRead,
+        user_schema: type[UserRead | UserReadDB] = UserRead,
     ):
         return await crud_user.get(
             db=session, id=user_id, return_as_model=True, schema_to_select=user_schema
@@ -21,7 +21,7 @@ class UserService:
         self,
         session: AsyncSession,
         email: str,
-        user_schema: type[UserRead | User] = UserRead,
+        user_schema: type[UserRead | UserReadDB] = UserRead,
     ):
         return await crud_user.get(
             db=session, email=email, return_as_model=True, schema_to_select=user_schema

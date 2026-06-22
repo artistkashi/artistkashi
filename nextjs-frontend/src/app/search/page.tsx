@@ -1,17 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { Search } from "lucide-react";
-import { RevealBlock } from "@/components/ui/misc";
-import { PAINTINGS, COURSES } from "@/data/constants";
-import Link from "next/link";
-import Image from "next/image";
 import { CourseRead } from "@/api/openapi-client";
+import { RevealBlock } from "@/components/ui/misc";
+import { PAINTINGS } from "@/data/constants";
+import { Search } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
 
-  const results = [...PAINTINGS, ...COURSES].filter((item) =>
+  const results = [...PAINTINGS].filter((item) =>
     item.title.toLowerCase().includes(query.toLowerCase())
   );
 
@@ -41,7 +41,7 @@ export default function SearchPage() {
                   const isPainting = "primary_image" in item;
                   const itemImage = isPainting
                     ? item.primary_image
-                    : (item as CourseRead).image_url;
+                    : (item as unknown as CourseRead).thumbnail_url;
                   const price =
                     typeof item.price === "string"
                       ? parseFloat(item.price)
@@ -58,7 +58,7 @@ export default function SearchPage() {
                       }
                       className="group bg-dark p-6 hover:bg-muted-light transition-colors cursor-pointer"
                     >
-                      <div className="relative aspect-[4/3] mb-4 overflow-hidden bg-muted">
+                      <div className="relative aspect-4/3 mb-4 overflow-hidden bg-muted">
                         <Image
                           src={itemImage || ""}
                           alt={item.title}

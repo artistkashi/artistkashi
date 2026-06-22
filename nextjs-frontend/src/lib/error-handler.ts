@@ -1,5 +1,5 @@
+import type { ErrorResponse } from "@/api/openapi-client";
 import type { AxiosError } from "axios";
-import type { ErrorResponse } from "@/api/openapi-client/types.gen";
 
 /**
  * Centrally handle API errors and extract the message provided by the backend.

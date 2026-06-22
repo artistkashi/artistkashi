@@ -1,7 +1,7 @@
-import { ChevronRight, Play } from "lucide-react";
-import Image from "next/image";
+import { CourseRead } from "@/api/openapi-client";
+import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
+import { Play } from "lucide-react";
 import Link from "next/link";
-import type { CourseRead } from "@/api/openapi-client";
 
 interface CourseCardProps {
   course: CourseRead;
@@ -14,25 +14,28 @@ export function CourseCard({
   completedLessons = 0,
   totalLessons = course.lessons_count,
 }: CourseCardProps) {
-  const progress = totalLessons ? Math.round((completedLessons / totalLessons) * 100) : 0;
+  const progress = totalLessons
+    ? Math.round((completedLessons / totalLessons) * 100)
+    : 0;
 
   return (
     <Link
-      href="/lesson-player"
+      href={`/courses/${course.slug}`}
       className="group block border border-border bg-surface card-luxury-hover overflow-hidden rounded"
     >
       <div className="relative w-full aspect-video overflow-hidden bg-dark">
-        <Image
-          src={course.image_url || ""}
+        <ImageWithFallback
+          src={course.computed_thumbnail_url}
           alt={course.title}
           fill
+          unoptimized
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-premium"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-dark/80 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-dark/80 via-transparent to-transparent" />
         <div className="absolute bottom-3 left-3 flex items-center gap-2">
           <span className="text-tiny font-mono tracking-widest uppercase bg-dark/80 border border-white/10 px-2.5 py-1 text-text-main">
-            {course.category || "Course"}
+            {course.category?.name || "Course"}
           </span>
         </div>
       </div>
@@ -40,9 +43,7 @@ export function CourseCard({
         <h3 className="text-text-main font-semibold text-sm md:text-base leading-snug mb-0.5 truncate">
           {course.title}
         </h3>
-        <p className="text-text-muted text-xs font-mono mb-2">
-          {course.instructor}
-        </p>
+
         <div className="flex items-center gap-2 mb-2">
           <div className="flex-1 h-1 bg-border rounded-full overflow-hidden">
             <div

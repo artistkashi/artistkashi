@@ -1,7 +1,8 @@
 "use client";
 
 import { unwrap } from "@/api/client-service";
-import { createReview, ReviewType } from "@/api/openapi-client";
+import type { ReviewType } from "@/api/openapi-client";
+import { createCourseReview } from "@/api/openapi-client";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
@@ -16,7 +17,7 @@ interface ReviewSubmitModalProps {
   onClose: () => void;
   onSuccess?: () => void;
   reviewType?: ReviewType;
-  entityId?: number;
+  entityId?: string;
   entityName?: string;
 }
 
@@ -34,7 +35,7 @@ export function ReviewSubmitModal({
   isOpen,
   onClose,
   onSuccess,
-  reviewType = "product",
+  reviewType = "course",
   entityId,
   entityName,
 }: ReviewSubmitModalProps) {
@@ -58,16 +59,19 @@ export function ReviewSubmitModal({
   const onSubmit = useCallback(
     async (data: ReviewFormData) => {
       try {
-        await unwrap(
-          createReview({
-            body: {
-              type: reviewType,
-              entity_id: entityId!,
-              rating: data.rating,
-              text: data.text,
-            },
-          })
-        );
+        if (reviewType === "course") {
+          await unwrap(
+            createCourseReview({
+              path: { slug: entityId! },
+              body: {
+                rating: data.rating,
+                text: data.text,
+              },
+            })
+          );
+        } else {
+          throw new Error("Product reviews not yet supported");
+        }
 
         reset();
         onClose();

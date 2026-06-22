@@ -10,6 +10,8 @@ from app.models.base import Base, SoftDeleteMixin, TimestampMixin
 if TYPE_CHECKING:
     from app.models.address import Address
     from app.models.cart import CartItem
+    from app.models.course_enrollment import CourseEnrollment
+    from app.models.lesson_progress import LessonProgress
     from app.models.order import Order
     from app.models.review import Review
     from app.models.user_auth_provider import UserAuthProvider
@@ -109,6 +111,18 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
 
     orders: Mapped[list["Order"]] = relationship(
         "Order",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
+    enrollments: Mapped[list["CourseEnrollment"]] = relationship(
+        "CourseEnrollment",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
+    lesson_progress: Mapped[list["LessonProgress"]] = relationship(
+        "LessonProgress",
         back_populates="user",
         cascade="all, delete-orphan",
     )

@@ -130,6 +130,11 @@ class Settings(BaseSettings):
     RAZORPAY_KEY_ID: str | None = None
     RAZORPAY_KEY_SECRET: str | None = None
 
+    # ==================== TRANSCODING ====================
+
+    FFMPEG_PATH: str = "ffmpeg"
+    FFPROBE_PATH: str = "ffprobe"
+
     # ==================== GOOGLE OAUTH ====================
 
     GOOGLE_CLIENT_ID: str | None = None

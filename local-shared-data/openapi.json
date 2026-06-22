@@ -4305,7 +4305,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse_dict_"
+                  "$ref": "#/components/schemas/SuccessResponse_NoneType_"
                 }
               }
             }
@@ -5310,7 +5310,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse_dict_"
+                  "$ref": "#/components/schemas/SuccessResponse_NoneType_"
                 }
               }
             }
@@ -5448,48 +5448,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PaginatedResponse_CourseListRead_"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/courses/by-slug/{slug}": {
-      "get": {
-        "tags": [
-          "courses"
-        ],
-        "summary": "Get Course By Slug",
-        "operationId": "get_course_by_slug",
-        "parameters": [
-          {
-            "name": "slug",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Slug"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse_CourseRead_"
                 }
               }
             }

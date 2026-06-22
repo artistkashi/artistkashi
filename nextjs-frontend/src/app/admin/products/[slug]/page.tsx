@@ -1,12 +1,13 @@
 "use client";
 
 import { unwrap, unwrapPaginated } from "@/api/client-service";
-import { getProductBySlug, listReviews } from "@/api/openapi-client";
 import {
+  getProductBySlug,
+  listAllReviews,
   ProductImageRead,
   ProductVariantRead,
-  ReviewReadPublic,
-} from "@/api/openapi-client/types.gen";
+  ReviewRead
+} from "@/api/openapi-client";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { Skeleton, SkeletonText } from "@/components/ui/Skeleton";
 import { Tag } from "@/components/ui/misc";
@@ -40,19 +41,19 @@ function useProduct(slug: string) {
   });
 }
 
-function useReviews(productId: number | null) {
+function useReviews(productId: string | null) {
   return useQuery({
     queryKey: ["reviews", productId],
     queryFn: async () => {
-      const { data } = await unwrapPaginated(
-        listReviews({
+      const result = await unwrapPaginated(
+        listAllReviews({
           query: {
             entity_id: productId!,
             review_type: "product",
           },
         })
       );
-      return data;
+      return result.data;
     },
     enabled: !!productId,
   });
@@ -504,7 +505,7 @@ function ProductReviewsSection({
             </p>
           </div>
         ) : (
-          reviews.map((review: ReviewReadPublic) => (
+          reviews.map((review: ReviewRead) => (
             <div
               key={review.id}
               className="p-4 border border-border bg-dark/10 space-y-4 hover:border-gold/20 transition-colors"

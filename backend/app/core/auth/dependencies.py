@@ -12,16 +12,24 @@ from app.core.auth.security import (
 from app.core.db import get_async_session
 from app.core.exceptions import ForbiddenException, UnauthorizedException
 from app.models.user import Role
-from app.schemas.user import User
+from app.schemas.user import UserReadDB
 from app.services.user_service import user_service
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/auth/login",
 )
+oauth2_scheme_optional = OAuth2PasswordBearer(
+    tokenUrl="/api/auth/login",
+    auto_error=False,
+)
 
 type TokenDep = Annotated[
     str,
     Depends(oauth2_scheme),
+]
+type TokenOptionalDep = Annotated[
+    str | None,
+    Depends(oauth2_scheme_optional),
 ]
 type DatabaseDep = Annotated[
     AsyncSession,
@@ -32,7 +40,7 @@ type DatabaseDep = Annotated[
 async def get_current_user(
     token: TokenDep,
     session: DatabaseDep,
-) -> User:
+) -> UserReadDB:
     payload = decode_access_token(token)
 
     if payload is None:
@@ -43,7 +51,7 @@ async def get_current_user(
     user = await user_service.get_by_id(
         session=session,
         user_id=user_id,
-        user_schema=User,
+        user_schema=UserReadDB,
     )
 
     if not user:
@@ -58,17 +66,43 @@ async def get_current_user(
 
 
 type CurrentUserDep = Annotated[
-    User,
+    UserReadDB,
     Depends(get_current_user),
 ]
 
 
 async def get_current_admin(
     current_user: CurrentUserDep,
-) -> User:
+) -> UserReadDB:
     if current_user.role != Role.ADMIN and not getattr(
         current_user, "is_superuser", False
     ):
         raise ForbiddenException("Admin privileges required")
 
     return current_user
+
+
+async def get_current_user_optional(
+    token: TokenOptionalDep,
+    session: DatabaseDep,
+) -> UserReadDB | None:
+    if token is None:
+        return None
+
+    payload = decode_access_token(token)
+
+    if payload is None:
+        return None
+
+    user_id: UUID = get_user_id_from_token(payload)
+
+    user = await user_service.get_by_id(
+        session=session,
+        user_id=user_id,
+        user_schema=UserReadDB,
+    )
+
+    if not user or not user.is_active or not user.is_verified:
+        return None
+
+    return user

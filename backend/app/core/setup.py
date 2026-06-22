@@ -12,6 +12,7 @@ from app.core.error_handler import setup_exception_handlers
 from app.core.queue import close_queue, init_queue
 from app.middleware.response import ResponseWrapperMiddleware
 from app.middleware.trailing_slash import TrailingSlashMiddleware
+from app.services.storage_service import storage_service
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +67,15 @@ def lifespan_factory(
                 await initialize_queue()
             except Exception:
                 logger.exception("Queue initialization failed")
+
+        # Configure MinIO/S3 CORS for browser-based direct uploads
+        try:
+            storage_service.configure_cors(
+                allowed_origin=settings.FRONTEND_URL,
+            )
+            logger.info("✅ S3 CORS configured")
+        except Exception:
+            logger.exception("S3 CORS configuration failed")
 
         logger.info("✨ Application started successfully")
 

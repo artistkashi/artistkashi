@@ -2,6 +2,11 @@ from app.models.address import Address
 from app.models.base import Base
 from app.models.cart import CartItem
 from app.models.course import Course
+from app.models.course_category import CourseCategory
+from app.models.course_enrollment import CourseEnrollment
+from app.models.course_lesson import CourseLesson
+from app.models.course_section import CourseSection
+from app.models.lesson_progress import LessonProgress
 from app.models.order import Order, OrderItem
 from app.models.product import (
     Product,
@@ -27,6 +32,11 @@ __all__ = [
     "SiteConfig",
     "Review",
     "Course",
+    "CourseCategory",
+    "CourseSection",
+    "CourseLesson",
+    "CourseEnrollment",
+    "LessonProgress",
     "Product",
     "ProductCategory",
     "ProductImage",

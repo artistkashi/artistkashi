@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import UploadFile
 from fastcrud import compute_offset
 from fastcrud.types import GetMultiResponseModel, SelectSchemaType
@@ -62,7 +64,7 @@ class ProductService:
         self,
         *,
         session: AsyncSession,
-        product_id: int | None = None,
+        product_id: uuid.UUID | None = None,
         slug: str | None = None,
         medium_id: int | None = None,
         status: ProductStatus | None = None,
@@ -97,7 +99,7 @@ class ProductService:
         self,
         *,
         session: AsyncSession,
-        product_id: int | None = None,
+        product_id: uuid.UUID | None = None,
         slug: str | None = None,
         status: ProductStatus | None = None,
         check: bool = False,
@@ -164,7 +166,7 @@ class ProductService:
         return product
 
     async def update_product(
-        self, *, session: AsyncSession, product_id: int, payload: ProductUpdate
+        self, *, session: AsyncSession, product_id: uuid.UUID, payload: ProductUpdate
     ) -> ProductBase:
         if payload.medium_id is not None:
             await product_medium_service.get_medium(
@@ -381,7 +383,7 @@ class ProductService:
         self,
         *,
         session: AsyncSession,
-        product_id: int,
+        product_id: uuid.UUID,
         payload: ProductUpdateRequest,
         files: list[UploadFile] | None = None,
     ) -> ProductDetailRead:
@@ -473,7 +475,16 @@ class ProductService:
         # Updates & Creations
         for img_state in payload.images:
             if img_state.id:
-                # Update existing
+                if img_state.id not in existing_images_map:
+                    raise ValidationException(
+                        message="Validation failed",
+                        details={
+                            "images": [
+                                f"Image {img_state.id} does not belong to this product "
+                                f"or no longer exists"
+                            ]
+                        },
+                    )
                 await product_image_service.update_image(
                     session=session,
                     image_id=img_state.id,
@@ -484,7 +495,6 @@ class ProductService:
                     ),
                 )
             else:
-                # New image (External or Uploaded)
                 image_url = img_state.image_url
                 source_type = ImageSourceType.EXTERNAL_URL
 
@@ -516,7 +526,7 @@ class ProductService:
         self,
         *,
         session: AsyncSession,
-        product_id: int,
+        product_id: uuid.UUID,
     ) -> bool:
         product = await self.get_product_detail(
             session=session,
@@ -795,7 +805,11 @@ class ProductVariantService:
         return variant
 
     async def create_variant(
-        self, *, session: AsyncSession, product_id: int, payload: ProductVariantCreate
+        self,
+        *,
+        session: AsyncSession,
+        product_id: uuid.UUID,
+        payload: ProductVariantCreate,
     ):
         product = await product_service.get_product(
             session=session, product_id=product_id, check=True
@@ -899,7 +913,11 @@ class ProductVariantService:
         return variant
 
     async def update_variant(
-        self, *, session: AsyncSession, variant_id: int, payload: ProductVariantUpdate
+        self,
+        *,
+        session: AsyncSession,
+        variant_id: uuid.UUID,
+        payload: ProductVariantUpdate,
     ) -> ProductVariantRead:
         variant = await self.get_product_variant(
             session=session, filter=ProductVariantCheckDB(id=variant_id), check=True
@@ -991,7 +1009,7 @@ class ProductVariantService:
 
         return updated
 
-    async def delete_variant(self, *, session: AsyncSession, variant_id: int):
+    async def delete_variant(self, *, session: AsyncSession, variant_id: uuid.UUID):
         variant = await self.get_product_variant(
             session=session, filter=ProductVariantCheckDB(id=variant_id), check=True
         )
@@ -1019,14 +1037,14 @@ class ProductVariantService:
                 )
 
     # can add list_variants method here which will be used to list variants of a product
-    async def get_variants(self, *, session: AsyncSession, product_id: int):
+    async def get_variants(self, *, session: AsyncSession, product_id: uuid.UUID):
         return await crud_product_variant.get_multi(db=session, product_id=product_id)
 
     async def list_variants(
         self,
         *,
         session: AsyncSession,
-        product_id: int,
+        product_id: uuid.UUID,
         page: int = 1,
         page_size: int = 20,
     ):
@@ -1070,7 +1088,7 @@ class ProductImageService:
         self,
         *,
         session: AsyncSession,
-        product_id: int,
+        product_id: uuid.UUID,
         payload: ProductImageInput,
         source_type: ImageSourceType = ImageSourceType.EXTERNAL_URL,
     ):
@@ -1131,13 +1149,16 @@ class ProductImageService:
                 )
 
         if payload.is_primary is True:
-            await crud_product_image.update(
-                db=session,
-                object={"is_primary": False},
-                allow_multiple=True,
-                product_id=image.product_id,
-                id__ne=image_id,
-            )
+            try:
+                await crud_product_image.update(
+                    db=session,
+                    object={"is_primary": False},
+                    allow_multiple=True,
+                    product_id=image.product_id,
+                    id__ne=image_id,
+                )
+            except NoResultFound:
+                pass
 
         updated = await crud_product_image.update(
             db=session,
@@ -1183,7 +1204,7 @@ class ProductImageService:
                     db=session, id=next_image.id, object={"is_primary": True}
                 )
 
-    async def get_images(self, *, session: AsyncSession, product_id: int):
+    async def get_images(self, *, session: AsyncSession, product_id: uuid.UUID):
         await product_service.get_product(
             session=session, product_id=product_id, check=True
         )

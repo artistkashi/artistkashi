@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter
 
 from app.api.dependencies import DatabaseDep
@@ -22,7 +24,7 @@ router = APIRouter(tags=["Product Images"])
 @router.get(
     "/product/{product_id}", response_model=SuccessResponse[list[ProductImageRead]]
 )
-async def get_product_images(product_id: int, session: DatabaseDep):
+async def get_product_images(product_id: UUID, session: DatabaseDep):
     images = await product_image_service.get_images(
         session=session, product_id=product_id
     )

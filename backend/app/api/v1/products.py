@@ -30,15 +30,6 @@ async def get_product(slug: str, session: DatabaseDep):
         session=session, slug=slug, status=ProductStatus.PUBLISHED, check=False
     )
 
-    # If not found and identifier is numeric, try product_id
-    if not product and slug.isdigit():
-        product = await product_service.get_product_detail(
-            session=session,
-            product_id=int(slug),
-            status=ProductStatus.PUBLISHED,
-            check=False,
-        )
-
     if not product:
         raise NotFoundException(
             resource="Product",

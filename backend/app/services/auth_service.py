@@ -33,14 +33,7 @@ from app.schemas.auth_provider import (
     UserAuthProviderCreate,
     UserAuthProviderRead,
 )
-from app.schemas.user import (
-    User as UserSchema,
-)
-from app.schemas.user import (
-    UserCreate,
-    UserCreateDB,
-    UserRead,
-)
+from app.schemas.user import UserCreate, UserCreateDB, UserRead, UserReadDB
 from app.schemas.user_session import UserSessionCreate
 from app.services.email.email import (
     send_reset_password_email,
@@ -72,7 +65,7 @@ class AuthService:
             )
 
         existing = await user_service.get_by_email(
-            session=session, email=payload.email, user_schema=UserSchema
+            session=session, email=payload.email, user_schema=UserReadDB
         )
 
         if existing:
@@ -136,7 +129,7 @@ class AuthService:
         user = await user_service.get_by_email(
             session=session,
             email=payload.email,
-            user_schema=UserSchema,
+            user_schema=UserReadDB,
         )
 
         if not user:
@@ -168,7 +161,7 @@ class AuthService:
         self,
         *,
         session: AsyncSession,
-        user: UserSchema,
+        user: UserReadDB,
     ) -> TokenResponse:
         access_token = create_access_token(
             user_id=user.id,
@@ -221,7 +214,7 @@ class AuthService:
             user = await user_service.get_by_id(
                 session=session,
                 user_id=existing_provider.user_id,
-                user_schema=UserSchema,
+                user_schema=UserReadDB,
             )
             if not user:
                 raise UnauthorizedException("User not found")
@@ -231,7 +224,7 @@ class AuthService:
         existing_user = await user_service.get_by_email(
             session=session,
             email=google_user.email,
-            user_schema=UserSchema,
+            user_schema=UserReadDB,
         )
 
         if existing_user:
@@ -297,7 +290,7 @@ class AuthService:
         user_model = await user_service.get_by_id(
             session=session,
             user_id=user.id,
-            user_schema=UserSchema,
+            user_schema=UserReadDB,
         )
         if not user_model:
             raise UnauthorizedException("Failed to create user")
@@ -308,7 +301,7 @@ class AuthService:
         self,
         *,
         session: AsyncSession,
-        user: UserSchema,
+        user: UserReadDB,
         payload: SetPasswordRequest,
     ) -> None:
         # Check that user doesn't already have a password provider
@@ -581,7 +574,7 @@ class AuthService:
         self,
         *,
         session: AsyncSession,
-        user: UserSchema,
+        user: UserReadDB,
         payload: ChangePasswordRequest,
     ) -> None:
         if not user.hashed_password:

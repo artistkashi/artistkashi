@@ -4,7 +4,7 @@ from pathlib import Path
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
 
 from app.core.config import settings
-from app.models.user import User
+from app.schemas.user import UserRead
 
 
 def get_email_config():
@@ -24,7 +24,7 @@ def get_email_config():
     return conf
 
 
-async def send_reset_password_email(user: User, token: str):
+async def send_reset_password_email(user: UserRead, token: str):
     conf = get_email_config()
     email = user.email
     base_url = f"{settings.FRONTEND_URL}/password-recovery/confirm?"
@@ -42,10 +42,7 @@ async def send_reset_password_email(user: User, token: str):
     await fm.send_message(message, template_name="password_reset.html")
 
 
-async def send_verification_email(
-    user: User,
-    token: str,
-):
+async def send_verification_email(user: UserRead, token: str):
     conf = get_email_config()
 
     link = f"{settings.FRONTEND_URL}/verify?token={token}"
@@ -68,9 +65,7 @@ async def send_verification_email(
     )
 
 
-async def send_welcome_email(
-    user: User,
-):
+async def send_welcome_email(user: UserRead):
     conf = get_email_config()
 
     message = MessageSchema(

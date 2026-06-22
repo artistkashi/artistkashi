@@ -5,9 +5,9 @@ import {
   createAddress,
   createOrder,
   listAddresses,
+  OrderRead,
   verifyPayment,
 } from "@/api/openapi-client";
-import { OrderRead } from "@/api/openapi-client/types.gen";
 import { GhostBtn, PrimaryBtn } from "@/components/ui/buttons";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { ModalType, StatusModal } from "@/components/ui/StatusModal";

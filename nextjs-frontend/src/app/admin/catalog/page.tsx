@@ -3,7 +3,9 @@
 import { PrimaryBtn } from "@/components/ui/buttons";
 import {
   useCategories,
+  useCourseCategories,
   useCreateCategory,
+  useCreateCourseCategory,
   useCreateMedium,
   useCreateVariantType,
   useMediums,
@@ -33,7 +35,7 @@ import { z } from "zod";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface CatalogItem {
-  id: number;
+  id: number | string;
   name: string;
   slug: string;
   description?: string | null;
@@ -41,7 +43,7 @@ interface CatalogItem {
   created_at?: string | null;
 }
 
-type ActiveTab = "categories" | "mediums" | "variantTypes";
+type ActiveTab = "categories" | "mediums" | "variantTypes" | "courseCategories";
 
 const catalogSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -56,6 +58,7 @@ const TABS: { key: ActiveTab; label: string; icon: React.ReactNode }[] = [
   { key: "categories", label: "Collections", icon: <Tag size={13} /> },
   { key: "mediums", label: "Mediums", icon: <Palette size={13} /> },
   { key: "variantTypes", label: "Variant Types", icon: <Layers size={13} /> },
+  { key: "courseCategories", label: "Course Categories", icon: <BookOpen size={13} /> },
 ];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -90,6 +93,16 @@ export default function CatalogPage() {
   } = useVariantTypes();
   const { createVariantType, creating: creatingVariantType } =
     useCreateVariantType();
+
+  // ── Course Categories
+  const {
+    courseCategories,
+    loading: ccLoading,
+    error: ccError,
+    refetch: refetchCourseCategories,
+  } = useCourseCategories();
+  const { createCourseCategory, creating: creatingCourseCategory } =
+    useCreateCourseCategory();
 
   // ── Handlers
 
@@ -135,6 +148,22 @@ export default function CatalogPage() {
     }
   };
 
+  const handleCreateCourseCategory = async (
+    name: string,
+    description?: string
+  ): Promise<void> => {
+    try {
+      await createCourseCategory({
+        name,
+        description: description?.trim() || null,
+      });
+      toast.success("Course category saved");
+      await refetchCourseCategories();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
+  };
+
   return (
     <div className="space-y-8 pb-16">
       {/* ── Page Header ── */}
@@ -163,6 +192,9 @@ export default function CatalogPage() {
           )}
           {!vtLoading && (
             <StatBadge icon={<Layers size={10} />} count={variantTypes.length} label="Formats" />
+          )}
+          {!ccLoading && (
+            <StatBadge icon={<BookOpen size={10} />} count={courseCategories.length} label="Courses" />
           )}
         </div>
       </div>
@@ -304,6 +336,43 @@ export default function CatalogPage() {
                 "Canvas Print",
                 "Framed Print",
                 "Limited Edition Print",
+              ]}
+            />
+          </motion.div>
+        )}
+
+        {activeTab === "courseCategories" && (
+          <motion.div
+            key="courseCategories"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.18 }}
+          >
+            <CatalogTabPanel
+              entityLabel="Course Category"
+              entityLabelPlural="Course Categories"
+              icon={<BookOpen size={15} />}
+              items={courseCategories.map((cc) => ({
+                id: cc.id,
+                name: cc.name,
+                slug: cc.slug,
+                description: cc.description,
+                is_active: cc.is_active ?? true,
+                created_at: cc.created_at,
+              }))}
+              loading={ccLoading}
+              error={ccError}
+              creating={creatingCourseCategory}
+              hasDescription
+              onRefetch={refetchCourseCategories}
+              onSubmit={handleCreateCourseCategory}
+              namePlaceholder="e.g. Beginner, Advanced, Acrylic..."
+              examples={[
+                "Beginner",
+                "Oil Painting",
+                "Sketching",
+                "Advanced Techniques",
               ]}
             />
           </motion.div>

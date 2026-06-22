@@ -1,4 +1,5 @@
 import enum
+import uuid
 from decimal import Decimal
 
 from sqlalchemy import (
@@ -74,7 +75,7 @@ class ProductStatus(enum.StrEnum):
 class Product(Base, TimestampMixin):
     __tablename__ = "products"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(
         String(255), unique=True, nullable=False, index=True
@@ -133,7 +134,7 @@ class ProductImage(Base, TimestampMixin):
     __tablename__ = "product_images"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    product_id: Mapped[int] = mapped_column(
+    product_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("products.id", ondelete="CASCADE")
     )
     image_url: Mapped[str] = mapped_column(String(500), nullable=False)
@@ -171,9 +172,9 @@ class ProductVariant(Base, TimestampMixin):
             name="uq_product_variant_dimension",
         ),
     )
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
 
-    product_id: Mapped[int] = mapped_column(
+    product_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("products.id", ondelete="CASCADE")
     )
     variant_type_id: Mapped[int | None] = mapped_column(

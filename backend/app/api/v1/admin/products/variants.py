@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter
 
 from app.api.dependencies import DatabaseDep
@@ -35,7 +37,7 @@ router = APIRouter(
     "/{variant_id}",
     response_model=SuccessResponse[ProductVariantRead],
 )
-async def get_variant(variant_id: int, session: DatabaseDep):
+async def get_variant(variant_id: UUID, session: DatabaseDep):
     variant = await product_variant_service.get_product_variant(
         session=session,
         id=variant_id,
@@ -50,7 +52,7 @@ async def get_variant(variant_id: int, session: DatabaseDep):
     "/product/{product_id}",
     response_model=SuccessResponse[list[ProductVariantRead]],
 )
-async def list_variants(product_id: int, session: DatabaseDep):
+async def list_variants(product_id: UUID, session: DatabaseDep):
     variants = await product_variant_service.get_variants(
         session=session,
         product_id=product_id,

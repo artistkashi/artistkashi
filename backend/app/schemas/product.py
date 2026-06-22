@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import re
 from datetime import datetime
 from decimal import Decimal
 from urllib.parse import urlparse
+from uuid import UUID
 
 from pydantic import (
     BaseModel,
@@ -14,19 +14,8 @@ from pydantic import (
     model_validator,
 )
 
-from app.core.schema import TimestampSchema
+from app.core.schema import TimestampSchemaRead, slugify
 from app.models.product import DimensionUnit, ImageSourceType, ProductStatus
-
-# ─── Utility ──────────────────────────────────────────────────────────────────
-
-
-def _slugify(text: str) -> str:
-    slug = text.lower().strip()
-    slug = re.sub(r"[^\w\s-]", "", slug)
-    slug = re.sub(r"[\s_]+", "-", slug)
-    slug = re.sub(r"-+", "-", slug)
-    return slug.strip("-")
-
 
 # ─── ProductMedium ────────────────────────────────────────────────────────────
 
@@ -39,7 +28,7 @@ class ProductMediumCreate(BaseModel):
     @model_validator(mode="after")
     def auto_slug(self) -> ProductMediumCreate:
         if not self.slug:
-            self.slug = _slugify(self.name)
+            self.slug = slugify(self.name)
         return self
 
 
@@ -49,7 +38,7 @@ class ProductMediumUpdate(BaseModel):
     is_active: bool | None = None
 
 
-class ProductMediumRead(TimestampSchema):
+class ProductMediumRead(TimestampSchemaRead):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -69,7 +58,7 @@ class VariantTypeCreate(BaseModel):
     @model_validator(mode="after")
     def auto_slug(self) -> VariantTypeCreate:
         if not self.slug:
-            self.slug = _slugify(self.name)
+            self.slug = slugify(self.name)
         return self
 
 
@@ -80,7 +69,7 @@ class VariantTypeUpdate(BaseModel):
     is_active: bool | None = None
 
 
-class VariantTypeRead(TimestampSchema):
+class VariantTypeRead(TimestampSchemaRead):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -123,7 +112,7 @@ class ProductImageInput(BaseModel):
 
 
 class ProductImageCreate(ProductImageInput):
-    product_id: int
+    product_id: UUID
     source_type: ImageSourceType
 
 
@@ -133,11 +122,11 @@ class ProductImageUpdate(BaseModel):
     sort_order: int | None = Field(None, ge=0)
 
 
-class ProductImageRead(TimestampSchema):
+class ProductImageRead(TimestampSchemaRead):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    product_id: int
+    product_id: UUID
     image_url: str
     alt_text: str | None
     is_primary: bool
@@ -165,19 +154,19 @@ class ProductVariantCreate(BaseModel):
 
 
 class ProductVariantCreateDB(ProductVariantCreate):
-    product_id: int
+    product_id: UUID
 
 
 class ProductVariantCheckDB(BaseModel):
-    id: int | None = None
-    product_id: int | None = None
+    id: UUID | None = None
+    product_id: UUID | None = None
     variant_type_id: int | None = None
     width: Decimal | None = None
     height: Decimal | None = None
 
 
 class ProductVariantUpdate(BaseModel):
-    id: int | None = None
+    id: UUID | None = None
 
     variant_type_id: int | None = None
 
@@ -197,11 +186,11 @@ class ProductVariantUpdate(BaseModel):
     is_available: bool | None = None
 
 
-class ProductVariantRead(TimestampSchema):
+class ProductVariantRead(TimestampSchemaRead):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
-    product_id: int
+    id: UUID
+    product_id: UUID
     variant_type_id: int | None
     variant_type_name: str | None = None
     # variant_type: VariantTypeRead | None = None
@@ -269,7 +258,7 @@ class _ProductComputedMixin(BaseModel):
 
 
 class ProductVariantState(BaseModel):
-    id: int | None = None
+    id: UUID | None = None
     variant_type_id: int
     price: Decimal = Field(..., gt=0, decimal_places=2)
     width: Decimal | None = Field(None, ge=0, decimal_places=2)
@@ -305,7 +294,7 @@ class ProductUpdateRequest(BaseModel):
 class ProductBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    id: UUID
     title: str
     slug: str
     short_description: str | None = None
@@ -345,7 +334,7 @@ class ProductCreate(BaseModel):
     @model_validator(mode="after")
     def auto_slug(self) -> ProductCreate:
         if not self.slug:
-            self.slug = _slugify(self.title)
+            self.slug = slugify(self.title)
         return self
 
 
@@ -370,7 +359,7 @@ class ProductUpdate(BaseModel):
     meta_description: str | None = Field(None, max_length=500)
 
 
-class ProductDetailRead(ProductBase, _ProductComputedMixin, TimestampSchema):
+class ProductDetailRead(ProductBase, _ProductComputedMixin, TimestampSchemaRead):
     description: str | None = None
 
     style: str | None = None
@@ -402,7 +391,7 @@ class ProductListRead(_ProductComputedMixin):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    id: UUID
     title: str
     slug: str
     short_description: str | None
@@ -485,7 +474,7 @@ class ProductCategoryCreate(BaseModel):
     @model_validator(mode="after")
     def auto_slug(self):
         if not self.slug:
-            self.slug = _slugify(self.name)
+            self.slug = slugify(self.name)
 
         return self
 
@@ -500,7 +489,7 @@ class ProductCategoryUpdate(BaseModel):
     is_active: bool | None = None
 
 
-class ProductCategoryRead(TimestampSchema):
+class ProductCategoryRead(TimestampSchemaRead):
     model_config = ConfigDict(
         from_attributes=True,
     )

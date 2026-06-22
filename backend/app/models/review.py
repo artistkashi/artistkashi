@@ -1,8 +1,14 @@
 import enum
 import uuid
 
-from sqlalchemy import CheckConstraint, Enum, ForeignKey, Integer, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import (
+    CheckConstraint,
+    Enum,
+    ForeignKey,
+    Integer,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -23,12 +29,9 @@ class Review(Base, TimestampMixin):
 
     __table_args__ = (
         CheckConstraint("rating >= 1 AND rating <= 5", name="check_review_rating"),
+        UniqueConstraint("user_id", "type", "entity_id", name="uq_review_user_entity"),
     )
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
 
     type: Mapped[ReviewType] = mapped_column(
         Enum(ReviewType, values_callable=lambda enum_cls: [e.value for e in enum_cls]),
@@ -36,39 +39,22 @@ class Review(Base, TimestampMixin):
         index=True,
     )
 
-    entity_id: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-        index=True,
-    )
+    entity_id: Mapped[uuid.UUID] = mapped_column(nullable=False, index=True)
 
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("users.id"),
-        nullable=False,
-        index=True,
+        ForeignKey("users.id"), nullable=False, index=True
     )
 
-    rating: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-    )
+    rating: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    comment: Mapped[str] = mapped_column(
-        Text,
-        nullable=False,
-    )
+    text: Mapped[str] = mapped_column(Text, nullable=False)
 
     status: Mapped[ReviewStatus] = mapped_column(
         Enum(
-            ReviewStatus,
-            values_callable=lambda enum_cls: [e.value for e in enum_cls],
+            ReviewStatus, values_callable=lambda enum_cls: [e.value for e in enum_cls]
         ),
         default=ReviewStatus.ACTIVE,
         nullable=False,
     )
 
-    user = relationship(
-        "User",
-        back_populates="reviews",
-    )
+    user = relationship("User", back_populates="reviews")

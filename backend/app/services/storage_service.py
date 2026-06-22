@@ -23,10 +23,37 @@ class StorageService:
 
         self.bucket = settings.S3_BUCKET_NAME
 
+    async def _upload(
+        self,
+        file: UploadFile,
+        folder: str = "products",
+        key: str | None = None,
+    ) -> str:
+        try:
+            content = await file.read()
+            if key is None:
+                extension = file.filename.split(".")[-1] if file.filename else "bin"
+                filename = f"{uuid.uuid4()}.{extension}"
+                key = f"{folder}/{filename}"
+            self.client.put_object(
+                Bucket=self.bucket,
+                Key=key,
+                Body=content,
+                ContentType=file.content_type or "application/octet-stream",
+            )
+            return key
+
+        except Exception as exc:
+            raise ServiceException(
+                "Storage",
+                f"Upload failed: {exc}",
+            ) from exc
+
     async def upload_image(
         self,
         file: UploadFile,
         folder: str = "products",
+        key: str | None = None,
     ) -> str:
         if not file.content_type:
             raise ValidationException("Invalid file")
@@ -41,29 +68,31 @@ class StorageService:
         if file.content_type not in allowed_types:
             raise ValidationException("Only JPEG, PNG, WEBP and GIF images are allowed")
 
-        try:
-            content = await file.read()
+        s3_key = await self._upload(file, folder, key=key)
+        return f"{settings.S3_PUBLIC_URL}/{self.bucket}/{s3_key}"
 
-            extension = file.filename.split(".")[-1]
+    async def upload_video(
+        self,
+        file: UploadFile,
+        folder: str = "videos",
+        key: str | None = None,
+    ) -> str:
+        if not file.content_type:
+            raise ValidationException("Invalid file")
 
-            filename = f"{uuid.uuid4()}.{extension}"
+        allowed_types = {
+            "video/mp4",
+            "video/webm",
+            "video/ogg",
+            "video/quicktime",
+            "video/x-msvideo",
+        }
 
-            key = f"{folder}/{filename}"
+        if file.content_type not in allowed_types:
+            raise ValidationException("Only MP4, WEBM, OGG, MOV and AVI videos are allowed")
 
-            self.client.put_object(
-                Bucket=self.bucket,
-                Key=key,
-                Body=content,
-                ContentType=file.content_type,
-            )
-
-            return f"{settings.S3_PUBLIC_URL}/{self.bucket}/{key}"
-
-        except Exception as exc:
-            raise ServiceException(
-                "Storage",
-                f"Upload failed: {exc}",
-            ) from exc
+        s3_key = await self._upload(file, folder, key=key)
+        return f"{settings.S3_PUBLIC_URL}/{self.bucket}/{s3_key}"
 
     async def upload_images(
         self,
@@ -84,6 +113,59 @@ class StorageService:
         )
 
         return list(results)
+
+    def configure_cors(self, allowed_origin: str = "*") -> None:
+        try:
+            self.client.put_bucket_cors(
+                Bucket=self.bucket,
+                CORSConfiguration={
+                    "CORSRules": [
+                        {
+                            "AllowedOrigins": [allowed_origin],
+                            "AllowedMethods": ["GET", "PUT", "HEAD"],
+                            "AllowedHeaders": ["*"],
+                            "ExposeHeaders": ["ETag"],
+                            "MaxAgeSeconds": 3600,
+                        }
+                    ]
+                },
+            )
+        except Exception:
+            pass
+
+    def generate_presigned_read_url(
+        self,
+        key: str,
+        expires_in: int = 3600,
+    ) -> str:
+        url = self.client.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": self.bucket,
+                "Key": key,
+            },
+            ExpiresIn=expires_in,
+        )
+        return url.replace(settings.S3_ENDPOINT_URL, settings.S3_PUBLIC_URL, 1)
+
+    def generate_presigned_upload_url(
+        self,
+        key: str,
+        content_type: str,
+        expires_in: int = 3600,
+    ) -> str:
+        url = self.client.generate_presigned_url(
+            "put_object",
+            Params={
+                "Bucket": self.bucket,
+                "Key": key,
+                "ContentType": content_type,
+            },
+            ExpiresIn=expires_in,
+        )
+        # boto3 generates URL with the internal endpoint (S3_ENDPOINT_URL, e.g. http://minio:9000)
+        # but the browser needs the externally-accessible public URL (S3_PUBLIC_URL, e.g. http://localhost:9000)
+        return url.replace(settings.S3_ENDPOINT_URL, settings.S3_PUBLIC_URL, 1)
 
     async def delete_file(self, key: str) -> bool:
         try:

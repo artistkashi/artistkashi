@@ -1,4 +1,5 @@
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, File, Form, Query, UploadFile
 from pydantic import Json
@@ -114,7 +115,7 @@ async def get_product_by_slug(slug: str, session: DatabaseDep):
 
 
 @router.get("/{product_id}", response_model=SuccessResponse[ProductDetailRead])
-async def get_product(product_id: int, session: DatabaseDep):
+async def get_product(product_id: UUID, session: DatabaseDep):
     product = await product_service.get_product_detail(
         session=session, product_id=product_id, check=True
     )
@@ -127,7 +128,7 @@ async def get_product(product_id: int, session: DatabaseDep):
     response_model=SuccessResponse[ProductDetailRead],
 )
 async def update_product(
-    product_id: int,
+    product_id: UUID,
     session: DatabaseDep,
     payload: Annotated[Json[ProductUpdateRequest], Form()],
     files: list[UploadFile] | None = File(None),
@@ -146,7 +147,7 @@ async def update_product(
 
 
 @router.patch("/{product_id}/publish", response_model=SuccessResponse[ProductBase])
-async def publish_product(product_id: int, session: DatabaseDep):
+async def publish_product(product_id: UUID, session: DatabaseDep):
     product = await product_service.update_product(
         session=session,
         product_id=product_id,
@@ -157,7 +158,7 @@ async def publish_product(product_id: int, session: DatabaseDep):
 
 
 @router.patch("/{product_id}/archive", response_model=SuccessResponse[ProductBase])
-async def archive_product(product_id: int, session: DatabaseDep):
+async def archive_product(product_id: UUID, session: DatabaseDep):
     product = await product_service.update_product(
         session=session,
         product_id=product_id,
@@ -168,7 +169,7 @@ async def archive_product(product_id: int, session: DatabaseDep):
 
 
 @router.delete("/{product_id}", response_model=SuccessResponse[None])
-async def delete_product(product_id: int, session: DatabaseDep):
+async def delete_product(product_id: UUID, session: DatabaseDep):
     await product_service.delete_product(session=session, product_id=product_id)
 
     return SuccessResponse(message="Product deleted successfully")

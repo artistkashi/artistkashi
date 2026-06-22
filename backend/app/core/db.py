@@ -1,4 +1,5 @@
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, AsyncIterator
+from contextlib import asynccontextmanager
 from urllib.parse import urlparse
 
 from sqlalchemy import NullPool
@@ -47,6 +48,13 @@ async def get_db() -> AsyncGenerator[AsyncSession]:
 
 # Alias used across project
 get_async_session = get_db
+
+
+@asynccontextmanager
+async def get_async_session_context() -> AsyncIterator[AsyncSession]:
+    """Async context manager for standalone use (workers, scripts)."""
+    async with async_session_maker() as session:
+        yield session
 
 
 async def create_db_and_tables() -> None:

@@ -1,12 +1,13 @@
 "use client";
 
 import { unwrap, unwrapPaginated } from "@/api/client-service";
-import { listReviews, productsGetProduct } from "@/api/openapi-client";
 import {
+  listAllReviews,
   ProductDetailRead,
+  productsGetProduct,
   ProductVariantRead,
-  ReviewReadPublic,
-} from "@/api/openapi-client/types.gen";
+  ReviewRead,
+} from "@/api/openapi-client";
 import { GhostBtn, PrimaryBtn } from "@/components/ui/buttons";
 import { CircularGallery } from "@/components/ui/circular-gallery";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
@@ -46,19 +47,19 @@ function useProduct(slug: string) {
   });
 }
 
-function useReviews(productId: number | null) {
+function useReviews(productId: string | null) {
   return useQuery({
     queryKey: ["reviews", productId],
     queryFn: async () => {
-      const { data } = await unwrapPaginated(
-        listReviews({
+      const result = await unwrapPaginated(
+        listAllReviews({
           query: {
             entity_id: productId!,
             review_type: "product",
           },
         })
       );
-      return data;
+      return result.data;
     },
     enabled: !!productId,
   });
@@ -271,7 +272,11 @@ function ProductVisualsSection({
             }}
             className="absolute top-6 right-6 text-white/70 hover:text-primary transition-all duration-500 z-10 hover:scale-110 active:scale-90 group/heart drop-shadow-sm"
           >
-            <Heart size={22} strokeWidth={1.5} className="transition-transform group-hover/heart:scale-110" />
+            <Heart
+              size={22}
+              strokeWidth={1.5}
+              className="transition-transform group-hover/heart:scale-110"
+            />
           </button>
         </div>
 
@@ -361,7 +366,9 @@ function ProductPurchaseSection({
         price: selectedVariant?.price ?? product.price ?? 0,
         title: product.title,
         variant_name: selectedVariant?.variant_type_name || "Standard",
-        image: product.primary_image || (product.images?.[0]?.image_url ?? undefined),
+        image:
+          product.primary_image ||
+          (product.images?.[0]?.image_url ?? undefined),
       },
     ]);
 
@@ -475,7 +482,7 @@ function ProductPurchaseSection({
           >
             Acquire Now <ArrowRight size={16} className="ml-2" />
           </PrimaryBtn>
-          <GhostBtn 
+          <GhostBtn
             onClick={() => toast.success("Added to your curated collection.")}
             className="w-full justify-center py-5 border-border/20"
           >
@@ -610,7 +617,7 @@ function ProductReviewsSection({
             </p>
           </div>
         ) : (
-          reviews.map((review: ReviewReadPublic) => (
+          reviews.map((review: ReviewRead) => (
             <div
               key={review.id}
               className="p-8 border border-border bg-dark/10 space-y-6 hover:border-gold/20 transition-all duration-500"

@@ -12,9 +12,9 @@ from app.schemas.user import PublicUserRead
 
 
 class OrderItemBase(BaseModel):
-    product_id: int | None = None
-    variant_id: int | None = None
-    course_id: int | None = None
+    product_id: UUID | None = None
+    variant_id: UUID | None = None
+    course_id: UUID | None = None
     quantity: int = 1
     price: Decimal
 

@@ -15,7 +15,4 @@ export type Page =
   | "signup"
   | "search";
 
-export interface CurriculumSection {
-  section: string;
-  lessons: string[];
-}
+

@@ -68,24 +68,46 @@
 
   /* Grayscale Reveal from Source */
   .reveal-image {
-    @apply grayscale transition-all duration-1000 ease-in-out scale-100;
+    /* filter: grayscale(0%); 
+    transition: all 1000ms ease-in-out;
+    transform: scale(1); */
+
+    @apply grayscale-0 transition-all duration-1000 ease-in-out;
   }
 
-  .reveal-image:hover {
-    @apply grayscale-0 scale-105;
+  @media (hover: hover) {
+    .reveal-image {
+      /* filter: grayscale(100%); desktop default: grayscale */
+      @apply grayscale;
+    }
+
+    .reveal-image:hover {
+      /* filter: grayscale(0%); 
+      transform: scale(1.05); */
+      @apply grayscale-0 scale-110;
+    }
+    .group:hover .reveal-image {
+      /* filter: grayscale(0%); 
+      transform: scale(1.05); */
+      @apply grayscale-0 scale-110;
+    }
   }
 
   /* Grayscale Logic: No grayscale on mobile/touch, only on hover for desktops */
   .grayscale {
     filter: none !important;
+    transition: all 1000ms;
   }
 
   @media (hover: hover) {
     .grayscale {
       filter: grayscale(100%) !important;
     }
-    .group:hover .group-hover\:grayscale-0,
+    /* .group:hover .group-hover\:grayscale-0,
     .grayscale:hover {
+      filter: grayscale(0%) !important;
+    } */
+    .group:hover .grayscale {
       filter: grayscale(0%) !important;
     }
   }
@@ -273,7 +295,7 @@
 
 /* Dark */
 .luxury-loader-dark {
-  --loader-color: rgba(33, 33, 33, 0.68);
+  --loader-color: var(---color-dark);
   --loader-shadow: rgba(10, 10, 10, 0.35);
 }
 

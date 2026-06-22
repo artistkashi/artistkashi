@@ -7,8 +7,8 @@ from app.schemas.product import ProductCardRead
 
 
 class WishlistBase(BaseModel):
-    product_id: int | None = None
-    course_id: int | None = None
+    product_id: uuid.UUID | None = None
+    course_id: uuid.UUID | None = None
 
 
 class WishlistCreate(WishlistBase):

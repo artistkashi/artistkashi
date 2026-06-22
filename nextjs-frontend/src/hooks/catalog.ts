@@ -1,22 +1,26 @@
 "use client";
 
 import { unwrap, unwrapPaginated } from "@/api/client-service";
-import {
-  createCategory as apiCreateCategory,
-  createMedium as apiCreateMedium,
-  createVariantType as apiCreateVariantType,
-  listCategories,
-  listMediums,
-  listVariantTypes,
-} from "@/api/openapi-client";
 import type {
+  CourseCategoryCreate,
+  CourseCategoryRead,
   ProductCategoryCreate,
   ProductCategoryRead,
   ProductMediumCreate,
   ProductMediumRead,
   VariantTypeCreate,
   VariantTypeRead,
-} from "@/api/openapi-client/types.gen";
+} from "@/api/openapi-client";
+import {
+  createCategory as apiCreateCategory,
+  createCourseCategory as apiCreateCourseCategory,
+  createMedium as apiCreateMedium,
+  createVariantType as apiCreateVariantType,
+  listCategories,
+  listCourseCategories,
+  listMediums,
+  listVariantTypes,
+} from "@/api/openapi-client";
 import { getErrorMessage } from "@/lib/error-handler";
 import { useCallback, useEffect, useState } from "react";
 
@@ -159,4 +163,53 @@ export function useCreateVariantType() {
   );
 
   return { createVariantType, creating };
+}
+
+// ─── useCourseCategories ───────────────────────────────────────────────────────
+
+export function useCourseCategories() {
+  const [courseCategories, setCourseCategories] = useState<
+    CourseCategoryRead[]
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const refetch = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data } = await unwrapPaginated(listCourseCategories());
+      setCourseCategories(data);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refetch();
+  }, [refetch]);
+
+  return { courseCategories, loading, error, refetch };
+}
+
+// ─── useCreateCourseCategory ───────────────────────────────────────────────────
+
+export function useCreateCourseCategory() {
+  const [creating, setCreating] = useState(false);
+
+  const createCourseCategory = useCallback(
+    async (data: CourseCategoryCreate): Promise<CourseCategoryRead> => {
+      setCreating(true);
+      try {
+        return await unwrap(apiCreateCourseCategory({ body: data }));
+      } finally {
+        setCreating(false);
+      }
+    },
+    []
+  );
+
+  return { createCourseCategory, creating };
 }

@@ -61,7 +61,7 @@ export function CustomSelect({
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "w-full bg-surface border border-border px-4 py-2 text-sm text-foreground flex items-center justify-between rounded-sm transition-all duration-300 focus:outline-none focus:border-primary",
+            "w-full bg-surface border border-border px-4 py-3 text-sm text-foreground flex items-center justify-between rounded-sm transition-all duration-300 focus:outline-none focus:border-primary",
             isOpen && "border-primary bg-surface",
             error && "border-danger danger-glow"
           )}

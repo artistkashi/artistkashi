@@ -9,19 +9,19 @@ from pydantic import (
     field_validator,
 )
 
-from app.core.schema import TimestampSchema, UUIDSchema
+from app.core.schema import TimestampSchemaRead, UUIDSchema
 from app.models.user import Role
 from app.schemas.address import AddressRead
 
 
 class UserBase(BaseModel):
-    full_name: Annotated[str, Field(min_length=2, max_length=30, examples=["User"])]
+    full_name: Annotated[str, Field(min_length=2, max_length=30, examples=["John Doe"])]
     email: Annotated[EmailStr, Field(examples=["user@example.com"])]
     phone: str | None = None
     profile_picture: str | None = None
 
 
-class User(UserBase, UUIDSchema, TimestampSchema):
+class UserReadDB(UserBase, UUIDSchema, TimestampSchemaRead):
     is_active: bool = True
     is_verified: bool = False
     is_superuser: bool = False
@@ -32,7 +32,7 @@ class User(UserBase, UUIDSchema, TimestampSchema):
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserRead(UserBase, UUIDSchema, TimestampSchema):
+class UserRead(UserBase, UUIDSchema, TimestampSchemaRead):
     is_active: bool
     is_verified: bool
     is_superuser: bool
@@ -47,7 +47,7 @@ class UserProfileRead(UserRead):
     model_config = ConfigDict(from_attributes=True)
 
 
-class PublicUserRead(UUIDSchema, TimestampSchema):
+class PublicUserRead(UUIDSchema, TimestampSchemaRead):
     full_name: str | None = None
     email: EmailStr | None = None
     phone: str | None = None

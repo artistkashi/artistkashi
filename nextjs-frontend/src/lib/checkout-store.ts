@@ -1,10 +1,10 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 export interface CheckoutItem {
-  product_id: number;
-  variant_id: number | null;
-  course_id: number | null;
+  product_id: string;
+  variant_id: string | null;
+  course_id: string | null;
   quantity: number;
   price: number | string;
   // UI helpers

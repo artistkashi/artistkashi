@@ -1,6 +1,6 @@
 "use client";
 
-import { CourseRead } from "@/api/openapi-client";
+import { CourseListRead } from "@/api/openapi-client";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { RevealBlock } from "@/components/ui/misc";
 import { displayPrice } from "@/lib/utils";
@@ -8,27 +8,37 @@ import { Clock, Play, Star } from "lucide-react";
 import Link from "next/link";
 
 interface CourseCardProps {
-  course: CourseRead;
+  course: CourseListRead;
   delay?: number;
+}
+
+function formatDuration(seconds: number | undefined | null): string {
+  if (!seconds) return "Self-paced";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
 }
 
 export function CourseCard({ course, delay = 0 }: CourseCardProps) {
   return (
     <RevealBlock delay={delay}>
       <Link
-        href={`/courses/${course.id}`}
+        href={`/courses/${course.slug}`}
         className="group bg-surface block w-full text-left transition-all duration-500 card-luxury-hover overflow-hidden rounded-sm"
       >
         <div className="relative overflow-hidden aspect-video">
           <ImageWithFallback
-            src={course.image_url || ""}
+            src={course.computed_thumbnail_url}
             alt={course.title}
-            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110"
+            fill
+            unoptimized
+            className="object-fill reveal-image group-hover:scale-110"
           />
           <div className="absolute inset-0 bg-linear-to-t from-dark/80 via-transparent to-transparent opacity-60" />
           <div className="absolute top-4 left-4">
             <span className="bg-background/80 backdrop-blur-sm text-primary text-2xs font-mono tracking-widest uppercase px-3 py-1.5 border border-primary/20">
-              {course.category || "Masterclass"}
+              {course.level || "Masterclass"}
             </span>
           </div>
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 backdrop-blur-[2px]">
@@ -43,19 +53,19 @@ export function CourseCard({ course, delay = 0 }: CourseCardProps) {
         </div>
         <div className="p-6">
           <div className="text-2xs font-mono text-text-muted tracking-[0.2em] uppercase mb-3">
-            Curated by {course.instructor}
+            {course.level ?? "Masterclass"}
           </div>
           <h3 className="text-foreground font-bold text-xl leading-tight mb-3 tracking-wide group-hover:text-primary transition-colors italic">
             {course.title}
           </h3>
           <p className="text-text-muted text-sm mb-6 line-clamp-2 leading-relaxed font-mono">
-            {course.description}
+            {course.short_description}
           </p>
           <div className="flex items-center justify-between pt-6 border-t border-border/10">
             <div className="flex items-center gap-4 text-2xs font-mono text-text-muted uppercase tracking-widest">
               <span className="flex items-center gap-2">
                 <Clock size={12} className="text-primary" />
-                {course.duration || "Self-paced"}
+                {formatDuration(course.total_duration_seconds)}
               </span>
             </div>
             <span className="text-primary font-bold text-xl italic">
@@ -72,18 +82,19 @@ export function CourseCardGrid({ course, delay = 0 }: CourseCardProps) {
   return (
     <RevealBlock delay={delay}>
       <Link
-        href={`/courses/${course.id}`}
+        href={`/courses/${course.slug}`}
         className="group bg-surface block w-full text-left transition-all duration-500 card-luxury-hover overflow-hidden rounded-sm"
       >
         <div className="relative overflow-hidden aspect-video">
           <ImageWithFallback
-            src={course.image_url || ""}
+            src={course.computed_thumbnail_url}
             alt={course.title}
-            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110"
+            unoptimized
+            className="object-fill reveal-image group-hover:scale-110 w-full h-full"
           />
-          <div className="absolute inset-0 bg-linear-to-t from-dark to-transparent opacity-40" />
-          <div className="absolute top-4 right-4 bg-background/80 backdrop-blur-sm text-foreground text-2xs font-mono tracking-widest px-3 py-1.5 border border-border uppercase">
-            {course.category || "Masterclass"}
+          {/* <div className="absolute inset-0 bg-linear-to-t from-dark to-transparent opacity-40" /> */}
+          <div className="absolute top-4 right-4 bg-background/80 backdrop-blur-sm text-foreground text-2xs font-mono tracking-widest px-3 py-1.5 border border-border uppercase rounded">
+            {course.level ?? "Beginner"}
           </div>
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
             <div className="w-12 h-12 bg-primary/20 border border-primary/40 flex items-center justify-center rounded-full gold-glow">
@@ -96,39 +107,16 @@ export function CourseCardGrid({ course, delay = 0 }: CourseCardProps) {
           </div>
         </div>
         <div className="p-6">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="flex gap-1">
-              {Array.from({ length: 5 }).map((_, j) => (
-                <Star
-                  key={`course-star-${course.id}-${j}`}
-                  size={12}
-                  fill={
-                    j < Math.floor(course.rating)
-                      ? "var(--color-primary)"
-                      : "none"
-                  }
-                  className={
-                    j < Math.floor(course.rating)
-                      ? "text-primary gold-glow"
-                      : "text-border"
-                  }
-                />
-              ))}
-            </div>
-            <span className="text-text-muted text-2xs font-mono tracking-tighter uppercase">
-              {course.rating} / 5.0
-            </span>
-          </div>
           <h3 className="text-foreground font-bold text-lg mb-2 tracking-wide group-hover:text-primary transition-colors italic">
             {course.title}
           </h3>
           <p className="text-text-muted text-xs mb-6 line-clamp-2 leading-relaxed font-mono opacity-80">
-            {course.description}
+            {course.short_description}
           </p>
           <div className="flex items-center gap-4 text-2xs font-mono text-text-muted mb-6 uppercase tracking-widest">
             <span className="flex items-center gap-2">
               <Clock size={11} className="text-primary" />
-              {course.duration || "Self-paced"}
+              {formatDuration(course.total_duration_seconds)}
             </span>
           </div>
           <div className="flex items-center justify-between border-t border-border/10 pt-5 mt-auto">
@@ -139,6 +127,72 @@ export function CourseCardGrid({ course, delay = 0 }: CourseCardProps) {
               Enroll <Play size={10} className="fill-current" />
             </span>
           </div>
+        </div>
+      </Link>
+    </RevealBlock>
+  );
+}
+
+export function CourseCardListItem({ course, delay = 0 }: CourseCardProps) {
+  return (
+    <RevealBlock delay={delay}>
+      <Link
+        href={`/courses/${course.slug}`}
+        className="group bg-surface flex items-stretch transition-all duration-500 card-luxury-hover overflow-hidden rounded-sm"
+      >
+        <div className="relative w-40 shrink-0 overflow-hidden self-stretch min-h-24 aspect-video">
+          <ImageWithFallback
+            src={course.computed_thumbnail_url}
+            alt={course.title}
+            unoptimized
+            className="object-fill reveal-image group-hover:scale-110 w-full h-full"
+          />
+          <div className="absolute inset-0 bg-dark/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+            <div className="w-10 h-10 bg-primary/20 border border-primary/40 flex items-center justify-center rounded-full gold-glow">
+              <Play
+                size={16}
+                fill="var(--color-primary)"
+                className="text-primary ml-1"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 flex flex-col justify-center px-4 py-3 min-w-0">
+          <div className="flex items-center gap-2 text-2xs font-mono text-text-muted mb-1">
+            <span className="uppercase tracking-widest">
+              {course.level ?? "Masterclass"}
+            </span>
+            <span className="text-text-muted/30">|</span>
+            <span className="flex items-center gap-1">
+              <Clock size={10} />
+              {formatDuration(course.total_duration_seconds)}
+            </span>
+            {!!course.average_rating && (
+              <>
+                <span className="text-text-muted/30">|</span>
+                <span className="flex items-center gap-1 text-gold">
+                  <Star size={10} className="fill-gold" />
+                  {course.average_rating.toFixed(1)}
+                </span>
+              </>
+            )}
+          </div>
+          <h3 className="text-foreground font-bold text-sm leading-tight tracking-wide group-hover:text-primary transition-colors italic truncate">
+            {course.title}
+          </h3>
+          {course.short_description && (
+            <p className="text-text-muted text-xs leading-relaxed font-mono opacity-70 truncate mt-0.5">
+              {course.short_description}
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col items-end justify-center gap-1 pr-5 shrink-0">
+          <span className="text-primary font-bold text-lg italic whitespace-nowrap leading-none">
+            {displayPrice(course.price)}
+          </span>
+          <span className="text-text-muted text-2xs font-mono uppercase tracking-widest flex items-center gap-1.5 group-hover:text-primary transition-colors border-b border-transparent hover:border-primary/40 pb-0.5 leading-none">
+            Enroll <Play size={9} className="fill-current" />
+          </span>
         </div>
       </Link>
     </RevealBlock>

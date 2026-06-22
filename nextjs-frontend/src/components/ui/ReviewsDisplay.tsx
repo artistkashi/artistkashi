@@ -1,23 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Star, Plus } from "lucide-react";
-import {
-  listReviews,
-  ReviewReadPublic,
-  ReviewType,
-} from "@/api/openapi-client";
-import { ReviewSubmitModal } from "./ReviewSubmitModal";
-import { useAuth } from "@/lib/auth-store";
 import { unwrapPaginated } from "@/api/client-service";
+import type { ReviewRead } from "@/api/openapi-client";
+import { listAllReviews, ReviewType } from "@/api/openapi-client";
+import { useAuth } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
+import { Plus, Star } from "lucide-react";
+import { useEffect, useState } from "react";
 import { PrimaryBtn } from "./buttons";
+import { ReviewSubmitModal } from "./ReviewSubmitModal";
 
 interface ReviewsDisplayProps {
   reviewType: ReviewType;
-  entityId?: number;
+  entityId?: string;
   entityName?: string;
-  limit?: number;
   showSubmitButton?: boolean;
   onReviewSubmitted?: () => void;
 }
@@ -26,11 +22,10 @@ export function ReviewsDisplay({
   reviewType,
   entityId,
   entityName,
-  limit = 10,
   showSubmitButton = true,
   onReviewSubmitted,
 }: ReviewsDisplayProps) {
-  const [reviews, setReviews] = useState<ReviewReadPublic[]>([]);
+  const [reviews, setReviews] = useState<ReviewRead[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const { user } = useAuth();
@@ -39,16 +34,15 @@ export function ReviewsDisplay({
     const loadReviews = async () => {
       try {
         setLoading(true);
-        const { data } = await unwrapPaginated(
-          listReviews({
+        const result = await unwrapPaginated(
+          listAllReviews({
             query: {
               review_type: reviewType,
               entity_id: entityId,
-              limit,
             },
           })
         );
-        setReviews(data);
+        setReviews(result.data);
       } catch (error) {
         console.error("Failed to load reviews:", error);
       } finally {
@@ -57,20 +51,19 @@ export function ReviewsDisplay({
     };
 
     loadReviews();
-  }, [reviewType, entityId, limit]);
+  }, [reviewType, entityId]);
 
   const handleReviewSubmitted = async () => {
     setShowModal(false);
-    const { data } = await unwrapPaginated(
-      listReviews({
+    const result = await unwrapPaginated(
+      listAllReviews({
         query: {
           review_type: reviewType,
           entity_id: entityId,
-          limit,
         },
       })
     );
-    setReviews(data);
+    setReviews(result.data);
     onReviewSubmitted?.();
   };
 
@@ -78,7 +71,9 @@ export function ReviewsDisplay({
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <div className="luxury-loader" />
-        <p className="text-2xs font-mono uppercase tracking-[0.2em] text-text-muted">Analyzing Chronicles...</p>
+        <p className="text-2xs font-mono uppercase tracking-[0.2em] text-text-muted">
+          Analyzing Chronicles...
+        </p>
       </div>
     );
   }
@@ -110,7 +105,10 @@ export function ReviewsDisplay({
       ) : (
         <div className="grid grid-cols-1 gap-6">
           {reviews.map((review) => (
-            <div key={`review-${review.id}`} className="p-card card-luxury-hover group">
+            <div
+              key={`review-${review.id}`}
+              className="p-card card-luxury-hover group"
+            >
               <div className="flex items-start justify-between mb-6">
                 <div className="flex gap-1.5">
                   {[...Array(5)].map((_, i) => (
@@ -127,11 +125,13 @@ export function ReviewsDisplay({
                   ))}
                 </div>
                 <span className="text-2xs font-mono uppercase tracking-tighter text-text-muted group-hover:text-primary transition-colors">
-                  {new Date(review.created_at).toLocaleDateString(undefined, {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                  })}
+                  {review.created_at
+                    ? new Date(review.created_at).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                    : null}
                 </span>
               </div>
               <p className="text-sm leading-relaxed text-foreground/90 font-medium tracking-wide">

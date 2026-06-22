@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import Image from "next/image";
 import { Play, Check, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { COURSES } from "@/data/constants";
 
 import { useAuth } from "@/lib/auth-store";
 import { AuthGuard } from "@/components/shared/AuthGuard";
@@ -120,7 +119,7 @@ export default function LessonPlayerPage() {
                 Section 01 · Foundation
               </div>
               <div className="text-text-main font-semibold">
-                {COURSES[0].title}
+                {"Oil Painting Fundamentals"}
               </div>
               <div className="mt-3 flex items-center gap-3">
                 <div className="flex-1 h-1 bg-border">
