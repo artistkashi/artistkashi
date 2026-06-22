@@ -1,40 +1,54 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { COURSES } from "@/data/constants";
 import { buildMetadata, siteUrl } from "@/lib/seo";
 
 type CourseDetailLayoutProps = {
   children: React.ReactNode;
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 };
+
+async function fetchCourseBySlug(slug: string) {
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
+  try {
+    const res = await fetch(`${apiUrl}/courses/${slug}`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
-  const course = COURSES.find((item) => item.id === Number(id));
+  const { slug } = await params;
+  const course = await fetchCourseBySlug(slug);
 
   if (!course) {
     return buildMetadata({
       title: "Course Not Found",
       description:
         "The requested course could not be found in the Artist Kashi academy.",
-      path: `/courses/${id}`,
+      path: `/courses/${slug}`,
       noIndex: true,
     });
   }
 
   return buildMetadata({
     title: `${course.title} - Masterclass`,
-    description: `${course.subtitle ?? ""} Learn with ${course.instructor}. ${course.lessons_count} lessons over ${course.duration}.`,
-    path: `/courses/${course.id}`,
+    description: course.short_description ?? `Learn with Artist Kashi.`,
+    path: `/courses/${course.slug}`,
     type: "article",
-    image: course.image_url ?? undefined,
+    image: course.computed_thumbnail_url ?? undefined,
     keywords: [
       course.title,
-      course.level ?? "Intermediate",
+      course.level ?? "intermediate",
       "painting course",
       "art masterclass",
     ],
@@ -45,34 +59,36 @@ export default async function CourseDetailLayout({
   children,
   params,
 }: CourseDetailLayoutProps) {
-  const { id } = await params;
-  const course = COURSES.find((item) => item.id === Number(id));
+  const { slug } = await params;
+  const course = await fetchCourseBySlug(slug);
 
   const schema = course
     ? {
         "@context": "https://schema.org",
         "@type": "Course",
         name: course.title,
-        description: course.subtitle ?? "",
+        description: course.short_description ?? "",
         provider: {
           "@type": "Organization",
           name: "Artist Kashi",
           url: siteUrl,
         },
-        image: course.image_url ? [course.image_url] : [],
+        image: course.computed_thumbnail_url
+          ? [course.computed_thumbnail_url]
+          : [],
         offers: {
           "@type": "Offer",
-          priceCurrency: "EUR",
-          price: course.price.toString(),
+          priceCurrency: "INR",
+          price: course.price,
           category: "Online Course",
-          url: `${siteUrl}/courses/${course.id}`,
+          url: `${siteUrl}/courses/${course.slug}`,
         },
       }
     : {
         "@context": "https://schema.org",
         "@type": "WebPage",
         name: "Course Not Found",
-        url: `${siteUrl}/courses/${id}`,
+        url: `${siteUrl}/courses/${slug}`,
       };
 
   return (

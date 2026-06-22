@@ -7,7 +7,7 @@ import type {
   CourseSectionWithLessonsRead,
 } from "@/api/openapi-client";
 import {
-  getCourseBySlug,
+  coursesGetCourse,
   getCourseCurriculum,
   getCourseProgress,
   getEnrollmentStatus,
@@ -52,7 +52,7 @@ function formatDuration(seconds: number | undefined | null): string {
 
 
 async function fetchCourseBySlug(slug: string): Promise<CourseRead> {
-  return unwrap(getCourseBySlug({ path: { slug } }));
+  return unwrap(coursesGetCourse({ path: { slug } }));
 }
 
 function SpeedControl() {
