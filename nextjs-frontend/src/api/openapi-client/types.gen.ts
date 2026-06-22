@@ -228,6 +228,20 @@ export type AdminOrderRead = {
 };
 
 /**
+ * AuthProvidersResponse
+ */
+export type AuthProvidersResponse = {
+    /**
+     * Providers
+     */
+    providers: Array<UserAuthProviderRead>;
+    /**
+     * Has Password
+     */
+    has_password: boolean;
+};
+
+/**
  * BannerSection
  */
 export type BannerSection = {
@@ -280,6 +294,24 @@ export type BasicHealthData = {
 };
 
 /**
+ * Body_ADMIN-create_course
+ */
+export type BodyAdminCreateCourse = {
+    /**
+     * Payload
+     */
+    payload: string;
+    /**
+     * Thumbnail
+     */
+    thumbnail?: Blob | File | null;
+    /**
+     * Demo Video
+     */
+    demo_video?: Blob | File | null;
+};
+
+/**
  * Body_ADMIN-create_product
  */
 export type BodyAdminCreateProduct = {
@@ -291,6 +323,24 @@ export type BodyAdminCreateProduct = {
      * Files
      */
     files?: Array<Blob | File> | null;
+};
+
+/**
+ * Body_ADMIN-update_course
+ */
+export type BodyAdminUpdateCourse = {
+    /**
+     * Payload
+     */
+    payload: string;
+    /**
+     * Thumbnail
+     */
+    thumbnail?: Blob | File | null;
+    /**
+     * Demo Video
+     */
+    demo_video?: Blob | File | null;
 };
 
 /**
@@ -344,11 +394,11 @@ export type CartItemCreate = {
     /**
      * Product Id
      */
-    product_id?: number | null;
+    product_id?: string | null;
     /**
      * Course Id
      */
-    course_id?: number | null;
+    course_id?: string | null;
     /**
      * Quantity
      */
@@ -362,11 +412,11 @@ export type CartItemRead = {
     /**
      * Product Id
      */
-    product_id?: number | null;
+    product_id?: string | null;
     /**
      * Course Id
      */
-    course_id?: number | null;
+    course_id?: string | null;
     /**
      * Quantity
      */
@@ -430,69 +480,1000 @@ export type CommunitySection = {
 };
 
 /**
- * CourseRead
+ * ConfirmVideoUploadRequest
  */
-export type CourseRead = {
+export type ConfirmVideoUploadRequest = {
     /**
-     * Title
+     * Video Key
      */
-    title: string;
+    video_key: string;
     /**
-     * Subtitle
+     * Duration Seconds
      */
-    subtitle?: string | null;
+    duration_seconds?: number | null;
+};
+
+/**
+ * CourseCategoryCreate
+ */
+export type CourseCategoryCreate = {
     /**
-     * Instructor
+     * Name
      */
-    instructor: string;
+    name: string;
     /**
-     * Level
+     * Slug
      */
-    level?: string | null;
-    /**
-     * Duration
-     */
-    duration?: string | null;
-    /**
-     * Lessons Count
-     */
-    lessons_count?: number;
-    /**
-     * Image Url
-     */
-    image_url?: string | null;
+    slug?: string | null;
     /**
      * Description
      */
     description?: string | null;
     /**
-     * Price
+     * Is Active
      */
-    price: number;
+    is_active?: boolean;
+};
+
+/**
+ * CourseCategoryRead
+ */
+export type CourseCategoryRead = {
     /**
-     * Category
+     * Created At
      */
-    category?: string | null;
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
     /**
      * Id
      */
-    id: number;
+    id: string;
     /**
-     * Rating
+     * Name
      */
-    rating: number;
+    name: string;
     /**
-     * Students Count
+     * Slug
      */
-    students_count: number;
+    slug: string;
     /**
-     * Featured
+     * Description
      */
-    featured: boolean;
+    description?: string | null;
     /**
      * Is Active
      */
-    is_active: boolean;
+    is_active?: boolean;
+};
+
+/**
+ * CourseCategoryUpdate
+ */
+export type CourseCategoryUpdate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Slug
+     */
+    slug?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Is Active
+     */
+    is_active?: boolean | null;
+};
+
+/**
+ * CourseCreate
+ */
+export type CourseCreate = {
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Slug
+     */
+    slug?: string | null;
+    /**
+     * Short Description
+     */
+    short_description?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    level?: CourseLevel;
+    /**
+     * Language
+     */
+    language?: string;
+    /**
+     * Price
+     */
+    price: number | string;
+    /**
+     * Welcome Message
+     */
+    welcome_message?: string | null;
+    /**
+     * What You Will Learn
+     */
+    what_you_will_learn?: Array<string> | null;
+    /**
+     * Requirements
+     */
+    requirements?: Array<string> | null;
+    /**
+     * Is Featured
+     */
+    is_featured?: boolean;
+    /**
+     * Is Published
+     */
+    is_published?: boolean;
+    /**
+     * Category Id
+     */
+    category_id?: string | null;
+    /**
+     * Thumbnail Url
+     */
+    thumbnail_url?: string | null;
+    /**
+     * Demo Video Url
+     */
+    demo_video_url?: string | null;
+    /**
+     * Whatsapp Channel Url
+     */
+    whatsapp_channel_url?: string | null;
+};
+
+/**
+ * CourseCurriculumRead
+ */
+export type CourseCurriculumRead = {
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Short Description
+     */
+    short_description?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Thumbnail Key
+     */
+    thumbnail_key?: string | null;
+    /**
+     * Thumbnail Url
+     */
+    thumbnail_url?: string | null;
+    /**
+     * Demo Video Key
+     */
+    demo_video_key?: string | null;
+    /**
+     * Demo Video Url
+     */
+    demo_video_url?: string | null;
+    /**
+     * Whatsapp Channel Url
+     */
+    whatsapp_channel_url?: string | null;
+    level: CourseLevel;
+    /**
+     * Language
+     */
+    language: string;
+    /**
+     * Price
+     */
+    price: string;
+    /**
+     * Welcome Message
+     */
+    welcome_message?: string | null;
+    /**
+     * What You Will Learn
+     */
+    what_you_will_learn?: Array<string> | null;
+    /**
+     * Requirements
+     */
+    requirements?: Array<string> | null;
+    /**
+     * Total Duration Seconds
+     */
+    total_duration_seconds?: number;
+    /**
+     * Is Featured
+     */
+    is_featured?: boolean;
+    /**
+     * Is Published
+     */
+    is_published?: boolean;
+    /**
+     * Category Id
+     */
+    category_id?: string | null;
+    category?: CourseCategoryRead | null;
+    /**
+     * Average Rating
+     */
+    average_rating?: number;
+    /**
+     * Review Count
+     */
+    review_count?: number;
+    /**
+     * Lessons Count
+     */
+    lessons_count?: number;
+    /**
+     * Enrollment Count
+     */
+    enrollment_count?: number;
+    /**
+     * Sections
+     */
+    sections?: Array<CourseSectionWithLessonsRead>;
+    /**
+     * Computed Thumbnail Url
+     */
+    readonly computed_thumbnail_url: string | null;
+    /**
+     * Computed Demo Video Url
+     */
+    readonly computed_demo_video_url: string | null;
+};
+
+/**
+ * CourseEnrollmentCreate
+ */
+export type CourseEnrollmentCreate = {
+    /**
+     * Is Active
+     */
+    is_active?: boolean;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Enrolled At
+     */
+    enrolled_at?: string;
+};
+
+/**
+ * CourseEnrollmentRead
+ */
+export type CourseEnrollmentRead = {
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Enrolled At
+     */
+    enrolled_at: string;
+    /**
+     * Completed At
+     */
+    completed_at?: string | null;
+    /**
+     * Expires At
+     */
+    expires_at?: string | null;
+    /**
+     * Is Active
+     */
+    is_active?: boolean;
+};
+
+/**
+ * CourseLessonCreate
+ */
+export type CourseLessonCreate = {
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Video Duration Seconds
+     */
+    video_duration_seconds?: number;
+    /**
+     * Thumbnail Key
+     */
+    thumbnail_key?: string | null;
+    /**
+     * Is Preview
+     */
+    is_preview?: boolean;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+    status?: LessonStatus;
+};
+
+/**
+ * CourseLessonRead
+ */
+export type CourseLessonRead = {
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Section Id
+     */
+    section_id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Video Duration Seconds
+     */
+    video_duration_seconds?: number;
+    /**
+     * Video Key
+     */
+    video_key?: string | null;
+    /**
+     * Thumbnail Key
+     */
+    thumbnail_key?: string | null;
+    /**
+     * Is Preview
+     */
+    is_preview?: boolean;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+    status: LessonStatus;
+    /**
+     * Computed Video Url
+     */
+    readonly computed_video_url: string | null;
+    /**
+     * Computed Thumbnail Url
+     */
+    readonly computed_thumbnail_url: string | null;
+};
+
+/**
+ * CourseLessonReadWithVideo
+ */
+export type CourseLessonReadWithVideo = {
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Section Id
+     */
+    section_id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Video Duration Seconds
+     */
+    video_duration_seconds?: number;
+    /**
+     * Video Key
+     */
+    video_key?: string | null;
+    /**
+     * Thumbnail Key
+     */
+    thumbnail_key?: string | null;
+    /**
+     * Is Preview
+     */
+    is_preview?: boolean;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+    status: LessonStatus;
+    /**
+     * Computed Video Url
+     */
+    readonly computed_video_url: string | null;
+    /**
+     * Computed Thumbnail Url
+     */
+    readonly computed_thumbnail_url: string | null;
+};
+
+/**
+ * CourseLessonUpdate
+ */
+export type CourseLessonUpdate = {
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Video Duration Seconds
+     */
+    video_duration_seconds?: number | null;
+    /**
+     * Thumbnail Key
+     */
+    thumbnail_key?: string | null;
+    /**
+     * Is Preview
+     */
+    is_preview?: boolean | null;
+    /**
+     * Sort Order
+     */
+    sort_order?: number | null;
+    status?: LessonStatus | null;
+};
+
+/**
+ * CourseLevel
+ */
+export type CourseLevel = 'beginner' | 'intermediate' | 'advanced';
+
+/**
+ * CourseListRead
+ */
+export type CourseListRead = {
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Short Description
+     */
+    short_description?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Thumbnail Key
+     */
+    thumbnail_key?: string | null;
+    /**
+     * Thumbnail Url
+     */
+    thumbnail_url?: string | null;
+    /**
+     * Demo Video Key
+     */
+    demo_video_key?: string | null;
+    /**
+     * Demo Video Url
+     */
+    demo_video_url?: string | null;
+    /**
+     * Whatsapp Channel Url
+     */
+    whatsapp_channel_url?: string | null;
+    level: CourseLevel;
+    /**
+     * Language
+     */
+    language: string;
+    /**
+     * Price
+     */
+    price: string;
+    /**
+     * Welcome Message
+     */
+    welcome_message?: string | null;
+    /**
+     * What You Will Learn
+     */
+    what_you_will_learn?: Array<string> | null;
+    /**
+     * Requirements
+     */
+    requirements?: Array<string> | null;
+    /**
+     * Total Duration Seconds
+     */
+    total_duration_seconds?: number;
+    /**
+     * Is Featured
+     */
+    is_featured?: boolean;
+    /**
+     * Is Published
+     */
+    is_published?: boolean;
+    /**
+     * Category Id
+     */
+    category_id?: string | null;
+    category?: CourseCategoryRead | null;
+    /**
+     * Average Rating
+     */
+    average_rating?: number;
+    /**
+     * Review Count
+     */
+    review_count?: number;
+    /**
+     * Lessons Count
+     */
+    lessons_count?: number;
+    /**
+     * Enrollment Count
+     */
+    enrollment_count?: number;
+    /**
+     * Computed Thumbnail Url
+     */
+    readonly computed_thumbnail_url: string | null;
+    /**
+     * Computed Demo Video Url
+     */
+    readonly computed_demo_video_url: string | null;
+};
+
+/**
+ * CourseProgressRead
+ */
+export type CourseProgressRead = {
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Total Lessons
+     */
+    total_lessons: number;
+    /**
+     * Completed Lessons
+     */
+    completed_lessons: number;
+    /**
+     * Progress Percentage
+     */
+    progress_percentage: number;
+};
+
+/**
+ * CourseRead
+ */
+export type CourseRead = {
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Short Description
+     */
+    short_description?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Thumbnail Key
+     */
+    thumbnail_key?: string | null;
+    /**
+     * Thumbnail Url
+     */
+    thumbnail_url?: string | null;
+    /**
+     * Demo Video Key
+     */
+    demo_video_key?: string | null;
+    /**
+     * Demo Video Url
+     */
+    demo_video_url?: string | null;
+    /**
+     * Whatsapp Channel Url
+     */
+    whatsapp_channel_url?: string | null;
+    level: CourseLevel;
+    /**
+     * Language
+     */
+    language: string;
+    /**
+     * Price
+     */
+    price: string;
+    /**
+     * Welcome Message
+     */
+    welcome_message?: string | null;
+    /**
+     * What You Will Learn
+     */
+    what_you_will_learn?: Array<string> | null;
+    /**
+     * Requirements
+     */
+    requirements?: Array<string> | null;
+    /**
+     * Total Duration Seconds
+     */
+    total_duration_seconds?: number;
+    /**
+     * Is Featured
+     */
+    is_featured?: boolean;
+    /**
+     * Is Published
+     */
+    is_published?: boolean;
+    /**
+     * Category Id
+     */
+    category_id?: string | null;
+    category?: CourseCategoryRead | null;
+    /**
+     * Average Rating
+     */
+    average_rating?: number;
+    /**
+     * Review Count
+     */
+    review_count?: number;
+    /**
+     * Lessons Count
+     */
+    lessons_count?: number;
+    /**
+     * Enrollment Count
+     */
+    enrollment_count?: number;
+    /**
+     * Computed Thumbnail Url
+     */
+    readonly computed_thumbnail_url: string | null;
+    /**
+     * Computed Demo Video Url
+     */
+    readonly computed_demo_video_url: string | null;
+};
+
+/**
+ * CourseSectionCreate
+ */
+export type CourseSectionCreate = {
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+};
+
+/**
+ * CourseSectionRead
+ */
+export type CourseSectionRead = {
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+    /**
+     * Lesson Count
+     */
+    lesson_count?: number;
+};
+
+/**
+ * CourseSectionUpdate
+ */
+export type CourseSectionUpdate = {
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Sort Order
+     */
+    sort_order?: number | null;
+};
+
+/**
+ * CourseSectionWithLessonsRead
+ */
+export type CourseSectionWithLessonsRead = {
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+    /**
+     * Lesson Count
+     */
+    lesson_count?: number;
+    /**
+     * Lessons
+     */
+    lessons?: Array<CourseLessonRead>;
+};
+
+/**
+ * CourseStatsRead
+ */
+export type CourseStatsRead = {
+    /**
+     * Enrollment Count
+     */
+    enrollment_count: number;
+    /**
+     * Total Revenue
+     */
+    total_revenue: string;
+};
+
+/**
+ * CourseUpdate
+ */
+export type CourseUpdate = {
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Slug
+     */
+    slug?: string | null;
+    /**
+     * Short Description
+     */
+    short_description?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    level?: CourseLevel | null;
+    /**
+     * Language
+     */
+    language?: string | null;
+    /**
+     * Price
+     */
+    price?: number | string | null;
+    /**
+     * Whatsapp Channel Url
+     */
+    whatsapp_channel_url?: string | null;
+    /**
+     * Welcome Message
+     */
+    welcome_message?: string | null;
+    /**
+     * What You Will Learn
+     */
+    what_you_will_learn?: Array<string> | null;
+    /**
+     * Requirements
+     */
+    requirements?: Array<string> | null;
+    /**
+     * Is Featured
+     */
+    is_featured?: boolean | null;
+    /**
+     * Is Published
+     */
+    is_published?: boolean | null;
+    /**
+     * Category Id
+     */
+    category_id?: string | null;
+    /**
+     * Thumbnail Url
+     */
+    thumbnail_url?: string | null;
+    /**
+     * Demo Video Url
+     */
+    demo_video_url?: string | null;
+};
+
+/**
+ * DeleteAccountRequest
+ */
+export type DeleteAccountRequest = {
+    /**
+     * Password
+     */
+    password: string;
 };
 
 /**
@@ -579,6 +1560,18 @@ export type ForgotPasswordRequest = {
      * Email
      */
     email: string;
+};
+
+/**
+ * GoogleAuthRequest
+ */
+export type GoogleAuthRequest = {
+    /**
+     * Credential
+     *
+     * Google ID token from the client
+     */
+    credential: string;
 };
 
 /**
@@ -677,6 +1670,124 @@ export type HomePageConfig = {
 export type ImageSourceType = 'upload' | 'external_url';
 
 /**
+ * InitVideoUploadRequest
+ */
+export type InitVideoUploadRequest = {
+    /**
+     * Content Type
+     */
+    content_type: string;
+    /**
+     * File Name
+     */
+    file_name: string;
+    /**
+     * File Size
+     */
+    file_size?: number | null;
+};
+
+/**
+ * InitVideoUploadResponse
+ */
+export type InitVideoUploadResponse = {
+    /**
+     * Upload Url
+     */
+    upload_url: string;
+    /**
+     * Video Key
+     */
+    video_key: string;
+    /**
+     * Expires In
+     */
+    expires_in: number;
+};
+
+/**
+ * LessonProgressDetail
+ */
+export type LessonProgressDetail = {
+    progress: LessonProgressRead;
+    /**
+     * Progress Percentage
+     */
+    progress_percentage: number;
+};
+
+/**
+ * LessonProgressRead
+ */
+export type LessonProgressRead = {
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Lesson Id
+     */
+    lesson_id: string;
+    status: ProgressStatus;
+    /**
+     * Watch Seconds
+     */
+    watch_seconds?: number;
+    /**
+     * Resume Position Seconds
+     */
+    resume_position_seconds?: number;
+    /**
+     * Completed At
+     */
+    completed_at?: string | null;
+    /**
+     * Last Watched At
+     */
+    last_watched_at?: string | null;
+};
+
+/**
+ * LessonProgressUpdate
+ */
+export type LessonProgressUpdate = {
+    status?: ProgressStatus | null;
+    /**
+     * Watch Seconds
+     */
+    watch_seconds?: number | null;
+    /**
+     * Resume Position Seconds
+     */
+    resume_position_seconds?: number | null;
+    /**
+     * Completed At
+     */
+    completed_at?: string | null;
+    /**
+     * Last Watched At
+     */
+    last_watched_at?: string | null;
+};
+
+/**
+ * LessonStatus
+ */
+export type LessonStatus = 'processing' | 'ready' | 'failed';
+
+/**
  * LogoutRequest
  */
 export type LogoutRequest = {
@@ -698,6 +1809,20 @@ export type Meta = {
      * Request Id
      */
     request_id?: string | null;
+};
+
+/**
+ * MoveLessonPayload
+ */
+export type MoveLessonPayload = {
+    /**
+     * Target Section Id
+     */
+    target_section_id: string;
+    /**
+     * Sort Order
+     */
+    sort_order?: number | null;
 };
 
 /**
@@ -758,15 +1883,15 @@ export type OrderItemBase = {
     /**
      * Product Id
      */
-    product_id?: number | null;
+    product_id?: string | null;
     /**
      * Variant Id
      */
-    variant_id?: number | null;
+    variant_id?: string | null;
     /**
      * Course Id
      */
-    course_id?: number | null;
+    course_id?: string | null;
     /**
      * Quantity
      */
@@ -784,15 +1909,15 @@ export type OrderItemRead = {
     /**
      * Product Id
      */
-    product_id?: number | null;
+    product_id?: string | null;
     /**
      * Variant Id
      */
-    variant_id?: number | null;
+    variant_id?: string | null;
     /**
      * Course Id
      */
-    course_id?: number | null;
+    course_id?: string | null;
     /**
      * Quantity
      */
@@ -905,9 +2030,9 @@ export type PaginatedResponseAddressRead = {
 };
 
 /**
- * PaginatedResponse[CourseRead]
+ * PaginatedResponse[CourseCategoryRead]
  */
-export type PaginatedResponseCourseRead = {
+export type PaginatedResponseCourseCategoryRead = {
     /**
      * Success
      */
@@ -923,7 +2048,31 @@ export type PaginatedResponseCourseRead = {
     /**
      * Data
      */
-    data?: Array<CourseRead>;
+    data?: Array<CourseCategoryRead>;
+    pagination: Pagination;
+    meta?: Meta;
+};
+
+/**
+ * PaginatedResponse[CourseListRead]
+ */
+export type PaginatedResponseCourseListRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<CourseListRead>;
     pagination: Pagination;
     meta?: Meta;
 };
@@ -1073,6 +2222,30 @@ export type PaginatedResponsePublicUserRead = {
 };
 
 /**
+ * PaginatedResponse[ReviewReadPublic]
+ */
+export type PaginatedResponseReviewReadPublic = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<ReviewReadPublic>;
+    pagination: Pagination;
+    meta?: Meta;
+};
+
+/**
  * PaginatedResponse[ReviewRead]
  */
 export type PaginatedResponseReviewRead = {
@@ -1180,7 +2353,7 @@ export type ProductBase = {
     /**
      * Id
      */
-    id: number;
+    id: string;
     /**
      * Title
      */
@@ -1213,7 +2386,7 @@ export type ProductCardRead = {
     /**
      * Id
      */
-    id: number;
+    id: string;
     /**
      * Title
      */
@@ -1276,7 +2449,7 @@ export type ProductCategoryRead = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -1422,7 +2595,7 @@ export type ProductDetailRead = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -1438,7 +2611,7 @@ export type ProductDetailRead = {
     /**
      * Id
      */
-    id: number;
+    id: string;
     /**
      * Title
      */
@@ -1531,7 +2704,7 @@ export type ProductImageRead = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -1543,7 +2716,7 @@ export type ProductImageRead = {
     /**
      * Product Id
      */
-    product_id: number;
+    product_id: string;
     /**
      * Image Url
      */
@@ -1618,7 +2791,7 @@ export type ProductMediumRead = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -1761,7 +2934,7 @@ export type ProductVariantRead = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -1769,11 +2942,11 @@ export type ProductVariantRead = {
     /**
      * Id
      */
-    id: number;
+    id: string;
     /**
      * Product Id
      */
-    product_id: number;
+    product_id: string;
     /**
      * Variant Type Id
      */
@@ -1824,7 +2997,7 @@ export type ProductVariantState = {
     /**
      * Id
      */
-    id?: number | null;
+    id?: string | null;
     /**
      * Variant Type Id
      */
@@ -1861,13 +3034,23 @@ export type ProductVariantState = {
 };
 
 /**
+ * ProgressStatus
+ */
+export type ProgressStatus = 'not_started' | 'in_progress' | 'completed';
+
+/**
+ * ProviderType
+ */
+export type ProviderType = 'password' | 'google';
+
+/**
  * PublicUserRead
  */
 export type PublicUserRead = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -1932,11 +3115,6 @@ export type ResetPasswordRequest = {
  * ReviewCreate
  */
 export type ReviewCreate = {
-    type: ReviewType;
-    /**
-     * Entity Id
-     */
-    entity_id?: number | null;
     /**
      * Rating
      */
@@ -1963,7 +3141,7 @@ export type ReviewRead = {
     /**
      * Entity Id
      */
-    entity_id?: number | null;
+    entity_id: string;
     /**
      * Rating
      */
@@ -1985,15 +3163,20 @@ export type ReviewRead = {
 
 /**
  * ReviewReadPublic
- *
- * Public version without sensitive info
  */
 export type ReviewReadPublic = {
-    type: ReviewType;
     /**
-     * Entity Id
+     * Created At
      */
-    entity_id?: number | null;
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
     /**
      * Rating
      */
@@ -2002,15 +3185,7 @@ export type ReviewReadPublic = {
      * Text
      */
     text: string;
-    /**
-     * Id
-     */
-    id: string;
-    status: ReviewStatus;
-    /**
-     * Created At
-     */
-    created_at: string;
+    user?: ReviewUserInfo | null;
 };
 
 /**
@@ -2027,7 +3202,6 @@ export type ReviewType = 'course' | 'product';
  * ReviewUpdate
  */
 export type ReviewUpdate = {
-    status?: ReviewStatus | null;
     /**
      * Rating
      */
@@ -2036,6 +3210,25 @@ export type ReviewUpdate = {
      * Text
      */
     text?: string | null;
+    status?: ReviewStatus | null;
+};
+
+/**
+ * ReviewUserInfo
+ */
+export type ReviewUserInfo = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Avatar
+     */
+    avatar?: string | null;
 };
 
 /**
@@ -2059,6 +3252,18 @@ export type ServiceHealth = {
      * Error
      */
     error?: string | null;
+};
+
+/**
+ * SetPasswordRequest
+ */
+export type SetPasswordRequest = {
+    /**
+     * Password
+     *
+     * New password for the user account
+     */
+    password: string;
 };
 
 /**
@@ -2098,6 +3303,26 @@ export type SuccessResponseAdminOrderRead = {
      */
     message: string;
     data?: AdminOrderRead | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[AuthProvidersResponse]
+ */
+export type SuccessResponseAuthProvidersResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: AuthProvidersResponse | null;
     meta?: Meta;
 };
 
@@ -2142,6 +3367,126 @@ export type SuccessResponseCartItemRead = {
 };
 
 /**
+ * SuccessResponse[CourseCategoryRead]
+ */
+export type SuccessResponseCourseCategoryRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: CourseCategoryRead | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[CourseCurriculumRead]
+ */
+export type SuccessResponseCourseCurriculumRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: CourseCurriculumRead | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[CourseEnrollmentRead]
+ */
+export type SuccessResponseCourseEnrollmentRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: CourseEnrollmentRead | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[CourseLessonReadWithVideo]
+ */
+export type SuccessResponseCourseLessonReadWithVideo = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: CourseLessonReadWithVideo | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[CourseLessonRead]
+ */
+export type SuccessResponseCourseLessonRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: CourseLessonRead | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[CourseProgressRead]
+ */
+export type SuccessResponseCourseProgressRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: CourseProgressRead | null;
+    meta?: Meta;
+};
+
+/**
  * SuccessResponse[CourseRead]
  */
 export type SuccessResponseCourseRead = {
@@ -2158,6 +3503,46 @@ export type SuccessResponseCourseRead = {
      */
     message: string;
     data?: CourseRead | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[CourseSectionRead]
+ */
+export type SuccessResponseCourseSectionRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: CourseSectionRead | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[CourseStatsRead]
+ */
+export type SuccessResponseCourseStatsRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: CourseStatsRead | null;
     meta?: Meta;
 };
 
@@ -2198,6 +3583,46 @@ export type SuccessResponseHomePageConfig = {
      */
     message: string;
     data?: HomePageConfig | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[InitVideoUploadResponse]
+ */
+export type SuccessResponseInitVideoUploadResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: InitVideoUploadResponse | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[LessonProgressDetail]
+ */
+export type SuccessResponseLessonProgressDetail = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: LessonProgressDetail | null;
     meta?: Meta;
 };
 
@@ -2405,6 +3830,26 @@ export type SuccessResponseTokenResponse = {
 };
 
 /**
+ * SuccessResponse[Union[ReviewRead, NoneType]]
+ */
+export type SuccessResponseUnionReviewReadNoneType = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: ReviewRead | null;
+    meta?: Meta;
+};
+
+/**
  * SuccessResponse[UserProfileRead]
  */
 export type SuccessResponseUserProfileRead = {
@@ -2535,31 +3980,6 @@ export type SuccessResponseDictStrInt = {
 };
 
 /**
- * SuccessResponse[dict[str, str]]
- */
-export type SuccessResponseDictStrStr = {
-    /**
-     * Success
-     */
-    success?: boolean;
-    /**
-     * Status
-     */
-    status?: number;
-    /**
-     * Message
-     */
-    message: string;
-    /**
-     * Data
-     */
-    data?: {
-        [key: string]: string;
-    } | null;
-    meta?: Meta;
-};
-
-/**
  * SuccessResponse[list[AddressRead]]
  */
 export type SuccessResponseListAddressRead = {
@@ -2606,6 +4026,121 @@ export type SuccessResponseListCartItemRead = {
 };
 
 /**
+ * SuccessResponse[list[CourseCategoryRead]]
+ */
+export type SuccessResponseListCourseCategoryRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<CourseCategoryRead> | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[list[CourseEnrollmentRead]]
+ */
+export type SuccessResponseListCourseEnrollmentRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<CourseEnrollmentRead> | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[list[CourseLessonRead]]
+ */
+export type SuccessResponseListCourseLessonRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<CourseLessonRead> | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[list[CourseSectionRead]]
+ */
+export type SuccessResponseListCourseSectionRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<CourseSectionRead> | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[list[LessonProgressRead]]
+ */
+export type SuccessResponseListLessonProgressRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<LessonProgressRead> | null;
+    meta?: Meta;
+};
+
+/**
  * SuccessResponse[list[ProductImageRead]]
  */
 export type SuccessResponseListProductImageRead = {
@@ -2648,52 +4183,6 @@ export type SuccessResponseListProductVariantRead = {
      * Data
      */
     data?: Array<ProductVariantRead> | null;
-    meta?: Meta;
-};
-
-/**
- * SuccessResponse[list[ReviewReadPublic]]
- */
-export type SuccessResponseListReviewReadPublic = {
-    /**
-     * Success
-     */
-    success?: boolean;
-    /**
-     * Status
-     */
-    status?: number;
-    /**
-     * Message
-     */
-    message: string;
-    /**
-     * Data
-     */
-    data?: Array<ReviewReadPublic> | null;
-    meta?: Meta;
-};
-
-/**
- * SuccessResponse[list[ReviewRead]]
- */
-export type SuccessResponseListReviewRead = {
-    /**
-     * Success
-     */
-    success?: boolean;
-    /**
-     * Status
-     */
-    status?: number;
-    /**
-     * Message
-     */
-    message: string;
-    /**
-     * Data
-     */
-    data?: Array<ReviewRead> | null;
     meta?: Meta;
 };
 
@@ -2746,31 +4235,6 @@ export type SuccessResponseListDict = {
 };
 
 /**
- * SuccessResponse[list[dict[str, str]]]
- */
-export type SuccessResponseListDictStrStr = {
-    /**
-     * Success
-     */
-    success?: boolean;
-    /**
-     * Status
-     */
-    status?: number;
-    /**
-     * Message
-     */
-    message: string;
-    /**
-     * Data
-     */
-    data?: Array<{
-        [key: string]: string;
-    }> | null;
-    meta?: Meta;
-};
-
-/**
  * TestimonialItem
  */
 export type TestimonialItem = {
@@ -2815,6 +4279,33 @@ export type TokenResponse = {
 };
 
 /**
+ * UserAuthProviderRead
+ */
+export type UserAuthProviderRead = {
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    provider: ProviderType;
+    /**
+     * Provider User Id
+     */
+    provider_user_id?: string | null;
+};
+
+/**
  * UserCreate
  */
 export type UserCreate = {
@@ -2843,7 +4334,7 @@ export type UserProfileRead = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -2894,7 +4385,7 @@ export type UserRead = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -2932,6 +4423,24 @@ export type UserRead = {
      */
     is_superuser: boolean;
     role: Role;
+};
+
+/**
+ * UserUpdate
+ */
+export type UserUpdate = {
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
+     * Profile Picture
+     */
+    profile_picture?: string | null;
 };
 
 /**
@@ -2987,7 +4496,7 @@ export type VariantTypeRead = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -3075,11 +4584,11 @@ export type WishlistCreate = {
     /**
      * Product Id
      */
-    product_id?: number | null;
+    product_id?: string | null;
     /**
      * Course Id
      */
-    course_id?: number | null;
+    course_id?: string | null;
 };
 
 /**
@@ -3089,11 +4598,11 @@ export type WishlistRead = {
     /**
      * Product Id
      */
-    product_id?: number | null;
+    product_id?: string | null;
     /**
      * Course Id
      */
-    course_id?: number | null;
+    course_id?: string | null;
     /**
      * Id
      */
@@ -3124,11 +4633,11 @@ export type CartItemReadWritable = {
     /**
      * Product Id
      */
-    product_id?: number | null;
+    product_id?: string | null;
     /**
      * Course Id
      */
-    course_id?: number | null;
+    course_id?: string | null;
     /**
      * Quantity
      */
@@ -3142,7 +4651,511 @@ export type CartItemReadWritable = {
      */
     user_id: string;
     product?: ProductCardReadWritable | null;
-    course?: CourseRead | null;
+    course?: CourseReadWritable | null;
+};
+
+/**
+ * CourseCurriculumRead
+ */
+export type CourseCurriculumReadWritable = {
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Short Description
+     */
+    short_description?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Thumbnail Key
+     */
+    thumbnail_key?: string | null;
+    /**
+     * Thumbnail Url
+     */
+    thumbnail_url?: string | null;
+    /**
+     * Demo Video Key
+     */
+    demo_video_key?: string | null;
+    /**
+     * Demo Video Url
+     */
+    demo_video_url?: string | null;
+    /**
+     * Whatsapp Channel Url
+     */
+    whatsapp_channel_url?: string | null;
+    level: CourseLevel;
+    /**
+     * Language
+     */
+    language: string;
+    /**
+     * Price
+     */
+    price: string;
+    /**
+     * Welcome Message
+     */
+    welcome_message?: string | null;
+    /**
+     * What You Will Learn
+     */
+    what_you_will_learn?: Array<string> | null;
+    /**
+     * Requirements
+     */
+    requirements?: Array<string> | null;
+    /**
+     * Total Duration Seconds
+     */
+    total_duration_seconds?: number;
+    /**
+     * Is Featured
+     */
+    is_featured?: boolean;
+    /**
+     * Is Published
+     */
+    is_published?: boolean;
+    /**
+     * Category Id
+     */
+    category_id?: string | null;
+    category?: CourseCategoryRead | null;
+    /**
+     * Average Rating
+     */
+    average_rating?: number;
+    /**
+     * Review Count
+     */
+    review_count?: number;
+    /**
+     * Lessons Count
+     */
+    lessons_count?: number;
+    /**
+     * Enrollment Count
+     */
+    enrollment_count?: number;
+    /**
+     * Sections
+     */
+    sections?: Array<CourseSectionWithLessonsReadWritable>;
+};
+
+/**
+ * CourseLessonRead
+ */
+export type CourseLessonReadWritable = {
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Section Id
+     */
+    section_id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Video Duration Seconds
+     */
+    video_duration_seconds?: number;
+    /**
+     * Video Key
+     */
+    video_key?: string | null;
+    /**
+     * Thumbnail Key
+     */
+    thumbnail_key?: string | null;
+    /**
+     * Is Preview
+     */
+    is_preview?: boolean;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+    status: LessonStatus;
+};
+
+/**
+ * CourseLessonReadWithVideo
+ */
+export type CourseLessonReadWithVideoWritable = {
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Section Id
+     */
+    section_id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Video Duration Seconds
+     */
+    video_duration_seconds?: number;
+    /**
+     * Video Key
+     */
+    video_key?: string | null;
+    /**
+     * Thumbnail Key
+     */
+    thumbnail_key?: string | null;
+    /**
+     * Is Preview
+     */
+    is_preview?: boolean;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+    status: LessonStatus;
+};
+
+/**
+ * CourseListRead
+ */
+export type CourseListReadWritable = {
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Short Description
+     */
+    short_description?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Thumbnail Key
+     */
+    thumbnail_key?: string | null;
+    /**
+     * Thumbnail Url
+     */
+    thumbnail_url?: string | null;
+    /**
+     * Demo Video Key
+     */
+    demo_video_key?: string | null;
+    /**
+     * Demo Video Url
+     */
+    demo_video_url?: string | null;
+    /**
+     * Whatsapp Channel Url
+     */
+    whatsapp_channel_url?: string | null;
+    level: CourseLevel;
+    /**
+     * Language
+     */
+    language: string;
+    /**
+     * Price
+     */
+    price: string;
+    /**
+     * Welcome Message
+     */
+    welcome_message?: string | null;
+    /**
+     * What You Will Learn
+     */
+    what_you_will_learn?: Array<string> | null;
+    /**
+     * Requirements
+     */
+    requirements?: Array<string> | null;
+    /**
+     * Total Duration Seconds
+     */
+    total_duration_seconds?: number;
+    /**
+     * Is Featured
+     */
+    is_featured?: boolean;
+    /**
+     * Is Published
+     */
+    is_published?: boolean;
+    /**
+     * Category Id
+     */
+    category_id?: string | null;
+    category?: CourseCategoryRead | null;
+    /**
+     * Average Rating
+     */
+    average_rating?: number;
+    /**
+     * Review Count
+     */
+    review_count?: number;
+    /**
+     * Lessons Count
+     */
+    lessons_count?: number;
+    /**
+     * Enrollment Count
+     */
+    enrollment_count?: number;
+};
+
+/**
+ * CourseRead
+ */
+export type CourseReadWritable = {
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Short Description
+     */
+    short_description?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Thumbnail Key
+     */
+    thumbnail_key?: string | null;
+    /**
+     * Thumbnail Url
+     */
+    thumbnail_url?: string | null;
+    /**
+     * Demo Video Key
+     */
+    demo_video_key?: string | null;
+    /**
+     * Demo Video Url
+     */
+    demo_video_url?: string | null;
+    /**
+     * Whatsapp Channel Url
+     */
+    whatsapp_channel_url?: string | null;
+    level: CourseLevel;
+    /**
+     * Language
+     */
+    language: string;
+    /**
+     * Price
+     */
+    price: string;
+    /**
+     * Welcome Message
+     */
+    welcome_message?: string | null;
+    /**
+     * What You Will Learn
+     */
+    what_you_will_learn?: Array<string> | null;
+    /**
+     * Requirements
+     */
+    requirements?: Array<string> | null;
+    /**
+     * Total Duration Seconds
+     */
+    total_duration_seconds?: number;
+    /**
+     * Is Featured
+     */
+    is_featured?: boolean;
+    /**
+     * Is Published
+     */
+    is_published?: boolean;
+    /**
+     * Category Id
+     */
+    category_id?: string | null;
+    category?: CourseCategoryRead | null;
+    /**
+     * Average Rating
+     */
+    average_rating?: number;
+    /**
+     * Review Count
+     */
+    review_count?: number;
+    /**
+     * Lessons Count
+     */
+    lessons_count?: number;
+    /**
+     * Enrollment Count
+     */
+    enrollment_count?: number;
+};
+
+/**
+ * CourseSectionWithLessonsRead
+ */
+export type CourseSectionWithLessonsReadWritable = {
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Sort Order
+     */
+    sort_order?: number;
+    /**
+     * Lesson Count
+     */
+    lesson_count?: number;
+    /**
+     * Lessons
+     */
+    lessons?: Array<CourseLessonReadWritable>;
+};
+
+/**
+ * PaginatedResponse[CourseListRead]
+ */
+export type PaginatedResponseCourseListReadWritable = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<CourseListReadWritable>;
+    pagination: Pagination;
+    meta?: Meta;
 };
 
 /**
@@ -3176,7 +5189,7 @@ export type ProductBaseWritable = {
     /**
      * Id
      */
-    id: number;
+    id: string;
     /**
      * Title
      */
@@ -3205,7 +5218,7 @@ export type ProductCardReadWritable = {
     /**
      * Id
      */
-    id: number;
+    id: string;
     /**
      * Title
      */
@@ -3242,7 +5255,7 @@ export type ProductDetailReadWritable = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -3258,7 +5271,7 @@ export type ProductDetailReadWritable = {
     /**
      * Id
      */
-    id: number;
+    id: string;
     /**
      * Title
      */
@@ -3331,7 +5344,7 @@ export type ProductVariantReadWritable = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -3339,11 +5352,11 @@ export type ProductVariantReadWritable = {
     /**
      * Id
      */
-    id: number;
+    id: string;
     /**
      * Product Id
      */
-    product_id: number;
+    product_id: string;
     /**
      * Variant Type Id
      */
@@ -3400,6 +5413,86 @@ export type SuccessResponseCartItemReadWritable = {
      */
     message: string;
     data?: CartItemReadWritable | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[CourseCurriculumRead]
+ */
+export type SuccessResponseCourseCurriculumReadWritable = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: CourseCurriculumReadWritable | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[CourseLessonReadWithVideo]
+ */
+export type SuccessResponseCourseLessonReadWithVideoWritable = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: CourseLessonReadWithVideoWritable | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[CourseLessonRead]
+ */
+export type SuccessResponseCourseLessonReadWritable = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: CourseLessonReadWritable | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[CourseRead]
+ */
+export type SuccessResponseCourseReadWritable = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: CourseReadWritable | null;
     meta?: Meta;
 };
 
@@ -3507,6 +5600,29 @@ export type SuccessResponseListCartItemReadWritable = {
 };
 
 /**
+ * SuccessResponse[list[CourseLessonRead]]
+ */
+export type SuccessResponseListCourseLessonReadWritable = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<CourseLessonReadWritable> | null;
+    meta?: Meta;
+};
+
+/**
  * SuccessResponse[list[ProductVariantRead]]
  */
 export type SuccessResponseListProductVariantReadWritable = {
@@ -3559,11 +5675,11 @@ export type WishlistReadWritable = {
     /**
      * Product Id
      */
-    product_id?: number | null;
+    product_id?: string | null;
     /**
      * Course Id
      */
-    course_id?: number | null;
+    course_id?: string | null;
     /**
      * Id
      */
@@ -3573,7 +5689,7 @@ export type WishlistReadWritable = {
      */
     user_id: string;
     product?: ProductCardReadWritable | null;
-    course?: CourseRead | null;
+    course?: CourseReadWritable | null;
 };
 
 export type HealthCheckData = {
@@ -4224,6 +6340,18 @@ export type ListProductsData = {
          */
         category_id?: number | null;
         /**
+         * Status
+         */
+        status?: ProductStatus | null;
+        /**
+         * Min Price
+         */
+        min_price?: number | null;
+        /**
+         * Max Price
+         */
+        max_price?: number | null;
+        /**
          * Is Featured
          */
         is_featured?: boolean | null;
@@ -4386,7 +6514,7 @@ export type DeleteProductData = {
         /**
          * Product Id
          */
-        product_id: number;
+        product_id: string;
     };
     query?: never;
     url: '/api/admin/products/{product_id}';
@@ -4416,7 +6544,7 @@ export type GetProductData = {
         /**
          * Product Id
          */
-        product_id: number;
+        product_id: string;
     };
     query?: never;
     url: '/api/admin/products/{product_id}';
@@ -4446,7 +6574,7 @@ export type UpdateProductData = {
         /**
          * Product Id
          */
-        product_id: number;
+        product_id: string;
     };
     query?: never;
     url: '/api/admin/products/{product_id}';
@@ -4476,7 +6604,7 @@ export type PublishProductData = {
         /**
          * Product Id
          */
-        product_id: number;
+        product_id: string;
     };
     query?: never;
     url: '/api/admin/products/{product_id}/publish';
@@ -4506,7 +6634,7 @@ export type ArchiveProductData = {
         /**
          * Product Id
          */
-        product_id: number;
+        product_id: string;
     };
     query?: never;
     url: '/api/admin/products/{product_id}/archive';
@@ -4536,7 +6664,7 @@ export type GetVariantData = {
         /**
          * Variant Id
          */
-        variant_id: number;
+        variant_id: string;
     };
     query?: never;
     url: '/api/admin/variants/{variant_id}';
@@ -4566,7 +6694,7 @@ export type ListVariantsData = {
         /**
          * Product Id
          */
-        product_id: number;
+        product_id: string;
     };
     query?: never;
     url: '/api/admin/variants/product/{product_id}';
@@ -4596,7 +6724,7 @@ export type GetProductImagesData = {
         /**
          * Product Id
          */
-        product_id: number;
+        product_id: string;
     };
     query?: never;
     url: '/api/admin/images/product/{product_id}';
@@ -4650,16 +6778,194 @@ export type GetImageResponses = {
 
 export type GetImageResponse = GetImageResponses[keyof GetImageResponses];
 
+export type ListCourseCategoriesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+    };
+    url: '/api/admin/course-categories';
+};
+
+export type ListCourseCategoriesErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type ListCourseCategoriesError = ListCourseCategoriesErrors[keyof ListCourseCategoriesErrors];
+
+export type ListCourseCategoriesResponses = {
+    /**
+     * Successful Response
+     */
+    200: PaginatedResponseCourseCategoryRead;
+};
+
+export type ListCourseCategoriesResponse = ListCourseCategoriesResponses[keyof ListCourseCategoriesResponses];
+
+export type CreateCourseCategoryData = {
+    body: CourseCategoryCreate;
+    path?: never;
+    query?: never;
+    url: '/api/admin/course-categories';
+};
+
+export type CreateCourseCategoryErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type CreateCourseCategoryError = CreateCourseCategoryErrors[keyof CreateCourseCategoryErrors];
+
+export type CreateCourseCategoryResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseCategoryRead;
+};
+
+export type CreateCourseCategoryResponse = CreateCourseCategoryResponses[keyof CreateCourseCategoryResponses];
+
+export type DeleteCourseCategoryData = {
+    body?: never;
+    path: {
+        /**
+         * Category Id
+         */
+        category_id: string;
+    };
+    query?: never;
+    url: '/api/admin/course-categories/{category_id}';
+};
+
+export type DeleteCourseCategoryErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type DeleteCourseCategoryError = DeleteCourseCategoryErrors[keyof DeleteCourseCategoryErrors];
+
+export type DeleteCourseCategoryResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseNoneType;
+};
+
+export type DeleteCourseCategoryResponse = DeleteCourseCategoryResponses[keyof DeleteCourseCategoryResponses];
+
+export type GetCourseCategoryData = {
+    body?: never;
+    path: {
+        /**
+         * Category Id
+         */
+        category_id: string;
+    };
+    query?: never;
+    url: '/api/admin/course-categories/{category_id}';
+};
+
+export type GetCourseCategoryErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetCourseCategoryError = GetCourseCategoryErrors[keyof GetCourseCategoryErrors];
+
+export type GetCourseCategoryResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseCategoryRead;
+};
+
+export type GetCourseCategoryResponse = GetCourseCategoryResponses[keyof GetCourseCategoryResponses];
+
+export type UpdateCourseCategoryData = {
+    body: CourseCategoryUpdate;
+    path: {
+        /**
+         * Category Id
+         */
+        category_id: string;
+    };
+    query?: never;
+    url: '/api/admin/course-categories/{category_id}';
+};
+
+export type UpdateCourseCategoryErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type UpdateCourseCategoryError = UpdateCourseCategoryErrors[keyof UpdateCourseCategoryErrors];
+
+export type UpdateCourseCategoryResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseCategoryRead;
+};
+
+export type UpdateCourseCategoryResponse = UpdateCourseCategoryResponses[keyof UpdateCourseCategoryResponses];
+
 export type ListCoursesData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+        /**
+         * Is Published
+         */
+        is_published?: boolean | null;
+        /**
+         * Is Featured
+         */
+        is_featured?: boolean | null;
+        /**
+         * Level
+         */
+        level?: CourseLevel | null;
+        /**
+         * Language
+         */
+        language?: string | null;
+        /**
+         * Category
+         */
+        category?: string | null;
+    };
     url: '/api/admin/courses';
 };
 
 export type ListCoursesErrors = {
     /**
-     * Error 422
+     * Validation Error
      */
     422: ErrorResponse;
 };
@@ -4670,21 +6976,76 @@ export type ListCoursesResponses = {
     /**
      * Successful Response
      */
-    200: SuccessResponseListDictStrStr;
+    200: PaginatedResponseCourseListRead;
 };
 
 export type ListCoursesResponse = ListCoursesResponses[keyof ListCoursesResponses];
+
+export type CreateCourseData = {
+    body: BodyAdminCreateCourse;
+    path?: never;
+    query?: never;
+    url: '/api/admin/courses';
+};
+
+export type CreateCourseErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type CreateCourseError = CreateCourseErrors[keyof CreateCourseErrors];
+
+export type CreateCourseResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseRead;
+};
+
+export type CreateCourseResponse = CreateCourseResponses[keyof CreateCourseResponses];
+
+export type DeleteCourseData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{slug}';
+};
+
+export type DeleteCourseErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type DeleteCourseError = DeleteCourseErrors[keyof DeleteCourseErrors];
+
+export type DeleteCourseResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseNoneType;
+};
+
+export type DeleteCourseResponse = DeleteCourseResponses[keyof DeleteCourseResponses];
 
 export type GetCourseData = {
     body?: never;
     path: {
         /**
-         * Course Id
+         * Slug
          */
-        course_id: string;
+        slug: string;
     };
     query?: never;
-    url: '/api/admin/courses/{course_id}';
+    url: '/api/admin/courses/{slug}';
 };
 
 export type GetCourseErrors = {
@@ -4700,10 +7061,697 @@ export type GetCourseResponses = {
     /**
      * Successful Response
      */
-    200: SuccessResponseDictStrStr;
+    200: SuccessResponseCourseRead;
 };
 
 export type GetCourseResponse = GetCourseResponses[keyof GetCourseResponses];
+
+export type UpdateCourseData = {
+    body: BodyAdminUpdateCourse;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{slug}';
+};
+
+export type UpdateCourseErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type UpdateCourseError = UpdateCourseErrors[keyof UpdateCourseErrors];
+
+export type UpdateCourseResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseRead;
+};
+
+export type UpdateCourseResponse = UpdateCourseResponses[keyof UpdateCourseResponses];
+
+export type PublishCourseData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{slug}/publish';
+};
+
+export type PublishCourseErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type PublishCourseError = PublishCourseErrors[keyof PublishCourseErrors];
+
+export type PublishCourseResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseRead;
+};
+
+export type PublishCourseResponse = PublishCourseResponses[keyof PublishCourseResponses];
+
+export type UnpublishCourseData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{slug}/unpublish';
+};
+
+export type UnpublishCourseErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type UnpublishCourseError = UnpublishCourseErrors[keyof UnpublishCourseErrors];
+
+export type UnpublishCourseResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseRead;
+};
+
+export type UnpublishCourseResponse = UnpublishCourseResponses[keyof UnpublishCourseResponses];
+
+export type FeatureCourseData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{slug}/feature';
+};
+
+export type FeatureCourseErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type FeatureCourseError = FeatureCourseErrors[keyof FeatureCourseErrors];
+
+export type FeatureCourseResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseRead;
+};
+
+export type FeatureCourseResponse = FeatureCourseResponses[keyof FeatureCourseResponses];
+
+export type UnfeatureCourseData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{slug}/unfeature';
+};
+
+export type UnfeatureCourseErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type UnfeatureCourseError = UnfeatureCourseErrors[keyof UnfeatureCourseErrors];
+
+export type UnfeatureCourseResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseRead;
+};
+
+export type UnfeatureCourseResponse = UnfeatureCourseResponses[keyof UnfeatureCourseResponses];
+
+export type GetCourseStatsData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{course_id}/stats';
+};
+
+export type GetCourseStatsErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetCourseStatsError = GetCourseStatsErrors[keyof GetCourseStatsErrors];
+
+export type GetCourseStatsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseStatsRead;
+};
+
+export type GetCourseStatsResponse = GetCourseStatsResponses[keyof GetCourseStatsResponses];
+
+export type ListEnrollmentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Course Id
+         */
+        course_id?: string | null;
+        /**
+         * User Id
+         */
+        user_id?: string | null;
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+    };
+    url: '/api/admin/enrollments';
+};
+
+export type ListEnrollmentsErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type ListEnrollmentsError = ListEnrollmentsErrors[keyof ListEnrollmentsErrors];
+
+export type ListEnrollmentsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseListCourseEnrollmentRead;
+};
+
+export type ListEnrollmentsResponse = ListEnrollmentsResponses[keyof ListEnrollmentsResponses];
+
+export type AdminEnrollUserData = {
+    body: CourseEnrollmentCreate;
+    path?: never;
+    query?: never;
+    url: '/api/admin/enrollments';
+};
+
+export type AdminEnrollUserErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type AdminEnrollUserError = AdminEnrollUserErrors[keyof AdminEnrollUserErrors];
+
+export type AdminEnrollUserResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseEnrollmentRead;
+};
+
+export type AdminEnrollUserResponse = AdminEnrollUserResponses[keyof AdminEnrollUserResponses];
+
+export type DeleteEnrollmentData = {
+    body?: never;
+    path: {
+        /**
+         * Enrollment Id
+         */
+        enrollment_id: string;
+    };
+    query?: never;
+    url: '/api/admin/enrollments/{enrollment_id}';
+};
+
+export type DeleteEnrollmentErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type DeleteEnrollmentError = DeleteEnrollmentErrors[keyof DeleteEnrollmentErrors];
+
+export type DeleteEnrollmentResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseNoneType;
+};
+
+export type DeleteEnrollmentResponse = DeleteEnrollmentResponses[keyof DeleteEnrollmentResponses];
+
+export type GetEnrollmentData = {
+    body?: never;
+    path: {
+        /**
+         * Enrollment Id
+         */
+        enrollment_id: string;
+    };
+    query?: never;
+    url: '/api/admin/enrollments/{enrollment_id}';
+};
+
+export type GetEnrollmentErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetEnrollmentError = GetEnrollmentErrors[keyof GetEnrollmentErrors];
+
+export type GetEnrollmentResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseEnrollmentRead;
+};
+
+export type GetEnrollmentResponse = GetEnrollmentResponses[keyof GetEnrollmentResponses];
+
+export type CreateSectionData = {
+    body: CourseSectionCreate;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{course_id}/sections';
+};
+
+export type CreateSectionErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type CreateSectionError = CreateSectionErrors[keyof CreateSectionErrors];
+
+export type CreateSectionResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseSectionRead;
+};
+
+export type CreateSectionResponse = CreateSectionResponses[keyof CreateSectionResponses];
+
+export type ReorderSectionsData = {
+    /**
+     * Ordered Ids
+     */
+    body: Array<string>;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{course_id}/sections/reorder';
+};
+
+export type ReorderSectionsErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type ReorderSectionsError = ReorderSectionsErrors[keyof ReorderSectionsErrors];
+
+export type ReorderSectionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseListCourseSectionRead;
+};
+
+export type ReorderSectionsResponse = ReorderSectionsResponses[keyof ReorderSectionsResponses];
+
+export type DeleteSectionData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Section Id
+         */
+        section_id: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{course_id}/sections/{section_id}';
+};
+
+export type DeleteSectionErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type DeleteSectionError = DeleteSectionErrors[keyof DeleteSectionErrors];
+
+export type DeleteSectionResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseNoneType;
+};
+
+export type DeleteSectionResponse = DeleteSectionResponses[keyof DeleteSectionResponses];
+
+export type UpdateSectionData = {
+    body: CourseSectionUpdate;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Section Id
+         */
+        section_id: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{course_id}/sections/{section_id}';
+};
+
+export type UpdateSectionErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type UpdateSectionError = UpdateSectionErrors[keyof UpdateSectionErrors];
+
+export type UpdateSectionResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseSectionRead;
+};
+
+export type UpdateSectionResponse = UpdateSectionResponses[keyof UpdateSectionResponses];
+
+export type CreateLessonData = {
+    body: CourseLessonCreate;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Section Id
+         */
+        section_id: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{course_id}/sections/{section_id}/lessons';
+};
+
+export type CreateLessonErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type CreateLessonError = CreateLessonErrors[keyof CreateLessonErrors];
+
+export type CreateLessonResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseLessonRead;
+};
+
+export type CreateLessonResponse = CreateLessonResponses[keyof CreateLessonResponses];
+
+export type ReorderLessonsData = {
+    /**
+     * Ordered Ids
+     */
+    body: Array<string>;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Section Id
+         */
+        section_id: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{course_id}/sections/{section_id}/lessons/reorder';
+};
+
+export type ReorderLessonsErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type ReorderLessonsError = ReorderLessonsErrors[keyof ReorderLessonsErrors];
+
+export type ReorderLessonsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseListCourseLessonRead;
+};
+
+export type ReorderLessonsResponse = ReorderLessonsResponses[keyof ReorderLessonsResponses];
+
+export type DeleteLessonData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Section Id
+         */
+        section_id: string;
+        /**
+         * Lesson Id
+         */
+        lesson_id: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{course_id}/sections/{section_id}/lessons/{lesson_id}';
+};
+
+export type DeleteLessonErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type DeleteLessonError = DeleteLessonErrors[keyof DeleteLessonErrors];
+
+export type DeleteLessonResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseNoneType;
+};
+
+export type DeleteLessonResponse = DeleteLessonResponses[keyof DeleteLessonResponses];
+
+export type UpdateLessonData = {
+    body: CourseLessonUpdate;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Section Id
+         */
+        section_id: string;
+        /**
+         * Lesson Id
+         */
+        lesson_id: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{course_id}/sections/{section_id}/lessons/{lesson_id}';
+};
+
+export type UpdateLessonErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type UpdateLessonError = UpdateLessonErrors[keyof UpdateLessonErrors];
+
+export type UpdateLessonResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseLessonRead;
+};
+
+export type UpdateLessonResponse = UpdateLessonResponses[keyof UpdateLessonResponses];
+
+export type InitVideoUploadData = {
+    body: InitVideoUploadRequest;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Lesson Id
+         */
+        lesson_id: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{course_id}/lessons/{lesson_id}/video/init';
+};
+
+export type InitVideoUploadErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type InitVideoUploadError = InitVideoUploadErrors[keyof InitVideoUploadErrors];
+
+export type InitVideoUploadResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseInitVideoUploadResponse;
+};
+
+export type InitVideoUploadResponse2 = InitVideoUploadResponses[keyof InitVideoUploadResponses];
+
+export type ConfirmVideoUploadData = {
+    body: ConfirmVideoUploadRequest;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Lesson Id
+         */
+        lesson_id: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{course_id}/lessons/{lesson_id}/video/confirm';
+};
+
+export type ConfirmVideoUploadErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type ConfirmVideoUploadError = ConfirmVideoUploadErrors[keyof ConfirmVideoUploadErrors];
+
+export type ConfirmVideoUploadResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseLessonReadWithVideo;
+};
+
+export type ConfirmVideoUploadResponse = ConfirmVideoUploadResponses[keyof ConfirmVideoUploadResponses];
+
+export type MoveLessonData = {
+    body: MoveLessonPayload;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Lesson Id
+         */
+        lesson_id: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{course_id}/lessons/{lesson_id}/move';
+};
+
+export type MoveLessonErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type MoveLessonError = MoveLessonErrors[keyof MoveLessonErrors];
+
+export type MoveLessonResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseLessonRead;
+};
+
+export type MoveLessonResponse = MoveLessonResponses[keyof MoveLessonResponses];
 
 export type OverviewData = {
     body?: never;
@@ -4863,7 +7911,7 @@ export type ListAllReviewsData = {
         /**
          * Entity Id
          */
-        entity_id?: number | null;
+        entity_id?: string | null;
         /**
          * Status
          */
@@ -5037,6 +8085,81 @@ export type LoginResponses = {
 };
 
 export type LoginResponse = LoginResponses[keyof LoginResponses];
+
+export type GoogleAuthData = {
+    body: GoogleAuthRequest;
+    path?: never;
+    query?: never;
+    url: '/api/auth/google';
+};
+
+export type GoogleAuthErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GoogleAuthError = GoogleAuthErrors[keyof GoogleAuthErrors];
+
+export type GoogleAuthResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseTokenResponse;
+};
+
+export type GoogleAuthResponse = GoogleAuthResponses[keyof GoogleAuthResponses];
+
+export type SetPasswordData = {
+    body: SetPasswordRequest;
+    path?: never;
+    query?: never;
+    url: '/api/auth/set-password';
+};
+
+export type SetPasswordErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type SetPasswordError = SetPasswordErrors[keyof SetPasswordErrors];
+
+export type SetPasswordResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseNoneType;
+};
+
+export type SetPasswordResponse = SetPasswordResponses[keyof SetPasswordResponses];
+
+export type GetAuthProvidersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/providers';
+};
+
+export type GetAuthProvidersErrors = {
+    /**
+     * Error 422
+     */
+    422: ErrorResponse;
+};
+
+export type GetAuthProvidersError = GetAuthProvidersErrors[keyof GetAuthProvidersErrors];
+
+export type GetAuthProvidersResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseAuthProvidersResponse;
+};
+
+export type GetAuthProvidersResponse = GetAuthProvidersResponses[keyof GetAuthProvidersResponses];
 
 export type RefreshTokenData = {
     body: RefreshTokenRequest;
@@ -5263,6 +8386,31 @@ export type LogoutAllResponses = {
 
 export type LogoutAllResponse = LogoutAllResponses[keyof LogoutAllResponses];
 
+export type DeleteOwnAccountData = {
+    body: DeleteAccountRequest;
+    path?: never;
+    query?: never;
+    url: '/api/profiles/me';
+};
+
+export type DeleteOwnAccountErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type DeleteOwnAccountError = DeleteOwnAccountErrors[keyof DeleteOwnAccountErrors];
+
+export type DeleteOwnAccountResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseNoneType;
+};
+
+export type DeleteOwnAccountResponse = DeleteOwnAccountResponses[keyof DeleteOwnAccountResponses];
+
 export type ReadOwnProfileData = {
     body?: never;
     path?: never;
@@ -5287,6 +8435,31 @@ export type ReadOwnProfileResponses = {
 };
 
 export type ReadOwnProfileResponse = ReadOwnProfileResponses[keyof ReadOwnProfileResponses];
+
+export type UpdateOwnProfileData = {
+    body: UserUpdate;
+    path?: never;
+    query?: never;
+    url: '/api/profiles/me';
+};
+
+export type UpdateOwnProfileErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type UpdateOwnProfileError = UpdateOwnProfileErrors[keyof UpdateOwnProfileErrors];
+
+export type UpdateOwnProfileResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseUserProfileRead;
+};
+
+export type UpdateOwnProfileResponse = UpdateOwnProfileResponses[keyof UpdateOwnProfileResponses];
 
 export type ReadMyAddressesData = {
     body?: never;
@@ -5470,97 +8643,30 @@ export type UpdateAddressResponses = {
 
 export type UpdateAddressResponse = UpdateAddressResponses[keyof UpdateAddressResponses];
 
-export type ListReviewsData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Review Type
-         */
-        review_type?: ReviewType | null;
-        /**
-         * Entity Id
-         */
-        entity_id?: number | null;
-        /**
-         * Skip
-         */
-        skip?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/api/reviews';
-};
-
-export type ListReviewsErrors = {
-    /**
-     * Validation Error
-     */
-    422: ErrorResponse;
-};
-
-export type ListReviewsError = ListReviewsErrors[keyof ListReviewsErrors];
-
-export type ListReviewsResponses = {
-    /**
-     * Successful Response
-     */
-    200: SuccessResponseListReviewReadPublic;
-};
-
-export type ListReviewsResponse = ListReviewsResponses[keyof ListReviewsResponses];
-
-export type CreateReviewData = {
-    body: ReviewCreate;
-    path?: never;
-    query?: never;
-    url: '/api/reviews';
-};
-
-export type CreateReviewErrors = {
-    /**
-     * Validation Error
-     */
-    422: ErrorResponse;
-};
-
-export type CreateReviewError = CreateReviewErrors[keyof CreateReviewErrors];
-
-export type CreateReviewResponses = {
-    /**
-     * Successful Response
-     */
-    200: SuccessResponseReviewRead;
-};
-
-export type CreateReviewResponse = CreateReviewResponses[keyof CreateReviewResponses];
-
-export type GetMyReviewsData = {
+export type ListPublicCourseCategoriesData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/reviews/user/my-reviews';
+    url: '/api/course-categories';
 };
 
-export type GetMyReviewsErrors = {
+export type ListPublicCourseCategoriesErrors = {
     /**
      * Error 422
      */
     422: ErrorResponse;
 };
 
-export type GetMyReviewsError = GetMyReviewsErrors[keyof GetMyReviewsErrors];
+export type ListPublicCourseCategoriesError = ListPublicCourseCategoriesErrors[keyof ListPublicCourseCategoriesErrors];
 
-export type GetMyReviewsResponses = {
+export type ListPublicCourseCategoriesResponses = {
     /**
      * Successful Response
      */
-    200: SuccessResponseListReviewRead;
+    200: SuccessResponseListCourseCategoryRead;
 };
 
-export type GetMyReviewsResponse = GetMyReviewsResponses[keyof GetMyReviewsResponses];
+export type ListPublicCourseCategoriesResponse = ListPublicCourseCategoriesResponses[keyof ListPublicCourseCategoriesResponses];
 
 export type CoursesListCoursesData = {
     body?: never;
@@ -5574,6 +8680,18 @@ export type CoursesListCoursesData = {
          * Page Size
          */
         page_size?: number;
+        /**
+         * Category
+         */
+        category?: string | null;
+        /**
+         * Min Price
+         */
+        min_price?: number | null;
+        /**
+         * Max Price
+         */
+        max_price?: number | null;
     };
     url: '/api/courses';
 };
@@ -5591,21 +8709,51 @@ export type CoursesListCoursesResponses = {
     /**
      * Successful Response
      */
-    200: PaginatedResponseCourseRead;
+    200: PaginatedResponseCourseListRead;
 };
 
 export type CoursesListCoursesResponse = CoursesListCoursesResponses[keyof CoursesListCoursesResponses];
+
+export type GetCourseBySlugData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/courses/by-slug/{slug}';
+};
+
+export type GetCourseBySlugErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetCourseBySlugError = GetCourseBySlugErrors[keyof GetCourseBySlugErrors];
+
+export type GetCourseBySlugResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseRead;
+};
+
+export type GetCourseBySlugResponse = GetCourseBySlugResponses[keyof GetCourseBySlugResponses];
 
 export type CoursesGetCourseData = {
     body?: never;
     path: {
         /**
-         * Course Id
+         * Slug
          */
-        course_id: number;
+        slug: string;
     };
     query?: never;
-    url: '/api/courses/{course_id}';
+    url: '/api/courses/{slug}';
 };
 
 export type CoursesGetCourseErrors = {
@@ -5625,6 +8773,373 @@ export type CoursesGetCourseResponses = {
 };
 
 export type CoursesGetCourseResponse = CoursesGetCourseResponses[keyof CoursesGetCourseResponses];
+
+export type GetCourseCurriculumData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/courses/{course_id}/curriculum';
+};
+
+export type GetCourseCurriculumErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetCourseCurriculumError = GetCourseCurriculumErrors[keyof GetCourseCurriculumErrors];
+
+export type GetCourseCurriculumResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseCurriculumRead;
+};
+
+export type GetCourseCurriculumResponse = GetCourseCurriculumResponses[keyof GetCourseCurriculumResponses];
+
+export type GetLessonData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Lesson Id
+         */
+        lesson_id: string;
+    };
+    query?: never;
+    url: '/api/courses/{course_id}/lessons/{lesson_id}';
+};
+
+export type GetLessonErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetLessonError = GetLessonErrors[keyof GetLessonErrors];
+
+export type GetLessonResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseLessonRead;
+};
+
+export type GetLessonResponse = GetLessonResponses[keyof GetLessonResponses];
+
+export type GetLessonVideoData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Lesson Id
+         */
+        lesson_id: string;
+    };
+    query?: never;
+    url: '/api/courses/{course_id}/lessons/{lesson_id}/video';
+};
+
+export type GetLessonVideoErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetLessonVideoError = GetLessonVideoErrors[keyof GetLessonVideoErrors];
+
+export type GetLessonVideoResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseLessonReadWithVideo;
+};
+
+export type GetLessonVideoResponse = GetLessonVideoResponses[keyof GetLessonVideoResponses];
+
+export type ListCourseReviewsData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+    };
+    url: '/api/courses/{slug}/reviews';
+};
+
+export type ListCourseReviewsErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type ListCourseReviewsError = ListCourseReviewsErrors[keyof ListCourseReviewsErrors];
+
+export type ListCourseReviewsResponses = {
+    /**
+     * Successful Response
+     */
+    200: PaginatedResponseReviewReadPublic;
+};
+
+export type ListCourseReviewsResponse = ListCourseReviewsResponses[keyof ListCourseReviewsResponses];
+
+export type CreateCourseReviewData = {
+    body: ReviewCreate;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/courses/{slug}/reviews';
+};
+
+export type CreateCourseReviewErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type CreateCourseReviewError = CreateCourseReviewErrors[keyof CreateCourseReviewErrors];
+
+export type CreateCourseReviewResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseReviewRead;
+};
+
+export type CreateCourseReviewResponse = CreateCourseReviewResponses[keyof CreateCourseReviewResponses];
+
+export type DeleteCourseReviewData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/courses/{slug}/reviews/my-review';
+};
+
+export type DeleteCourseReviewErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type DeleteCourseReviewError = DeleteCourseReviewErrors[keyof DeleteCourseReviewErrors];
+
+export type DeleteCourseReviewResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseNoneType;
+};
+
+export type DeleteCourseReviewResponse = DeleteCourseReviewResponses[keyof DeleteCourseReviewResponses];
+
+export type GetMyCourseReviewData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/courses/{slug}/reviews/my-review';
+};
+
+export type GetMyCourseReviewErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetMyCourseReviewError = GetMyCourseReviewErrors[keyof GetMyCourseReviewErrors];
+
+export type GetMyCourseReviewResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseUnionReviewReadNoneType;
+};
+
+export type GetMyCourseReviewResponse = GetMyCourseReviewResponses[keyof GetMyCourseReviewResponses];
+
+export type UpdateCourseReviewData = {
+    body: ReviewUpdate;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/courses/{slug}/reviews/my-review';
+};
+
+export type UpdateCourseReviewErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type UpdateCourseReviewError = UpdateCourseReviewErrors[keyof UpdateCourseReviewErrors];
+
+export type UpdateCourseReviewResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseReviewRead;
+};
+
+export type UpdateCourseReviewResponse = UpdateCourseReviewResponses[keyof UpdateCourseReviewResponses];
+
+export type ListMyEnrollmentsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/enrollments';
+};
+
+export type ListMyEnrollmentsErrors = {
+    /**
+     * Error 422
+     */
+    422: ErrorResponse;
+};
+
+export type ListMyEnrollmentsError = ListMyEnrollmentsErrors[keyof ListMyEnrollmentsErrors];
+
+export type ListMyEnrollmentsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseListCourseEnrollmentRead;
+};
+
+export type ListMyEnrollmentsResponse = ListMyEnrollmentsResponses[keyof ListMyEnrollmentsResponses];
+
+export type EnrollInCourseData = {
+    body: CourseEnrollmentCreate;
+    path?: never;
+    query?: never;
+    url: '/api/enrollments';
+};
+
+export type EnrollInCourseErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type EnrollInCourseError = EnrollInCourseErrors[keyof EnrollInCourseErrors];
+
+export type EnrollInCourseResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseEnrollmentRead;
+};
+
+export type EnrollInCourseResponse = EnrollInCourseResponses[keyof EnrollInCourseResponses];
+
+export type UnenrollFromCourseData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/enrollments/{course_id}';
+};
+
+export type UnenrollFromCourseErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type UnenrollFromCourseError = UnenrollFromCourseErrors[keyof UnenrollFromCourseErrors];
+
+export type UnenrollFromCourseResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseNoneType;
+};
+
+export type UnenrollFromCourseResponse = UnenrollFromCourseResponses[keyof UnenrollFromCourseResponses];
+
+export type GetEnrollmentStatusData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/enrollments/{course_id}';
+};
+
+export type GetEnrollmentStatusErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetEnrollmentStatusError = GetEnrollmentStatusErrors[keyof GetEnrollmentStatusErrors];
+
+export type GetEnrollmentStatusResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseEnrollmentRead;
+};
+
+export type GetEnrollmentStatusResponse = GetEnrollmentStatusResponses[keyof GetEnrollmentStatusResponses];
 
 export type ProductsListProductsData = {
     body?: never;
@@ -5689,6 +9204,134 @@ export type ProductsGetProductResponses = {
 };
 
 export type ProductsGetProductResponse = ProductsGetProductResponses[keyof ProductsGetProductResponses];
+
+export type GetLessonProgressData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Lesson Id
+         */
+        lesson_id: string;
+    };
+    query?: never;
+    url: '/api/courses/{course_id}/lessons/{lesson_id}/progress';
+};
+
+export type GetLessonProgressErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetLessonProgressError = GetLessonProgressErrors[keyof GetLessonProgressErrors];
+
+export type GetLessonProgressResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseLessonProgressDetail;
+};
+
+export type GetLessonProgressResponse = GetLessonProgressResponses[keyof GetLessonProgressResponses];
+
+export type UpdateLessonProgressData = {
+    body: LessonProgressUpdate;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Lesson Id
+         */
+        lesson_id: string;
+    };
+    query?: never;
+    url: '/api/courses/{course_id}/lessons/{lesson_id}/progress';
+};
+
+export type UpdateLessonProgressErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type UpdateLessonProgressError = UpdateLessonProgressErrors[keyof UpdateLessonProgressErrors];
+
+export type UpdateLessonProgressResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseLessonProgressDetail;
+};
+
+export type UpdateLessonProgressResponse = UpdateLessonProgressResponses[keyof UpdateLessonProgressResponses];
+
+export type GetCourseProgressData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/courses/{course_id}/progress';
+};
+
+export type GetCourseProgressErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetCourseProgressError = GetCourseProgressErrors[keyof GetCourseProgressErrors];
+
+export type GetCourseProgressResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseProgressRead;
+};
+
+export type GetCourseProgressResponse = GetCourseProgressResponses[keyof GetCourseProgressResponses];
+
+export type ContinueWatchingData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/progress/continue-watching';
+};
+
+export type ContinueWatchingErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type ContinueWatchingError = ContinueWatchingErrors[keyof ContinueWatchingErrors];
+
+export type ContinueWatchingResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseListLessonProgressRead;
+};
+
+export type ContinueWatchingResponse = ContinueWatchingResponses[keyof ContinueWatchingResponses];
 
 export type ListMyOrdersData = {
     body?: never;

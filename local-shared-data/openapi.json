@@ -1474,7 +1474,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
+              "type": "string",
+              "format": "uuid",
               "title": "Product Id"
             }
           }
@@ -1521,7 +1522,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
+              "type": "string",
+              "format": "uuid",
               "title": "Product Id"
             }
           }
@@ -1578,7 +1580,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
+              "type": "string",
+              "format": "uuid",
               "title": "Product Id"
             }
           }
@@ -1627,7 +1630,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
+              "type": "string",
+              "format": "uuid",
               "title": "Product Id"
             }
           }
@@ -1676,7 +1680,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
+              "type": "string",
+              "format": "uuid",
               "title": "Product Id"
             }
           }
@@ -1725,7 +1730,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
+              "type": "string",
+              "format": "uuid",
               "title": "Variant Id"
             }
           }
@@ -1774,7 +1780,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
+              "type": "string",
+              "format": "uuid",
               "title": "Product Id"
             }
           }
@@ -1823,7 +1830,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
+              "type": "string",
+              "format": "uuid",
               "title": "Product Id"
             }
           }
@@ -1901,27 +1909,42 @@
         }
       }
     },
-    "/api/admin/courses": {
-      "get": {
+    "/api/admin/course-categories": {
+      "post": {
         "tags": [
           "ADMIN",
-          "admin-courses"
+          "admin-course-categories"
         ],
-        "summary": "List Courses",
-        "operationId": "list_courses",
+        "summary": "Create Course Category",
+        "operationId": "create_course_category",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseCategoryCreate"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse_list_dict_str__str___"
+                  "$ref": "#/components/schemas/SuccessResponse_CourseCategoryRead_"
                 }
               }
             }
           },
           "422": {
-            "description": "Error 422",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1930,15 +1953,409 @@
               }
             }
           }
-        },
+        }
+      },
+      "get": {
+        "tags": [
+          "ADMIN",
+          "admin-course-categories"
+        ],
+        "summary": "List Course Categories",
+        "operationId": "list_course_categories",
         "security": [
           {
             "OAuth2PasswordBearer": []
           }
-        ]
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_CourseCategoryRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "/api/admin/courses/{course_id}": {
+    "/api/admin/course-categories/{category_id}": {
+      "get": {
+        "tags": [
+          "ADMIN",
+          "admin-course-categories"
+        ],
+        "summary": "Get Course Category",
+        "operationId": "get_course_category",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Category Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseCategoryRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ADMIN",
+          "admin-course-categories"
+        ],
+        "summary": "Update Course Category",
+        "operationId": "update_course_category",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Category Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseCategoryUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseCategoryRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ADMIN",
+          "admin-course-categories"
+        ],
+        "summary": "Delete Course Category",
+        "operationId": "delete_course_category",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Category Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses": {
+      "post": {
+        "tags": [
+          "ADMIN",
+          "admin-courses"
+        ],
+        "summary": "Create Course",
+        "operationId": "create_course",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_ADMIN-create_course"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "ADMIN",
+          "admin-courses"
+        ],
+        "summary": "List Courses",
+        "operationId": "list_courses",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "is_published",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Is Published"
+            }
+          },
+          {
+            "name": "is_featured",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Is Featured"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/CourseLevel"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Level"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Language"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_CourseListRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses/{slug}": {
       "get": {
         "tags": [
           "ADMIN",
@@ -1946,6 +2363,348 @@
         ],
         "summary": "Get Course",
         "operationId": "get_course",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ADMIN",
+          "admin-courses"
+        ],
+        "summary": "Update Course",
+        "operationId": "update_course",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_ADMIN-update_course"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ADMIN",
+          "admin-courses"
+        ],
+        "summary": "Delete Course",
+        "operationId": "delete_course",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses/{slug}/publish": {
+      "post": {
+        "tags": [
+          "ADMIN",
+          "admin-courses"
+        ],
+        "summary": "Publish Course",
+        "operationId": "publish_course",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses/{slug}/unpublish": {
+      "post": {
+        "tags": [
+          "ADMIN",
+          "admin-courses"
+        ],
+        "summary": "Unpublish Course",
+        "operationId": "unpublish_course",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses/{slug}/feature": {
+      "post": {
+        "tags": [
+          "ADMIN",
+          "admin-courses"
+        ],
+        "summary": "Feature Course",
+        "operationId": "feature_course",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses/{slug}/unfeature": {
+      "post": {
+        "tags": [
+          "ADMIN",
+          "admin-courses"
+        ],
+        "summary": "Unfeature Course",
+        "operationId": "unfeature_course",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses/{course_id}/stats": {
+      "get": {
+        "tags": [
+          "ADMIN",
+          "admin-courses"
+        ],
+        "summary": "Get Course Stats",
+        "operationId": "get_course_stats",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -1968,7 +2727,989 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse_dict_str__str__"
+                  "$ref": "#/components/schemas/SuccessResponse_CourseStatsRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/enrollments": {
+      "get": {
+        "tags": [
+          "ADMIN",
+          "admin-enrollments"
+        ],
+        "summary": "List Enrollments",
+        "operationId": "list_enrollments",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_CourseEnrollmentRead__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ADMIN",
+          "admin-enrollments"
+        ],
+        "summary": "Admin Enroll User",
+        "operationId": "admin_enroll_user",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseEnrollmentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseEnrollmentRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/enrollments/{enrollment_id}": {
+      "get": {
+        "tags": [
+          "ADMIN",
+          "admin-enrollments"
+        ],
+        "summary": "Get Enrollment",
+        "operationId": "get_enrollment",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "enrollment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Enrollment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseEnrollmentRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ADMIN",
+          "admin-enrollments"
+        ],
+        "summary": "Delete Enrollment",
+        "operationId": "delete_enrollment",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "enrollment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Enrollment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses/{course_id}/sections": {
+      "post": {
+        "tags": [
+          "ADMIN",
+          "admin-sections"
+        ],
+        "summary": "Create Section",
+        "operationId": "create_section",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseSectionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseSectionRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses/{course_id}/sections/reorder": {
+      "put": {
+        "tags": [
+          "ADMIN",
+          "admin-sections"
+        ],
+        "summary": "Reorder Sections",
+        "operationId": "reorder_sections",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "title": "Ordered Ids"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_CourseSectionRead__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses/{course_id}/sections/{section_id}": {
+      "put": {
+        "tags": [
+          "ADMIN",
+          "admin-sections"
+        ],
+        "summary": "Update Section",
+        "operationId": "update_section",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "section_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Section Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseSectionUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseSectionRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ADMIN",
+          "admin-sections"
+        ],
+        "summary": "Delete Section",
+        "operationId": "delete_section",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "section_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Section Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses/{course_id}/sections/{section_id}/lessons": {
+      "post": {
+        "tags": [
+          "ADMIN",
+          "admin-lessons"
+        ],
+        "summary": "Create Lesson",
+        "operationId": "create_lesson",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "section_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Section Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseLessonCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseLessonRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses/{course_id}/sections/{section_id}/lessons/reorder": {
+      "put": {
+        "tags": [
+          "ADMIN",
+          "admin-lessons"
+        ],
+        "summary": "Reorder Lessons",
+        "operationId": "reorder_lessons",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "section_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Section Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "title": "Ordered Ids"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_CourseLessonRead__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses/{course_id}/sections/{section_id}/lessons/{lesson_id}": {
+      "put": {
+        "tags": [
+          "ADMIN",
+          "admin-lessons"
+        ],
+        "summary": "Update Lesson",
+        "operationId": "update_lesson",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "section_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Section Id"
+            }
+          },
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseLessonUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseLessonRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ADMIN",
+          "admin-lessons"
+        ],
+        "summary": "Delete Lesson",
+        "operationId": "delete_lesson",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "section_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Section Id"
+            }
+          },
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses/{course_id}/lessons/{lesson_id}/video/init": {
+      "post": {
+        "tags": [
+          "ADMIN",
+          "admin-lessons"
+        ],
+        "summary": "Init Video Upload",
+        "operationId": "init_video_upload",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitVideoUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_InitVideoUploadResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses/{course_id}/lessons/{lesson_id}/video/confirm": {
+      "post": {
+        "tags": [
+          "ADMIN",
+          "admin-lessons"
+        ],
+        "summary": "Confirm Video Upload",
+        "operationId": "confirm_video_upload",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmVideoUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseLessonReadWithVideo_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses/{course_id}/lessons/{lesson_id}/move": {
+      "put": {
+        "tags": [
+          "ADMIN",
+          "admin-lessons"
+        ],
+        "summary": "Move Lesson",
+        "operationId": "move_lesson",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveLessonPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseLessonRead_"
                 }
               }
             }
@@ -2352,7 +4093,8 @@
             "schema": {
               "anyOf": [
                 {
-                  "type": "integer"
+                  "type": "string",
+                  "format": "uuid"
                 },
                 {
                   "type": "null"
@@ -3184,6 +4926,94 @@
             "OAuth2PasswordBearer": []
           }
         ]
+      },
+      "delete": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Delete Own Account",
+        "operationId": "delete_own_account",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Update Own Profile",
+        "operationId": "update_own_profile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_UserProfileRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     },
     "/api/profiles/me/addresses": {
@@ -3498,68 +5328,116 @@
         }
       }
     },
-    "/api/reviews": {
+    "/api/course-categories": {
       "get": {
         "tags": [
-          "reviews"
+          "course-categories"
         ],
-        "summary": "List Reviews",
-        "description": "Get approved reviews (public endpoint).",
-        "operationId": "list_reviews",
+        "summary": "List Public Course Categories",
+        "operationId": "list_public_course_categories",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_CourseCategoryRead__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/courses": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "List Courses",
+        "operationId": "courses_list_courses",
         "parameters": [
           {
-            "name": "review_type",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/ReviewType"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Review Type"
-            }
-          },
-          {
-            "name": "entity_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Entity Id"
-            }
-          },
-          {
-            "name": "skip",
+            "name": "page",
             "in": "query",
             "required": false,
             "schema": {
               "type": "integer",
-              "minimum": 0,
-              "default": 0,
-              "title": "Skip"
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
             }
           },
           {
-            "name": "limit",
+            "name": "page_size",
             "in": "query",
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 100,
               "minimum": 1,
               "default": 20,
-              "title": "Limit"
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          },
+          {
+            "name": "min_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Price"
+            }
+          },
+          {
+            "name": "max_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Price"
             }
           }
         ],
@@ -3569,7 +5447,315 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse_list_ReviewReadPublic__"
+                  "$ref": "#/components/schemas/PaginatedResponse_CourseListRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/courses/by-slug/{slug}": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Get Course By Slug",
+        "operationId": "get_course_by_slug",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/courses/{slug}": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Get Course",
+        "operationId": "courses_get_course",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/courses/{course_id}/curriculum": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Get Course Curriculum",
+        "operationId": "get_course_curriculum",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseCurriculumRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/courses/{course_id}/lessons/{lesson_id}": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Get Lesson",
+        "operationId": "get_lesson",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseLessonRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/courses/{course_id}/lessons/{lesson_id}/video": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Get Lesson Video",
+        "operationId": "get_lesson_video",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseLessonReadWithVideo_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/courses/{slug}/reviews": {
+      "get": {
+        "tags": [
+          "course-reviews"
+        ],
+        "summary": "List Course Reviews",
+        "operationId": "list_course_reviews",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_ReviewReadPublic_"
                 }
               }
             }
@@ -3588,14 +5774,24 @@
       },
       "post": {
         "tags": [
-          "reviews"
+          "course-reviews"
         ],
-        "summary": "Create Review",
-        "description": "Create a new review (requires login).",
-        "operationId": "create_review",
+        "summary": "Create Course Review",
+        "operationId": "create_course_review",
         "security": [
           {
             "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
           }
         ],
         "requestBody": {
@@ -3632,21 +5828,168 @@
         }
       }
     },
-    "/api/reviews/user/my-reviews": {
+    "/api/courses/{slug}/reviews/my-review": {
       "get": {
         "tags": [
-          "reviews"
+          "course-reviews"
         ],
-        "summary": "Get My Reviews",
-        "description": "Get current user's reviews.",
-        "operationId": "get_my_reviews",
+        "summary": "Get My Course Review",
+        "operationId": "get_my_course_review",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse_list_ReviewRead__"
+                  "$ref": "#/components/schemas/SuccessResponse_Union_ReviewRead__NoneType__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "course-reviews"
+        ],
+        "summary": "Update Course Review",
+        "operationId": "update_course_review",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_ReviewRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "course-reviews"
+        ],
+        "summary": "Delete Course Review",
+        "description": "Delete the current user's review for a course.",
+        "operationId": "delete_course_review",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/enrollments": {
+      "get": {
+        "tags": [
+          "enrollments"
+        ],
+        "summary": "List My Enrollments",
+        "operationId": "list_my_enrollments",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_CourseEnrollmentRead__"
                 }
               }
             }
@@ -3667,37 +6010,73 @@
             "OAuth2PasswordBearer": []
           }
         ]
-      }
-    },
-    "/api/courses": {
-      "get": {
+      },
+      "post": {
         "tags": [
-          "courses"
+          "enrollments"
         ],
-        "summary": "List Courses",
-        "operationId": "courses_list_courses",
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 1,
-              "title": "Page"
+        "summary": "Enroll In Course",
+        "operationId": "enroll_in_course",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseEnrollmentCreate"
+              }
             }
           },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseEnrollmentRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
           {
-            "name": "page_size",
-            "in": "query",
-            "required": false,
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/enrollments/{course_id}": {
+      "get": {
+        "tags": [
+          "enrollments"
+        ],
+        "summary": "Get Enrollment Status",
+        "operationId": "get_enrollment_status",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
             "schema": {
-              "type": "integer",
-              "maximum": 100,
-              "minimum": 1,
-              "default": 20,
-              "title": "Page Size"
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
             }
           }
         ],
@@ -3707,7 +6086,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponse_CourseRead_"
+                  "$ref": "#/components/schemas/SuccessResponse_CourseEnrollmentRead_"
                 }
               }
             }
@@ -3723,22 +6102,26 @@
             }
           }
         }
-      }
-    },
-    "/api/courses/{course_id}": {
-      "get": {
+      },
+      "delete": {
         "tags": [
-          "courses"
+          "enrollments"
         ],
-        "summary": "Get Course",
-        "operationId": "courses_get_course",
+        "summary": "Unenroll From Course",
+        "operationId": "unenroll_from_course",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "course_id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
+              "type": "string",
+              "format": "uuid",
               "title": "Course Id"
             }
           }
@@ -3749,7 +6132,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse_CourseRead_"
+                  "$ref": "#/components/schemas/SuccessResponse_NoneType_"
                 }
               }
             }
@@ -3845,6 +6228,228 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SuccessResponse_ProductDetailRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/courses/{course_id}/lessons/{lesson_id}/progress": {
+      "put": {
+        "tags": [
+          "progress"
+        ],
+        "summary": "Update Lesson Progress",
+        "operationId": "update_lesson_progress",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LessonProgressUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_LessonProgressDetail_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "progress"
+        ],
+        "summary": "Get Lesson Progress",
+        "operationId": "get_lesson_progress",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "lesson_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Lesson Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_LessonProgressDetail_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/courses/{course_id}/progress": {
+      "get": {
+        "tags": [
+          "progress"
+        ],
+        "summary": "Get Course Progress",
+        "operationId": "get_course_progress",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseProgressRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/progress/continue-watching": {
+      "get": {
+        "tags": [
+          "progress"
+        ],
+        "summary": "Continue Watching",
+        "operationId": "continue_watching",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 20,
+              "minimum": 1,
+              "default": 5,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_LessonProgressRead__"
                 }
               }
             }
@@ -4937,6 +7542,47 @@
         ],
         "title": "BasicHealthData"
       },
+      "Body_ADMIN-create_course": {
+        "properties": {
+          "payload": {
+            "type": "string",
+            "contentMediaType": "application/json",
+            "contentSchema": {
+              "$ref": "#/components/schemas/CourseCreate"
+            },
+            "title": "Payload"
+          },
+          "thumbnail": {
+            "anyOf": [
+              {
+                "type": "string",
+                "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail"
+          },
+          "demo_video": {
+            "anyOf": [
+              {
+                "type": "string",
+                "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demo Video"
+          }
+        },
+        "type": "object",
+        "required": [
+          "payload"
+        ],
+        "title": "Body_ADMIN-create_course"
+      },
       "Body_ADMIN-create_product": {
         "properties": {
           "payload": {
@@ -4968,6 +7614,47 @@
           "payload"
         ],
         "title": "Body_ADMIN-create_product"
+      },
+      "Body_ADMIN-update_course": {
+        "properties": {
+          "payload": {
+            "type": "string",
+            "contentMediaType": "application/json",
+            "contentSchema": {
+              "$ref": "#/components/schemas/CourseUpdate"
+            },
+            "title": "Payload"
+          },
+          "thumbnail": {
+            "anyOf": [
+              {
+                "type": "string",
+                "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail"
+          },
+          "demo_video": {
+            "anyOf": [
+              {
+                "type": "string",
+                "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demo Video"
+          }
+        },
+        "type": "object",
+        "required": [
+          "payload"
+        ],
+        "title": "Body_ADMIN-update_course"
       },
       "Body_ADMIN-update_product": {
         "properties": {
@@ -5065,7 +7752,8 @@
           "product_id": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"
@@ -5076,7 +7764,8 @@
           "course_id": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"
@@ -5098,7 +7787,8 @@
           "product_id": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"
@@ -5109,7 +7799,8 @@
           "course_id": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"
@@ -5223,28 +7914,54 @@
         ],
         "title": "CommunitySection"
       },
-      "CourseRead": {
+      "ConfirmVideoUploadRequest": {
         "properties": {
-          "title": {
+          "video_key": {
             "type": "string",
-            "title": "Title"
+            "title": "Video Key"
           },
-          "subtitle": {
+          "duration_seconds": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "number"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Subtitle"
-          },
-          "instructor": {
+            "title": "Duration Seconds"
+          }
+        },
+        "type": "object",
+        "required": [
+          "video_key"
+        ],
+        "title": "ConfirmVideoUploadRequest"
+      },
+      "CourseCategoryCreate": {
+        "properties": {
+          "name": {
             "type": "string",
-            "title": "Instructor"
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "examples": [
+              "Portrait Drawing"
+            ]
           },
-          "level": {
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "description": {
             "anyOf": [
               {
                 "type": "string"
@@ -5253,10 +7970,26 @@
                 "type": "null"
               }
             ],
-            "title": "Level",
-            "default": "Beginner"
+            "title": "Description",
+            "examples": [
+              "Courses focused on portrait drawing techniques"
+            ]
           },
-          "duration": {
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CourseCategoryCreate"
+      },
+      "CourseCategoryRead": {
+        "properties": {
+          "created_at": {
             "anyOf": [
               {
                 "type": "string"
@@ -5265,14 +7998,9 @@
                 "type": "null"
               }
             ],
-            "title": "Duration"
+            "title": "Created At"
           },
-          "lessons_count": {
-            "type": "integer",
-            "title": "Lessons Count",
-            "default": 0
-          },
-          "image_url": {
+          "updated_at": {
             "anyOf": [
               {
                 "type": "string"
@@ -5281,7 +8009,20 @@
                 "type": "null"
               }
             ],
-            "title": "Image Url"
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
           },
           "description": {
             "anyOf": [
@@ -5294,11 +8035,48 @@
             ],
             "title": "Description"
           },
-          "price": {
-            "type": "number",
-            "title": "Price"
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "slug"
+        ],
+        "title": "CourseCategoryRead"
+      },
+      "CourseCategoryUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
           },
-          "category": {
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "description": {
             "anyOf": [
               {
                 "type": "string"
@@ -5307,41 +8085,1970 @@
                 "type": "null"
               }
             ],
-            "title": "Category"
-          },
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "rating": {
-            "type": "number",
-            "title": "Rating"
-          },
-          "students_count": {
-            "type": "integer",
-            "title": "Students Count"
-          },
-          "featured": {
-            "type": "boolean",
-            "title": "Featured"
+            "title": "Description"
           },
           "is_active": {
-            "type": "boolean",
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "title": "CourseCategoryUpdate"
+      },
+      "CourseCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "short_description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Description"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "level": {
+            "$ref": "#/components/schemas/CourseLevel",
+            "default": "beginner"
+          },
+          "language": {
+            "type": "string",
+            "maxLength": 50,
+            "title": "Language",
+            "default": "English"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
+              }
+            ],
+            "title": "Price"
+          },
+          "welcome_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Welcome Message"
+          },
+          "what_you_will_learn": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "What You Will Learn"
+          },
+          "requirements": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requirements"
+          },
+          "is_featured": {
+            "type": "boolean",
+            "title": "Is Featured",
+            "default": false
+          },
+          "is_published": {
+            "type": "boolean",
+            "title": "Is Published",
+            "default": false
+          },
+          "category_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Id"
+          },
+          "thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Url"
+          },
+          "demo_video_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demo Video Url"
+          },
+          "whatsapp_channel_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Whatsapp Channel Url"
           }
         },
         "type": "object",
         "required": [
           "title",
-          "instructor",
-          "price",
+          "price"
+        ],
+        "title": "CourseCreate"
+      },
+      "CourseCurriculumRead": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "short_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Description"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "thumbnail_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Key"
+          },
+          "thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Url"
+          },
+          "demo_video_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demo Video Key"
+          },
+          "demo_video_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demo Video Url"
+          },
+          "whatsapp_channel_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Whatsapp Channel Url"
+          },
+          "level": {
+            "$ref": "#/components/schemas/CourseLevel"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language"
+          },
+          "price": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Price"
+          },
+          "welcome_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Welcome Message"
+          },
+          "what_you_will_learn": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "What You Will Learn"
+          },
+          "requirements": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requirements"
+          },
+          "total_duration_seconds": {
+            "type": "integer",
+            "title": "Total Duration Seconds",
+            "default": 0
+          },
+          "is_featured": {
+            "type": "boolean",
+            "title": "Is Featured",
+            "default": false
+          },
+          "is_published": {
+            "type": "boolean",
+            "title": "Is Published",
+            "default": false
+          },
+          "category_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Id"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseCategoryRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "average_rating": {
+            "type": "number",
+            "title": "Average Rating",
+            "default": 0.0
+          },
+          "review_count": {
+            "type": "integer",
+            "title": "Review Count",
+            "default": 0
+          },
+          "lessons_count": {
+            "type": "integer",
+            "title": "Lessons Count",
+            "default": 0
+          },
+          "enrollment_count": {
+            "type": "integer",
+            "title": "Enrollment Count",
+            "default": 0
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/CourseSectionWithLessonsRead"
+            },
+            "type": "array",
+            "title": "Sections",
+            "default": []
+          },
+          "computed_thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Computed Thumbnail Url",
+            "readOnly": true
+          },
+          "computed_demo_video_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Computed Demo Video Url",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
           "id",
-          "rating",
-          "students_count",
-          "featured",
-          "is_active"
+          "title",
+          "slug",
+          "level",
+          "language",
+          "price",
+          "computed_thumbnail_url",
+          "computed_demo_video_url"
+        ],
+        "title": "CourseCurriculumRead"
+      },
+      "CourseEnrollmentCreate": {
+        "properties": {
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "enrolled_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Enrolled At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "course_id"
+        ],
+        "title": "CourseEnrollmentCreate"
+      },
+      "CourseEnrollmentRead": {
+        "properties": {
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "enrolled_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Enrolled At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "course_id",
+          "enrolled_at"
+        ],
+        "title": "CourseEnrollmentRead"
+      },
+      "CourseLessonCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "video_duration_seconds": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Video Duration Seconds",
+            "default": 0
+          },
+          "thumbnail_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Key"
+          },
+          "is_preview": {
+            "type": "boolean",
+            "title": "Is Preview",
+            "default": false
+          },
+          "sort_order": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Sort Order",
+            "default": 0
+          },
+          "status": {
+            "$ref": "#/components/schemas/LessonStatus",
+            "default": "processing"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "CourseLessonCreate"
+      },
+      "CourseLessonRead": {
+        "properties": {
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "section_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Section Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "video_duration_seconds": {
+            "type": "integer",
+            "title": "Video Duration Seconds",
+            "default": 0
+          },
+          "video_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Video Key"
+          },
+          "thumbnail_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Key"
+          },
+          "is_preview": {
+            "type": "boolean",
+            "title": "Is Preview",
+            "default": false
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          },
+          "status": {
+            "$ref": "#/components/schemas/LessonStatus"
+          },
+          "computed_video_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Computed Video Url",
+            "readOnly": true
+          },
+          "computed_thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Computed Thumbnail Url",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "course_id",
+          "section_id",
+          "title",
+          "status",
+          "computed_video_url",
+          "computed_thumbnail_url"
+        ],
+        "title": "CourseLessonRead"
+      },
+      "CourseLessonReadWithVideo": {
+        "properties": {
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "section_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Section Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "video_duration_seconds": {
+            "type": "integer",
+            "title": "Video Duration Seconds",
+            "default": 0
+          },
+          "video_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Video Key"
+          },
+          "thumbnail_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Key"
+          },
+          "is_preview": {
+            "type": "boolean",
+            "title": "Is Preview",
+            "default": false
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          },
+          "status": {
+            "$ref": "#/components/schemas/LessonStatus"
+          },
+          "computed_video_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Computed Video Url",
+            "readOnly": true
+          },
+          "computed_thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Computed Thumbnail Url",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "course_id",
+          "section_id",
+          "title",
+          "status",
+          "computed_video_url",
+          "computed_thumbnail_url"
+        ],
+        "title": "CourseLessonReadWithVideo"
+      },
+      "CourseLessonUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "video_duration_seconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Video Duration Seconds"
+          },
+          "thumbnail_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Key"
+          },
+          "is_preview": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Preview"
+          },
+          "sort_order": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sort Order"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LessonStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "CourseLessonUpdate"
+      },
+      "CourseLevel": {
+        "type": "string",
+        "enum": [
+          "beginner",
+          "intermediate",
+          "advanced"
+        ],
+        "title": "CourseLevel"
+      },
+      "CourseListRead": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "short_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Description"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "thumbnail_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Key"
+          },
+          "thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Url"
+          },
+          "demo_video_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demo Video Key"
+          },
+          "demo_video_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demo Video Url"
+          },
+          "whatsapp_channel_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Whatsapp Channel Url"
+          },
+          "level": {
+            "$ref": "#/components/schemas/CourseLevel"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language"
+          },
+          "price": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Price"
+          },
+          "welcome_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Welcome Message"
+          },
+          "what_you_will_learn": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "What You Will Learn"
+          },
+          "requirements": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requirements"
+          },
+          "total_duration_seconds": {
+            "type": "integer",
+            "title": "Total Duration Seconds",
+            "default": 0
+          },
+          "is_featured": {
+            "type": "boolean",
+            "title": "Is Featured",
+            "default": false
+          },
+          "is_published": {
+            "type": "boolean",
+            "title": "Is Published",
+            "default": false
+          },
+          "category_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Id"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseCategoryRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "average_rating": {
+            "type": "number",
+            "title": "Average Rating",
+            "default": 0.0
+          },
+          "review_count": {
+            "type": "integer",
+            "title": "Review Count",
+            "default": 0
+          },
+          "lessons_count": {
+            "type": "integer",
+            "title": "Lessons Count",
+            "default": 0
+          },
+          "enrollment_count": {
+            "type": "integer",
+            "title": "Enrollment Count",
+            "default": 0
+          },
+          "computed_thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Computed Thumbnail Url",
+            "readOnly": true
+          },
+          "computed_demo_video_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Computed Demo Video Url",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "id",
+          "title",
+          "slug",
+          "level",
+          "language",
+          "price",
+          "computed_thumbnail_url",
+          "computed_demo_video_url"
+        ],
+        "title": "CourseListRead"
+      },
+      "CourseProgressRead": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "total_lessons": {
+            "type": "integer",
+            "title": "Total Lessons"
+          },
+          "completed_lessons": {
+            "type": "integer",
+            "title": "Completed Lessons"
+          },
+          "progress_percentage": {
+            "type": "number",
+            "title": "Progress Percentage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "course_id",
+          "total_lessons",
+          "completed_lessons",
+          "progress_percentage"
+        ],
+        "title": "CourseProgressRead"
+      },
+      "CourseRead": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "short_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Description"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "thumbnail_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Key"
+          },
+          "thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Url"
+          },
+          "demo_video_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demo Video Key"
+          },
+          "demo_video_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demo Video Url"
+          },
+          "whatsapp_channel_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Whatsapp Channel Url"
+          },
+          "level": {
+            "$ref": "#/components/schemas/CourseLevel"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language"
+          },
+          "price": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Price"
+          },
+          "welcome_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Welcome Message"
+          },
+          "what_you_will_learn": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "What You Will Learn"
+          },
+          "requirements": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requirements"
+          },
+          "total_duration_seconds": {
+            "type": "integer",
+            "title": "Total Duration Seconds",
+            "default": 0
+          },
+          "is_featured": {
+            "type": "boolean",
+            "title": "Is Featured",
+            "default": false
+          },
+          "is_published": {
+            "type": "boolean",
+            "title": "Is Published",
+            "default": false
+          },
+          "category_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Id"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseCategoryRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "average_rating": {
+            "type": "number",
+            "title": "Average Rating",
+            "default": 0.0
+          },
+          "review_count": {
+            "type": "integer",
+            "title": "Review Count",
+            "default": 0
+          },
+          "lessons_count": {
+            "type": "integer",
+            "title": "Lessons Count",
+            "default": 0
+          },
+          "enrollment_count": {
+            "type": "integer",
+            "title": "Enrollment Count",
+            "default": 0
+          },
+          "computed_thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Computed Thumbnail Url",
+            "readOnly": true
+          },
+          "computed_demo_video_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Computed Demo Video Url",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "id",
+          "title",
+          "slug",
+          "level",
+          "language",
+          "price",
+          "computed_thumbnail_url",
+          "computed_demo_video_url"
         ],
         "title": "CourseRead"
+      },
+      "CourseSectionCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "sort_order": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Sort Order",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "CourseSectionCreate"
+      },
+      "CourseSectionRead": {
+        "properties": {
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          },
+          "lesson_count": {
+            "type": "integer",
+            "title": "Lesson Count",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "course_id",
+          "title"
+        ],
+        "title": "CourseSectionRead"
+      },
+      "CourseSectionUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "sort_order": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sort Order"
+          }
+        },
+        "type": "object",
+        "title": "CourseSectionUpdate"
+      },
+      "CourseSectionWithLessonsRead": {
+        "properties": {
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "default": 0
+          },
+          "lesson_count": {
+            "type": "integer",
+            "title": "Lesson Count",
+            "default": 0
+          },
+          "lessons": {
+            "items": {
+              "$ref": "#/components/schemas/CourseLessonRead"
+            },
+            "type": "array",
+            "title": "Lessons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "course_id",
+          "title"
+        ],
+        "title": "CourseSectionWithLessonsRead"
+      },
+      "CourseStatsRead": {
+        "properties": {
+          "enrollment_count": {
+            "type": "integer",
+            "title": "Enrollment Count"
+          },
+          "total_revenue": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Total Revenue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enrollment_count",
+          "total_revenue"
+        ],
+        "title": "CourseStatsRead"
+      },
+      "CourseUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "short_description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Description"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,11}0*$)\\d{0,8}\\.\\d{0,2}0*$)"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "whatsapp_channel_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Whatsapp Channel Url"
+          },
+          "welcome_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Welcome Message"
+          },
+          "what_you_will_learn": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "What You Will Learn"
+          },
+          "requirements": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requirements"
+          },
+          "is_featured": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Featured"
+          },
+          "is_published": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Published"
+          },
+          "category_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Id"
+          },
+          "thumbnail_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thumbnail Url"
+          },
+          "demo_video_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demo Video Url"
+          }
+        },
+        "type": "object",
+        "title": "CourseUpdate"
+      },
+      "DeleteAccountRequest": {
+        "properties": {
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "password"
+        ],
+        "title": "DeleteAccountRequest"
       },
       "DetailedHealthData": {
         "properties": {
@@ -5655,6 +10362,234 @@
         ],
         "title": "ImageSourceType"
       },
+      "InitVideoUploadRequest": {
+        "properties": {
+          "content_type": {
+            "type": "string",
+            "title": "Content Type"
+          },
+          "file_name": {
+            "type": "string",
+            "title": "File Name"
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size"
+          }
+        },
+        "type": "object",
+        "required": [
+          "content_type",
+          "file_name"
+        ],
+        "title": "InitVideoUploadRequest"
+      },
+      "InitVideoUploadResponse": {
+        "properties": {
+          "upload_url": {
+            "type": "string",
+            "title": "Upload Url"
+          },
+          "video_key": {
+            "type": "string",
+            "title": "Video Key"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In"
+          }
+        },
+        "type": "object",
+        "required": [
+          "upload_url",
+          "video_key",
+          "expires_in"
+        ],
+        "title": "InitVideoUploadResponse"
+      },
+      "LessonProgressDetail": {
+        "properties": {
+          "progress": {
+            "$ref": "#/components/schemas/LessonProgressRead"
+          },
+          "progress_percentage": {
+            "type": "number",
+            "title": "Progress Percentage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "progress",
+          "progress_percentage"
+        ],
+        "title": "LessonProgressDetail"
+      },
+      "LessonProgressRead": {
+        "properties": {
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "lesson_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Lesson Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProgressStatus"
+          },
+          "watch_seconds": {
+            "type": "integer",
+            "title": "Watch Seconds",
+            "default": 0
+          },
+          "resume_position_seconds": {
+            "type": "integer",
+            "title": "Resume Position Seconds",
+            "default": 0
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "last_watched_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Watched At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "lesson_id",
+          "status"
+        ],
+        "title": "LessonProgressRead"
+      },
+      "LessonProgressUpdate": {
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProgressStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "watch_seconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Watch Seconds"
+          },
+          "resume_position_seconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resume Position Seconds"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "last_watched_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Watched At"
+          }
+        },
+        "type": "object",
+        "title": "LessonProgressUpdate"
+      },
+      "LessonStatus": {
+        "type": "string",
+        "enum": [
+          "processing",
+          "ready",
+          "failed"
+        ],
+        "title": "LessonStatus"
+      },
       "LogoutRequest": {
         "properties": {
           "refresh_token": {
@@ -5690,6 +10625,32 @@
         },
         "type": "object",
         "title": "Meta"
+      },
+      "MoveLessonPayload": {
+        "properties": {
+          "target_section_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Target Section Id"
+          },
+          "sort_order": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sort Order"
+          }
+        },
+        "type": "object",
+        "required": [
+          "target_section_id"
+        ],
+        "title": "MoveLessonPayload"
       },
       "OrderCreate": {
         "properties": {
@@ -5800,7 +10761,8 @@
           "product_id": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"
@@ -5811,7 +10773,8 @@
           "variant_id": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"
@@ -5822,7 +10785,8 @@
           "course_id": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"
@@ -5859,7 +10823,8 @@
           "product_id": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"
@@ -5870,7 +10835,8 @@
           "variant_id": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"
@@ -5881,7 +10847,8 @@
           "course_id": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"
@@ -6111,7 +11078,7 @@
         ],
         "title": "PaginatedResponse[AddressRead]"
       },
-      "PaginatedResponse_CourseRead_": {
+      "PaginatedResponse_CourseCategoryRead_": {
         "properties": {
           "success": {
             "type": "boolean",
@@ -6129,7 +11096,7 @@
           },
           "data": {
             "items": {
-              "$ref": "#/components/schemas/CourseRead"
+              "$ref": "#/components/schemas/CourseCategoryRead"
             },
             "type": "array",
             "title": "Data"
@@ -6146,7 +11113,44 @@
           "message",
           "pagination"
         ],
-        "title": "PaginatedResponse[CourseRead]"
+        "title": "PaginatedResponse[CourseCategoryRead]"
+      },
+      "PaginatedResponse_CourseListRead_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/CourseListRead"
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "pagination"
+        ],
+        "title": "PaginatedResponse[CourseListRead]"
       },
       "PaginatedResponse_OrderDashboardRead_": {
         "properties": {
@@ -6370,6 +11374,43 @@
         ],
         "title": "PaginatedResponse[PublicUserRead]"
       },
+      "PaginatedResponse_ReviewReadPublic_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewReadPublic"
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "pagination"
+        ],
+        "title": "PaginatedResponse[ReviewReadPublic]"
+      },
       "PaginatedResponse_ReviewRead_": {
         "properties": {
           "success": {
@@ -6518,7 +11559,8 @@
       "ProductBase": {
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
+            "format": "uuid",
             "title": "Id"
           },
           "title": {
@@ -6587,7 +11629,8 @@
       "ProductCardRead": {
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
+            "format": "uuid",
             "title": "Id"
           },
           "title": {
@@ -6723,20 +11766,15 @@
       "ProductCategoryRead": {
         "properties": {
           "created_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "format": "date-time",
             "title": "Created At"
           },
           "updated_at": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "format": "date-time"
               },
               {
                 "type": "null"
@@ -6774,6 +11812,7 @@
         },
         "type": "object",
         "required": [
+          "created_at",
           "id",
           "name",
           "slug",
@@ -7048,20 +12087,15 @@
       "ProductDetailRead": {
         "properties": {
           "created_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "format": "date-time",
             "title": "Created At"
           },
           "updated_at": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "format": "date-time"
               },
               {
                 "type": "null"
@@ -7084,7 +12118,8 @@
             "title": "Variants"
           },
           "id": {
-            "type": "integer",
+            "type": "string",
+            "format": "uuid",
             "title": "Id"
           },
           "title": {
@@ -7261,6 +12296,7 @@
         },
         "type": "object",
         "required": [
+          "created_at",
           "id",
           "title",
           "slug",
@@ -7279,20 +12315,15 @@
       "ProductImageRead": {
         "properties": {
           "created_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "format": "date-time",
             "title": "Created At"
           },
           "updated_at": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "format": "date-time"
               },
               {
                 "type": "null"
@@ -7305,7 +12336,8 @@
             "title": "Id"
           },
           "product_id": {
-            "type": "integer",
+            "type": "string",
+            "format": "uuid",
             "title": "Product Id"
           },
           "image_url": {
@@ -7337,6 +12369,7 @@
         },
         "type": "object",
         "required": [
+          "created_at",
           "id",
           "product_id",
           "image_url",
@@ -7447,20 +12480,15 @@
       "ProductMediumRead": {
         "properties": {
           "created_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "format": "date-time",
             "title": "Created At"
           },
           "updated_at": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "format": "date-time"
               },
               {
                 "type": "null"
@@ -7487,6 +12515,7 @@
         },
         "type": "object",
         "required": [
+          "created_at",
           "id",
           "name",
           "slug",
@@ -7792,20 +12821,15 @@
       "ProductVariantRead": {
         "properties": {
           "created_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "format": "date-time",
             "title": "Created At"
           },
           "updated_at": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "format": "date-time"
               },
               {
                 "type": "null"
@@ -7814,11 +12838,13 @@
             "title": "Updated At"
           },
           "id": {
-            "type": "integer",
+            "type": "string",
+            "format": "uuid",
             "title": "Id"
           },
           "product_id": {
-            "type": "integer",
+            "type": "string",
+            "format": "uuid",
             "title": "Product Id"
           },
           "variant_type_id": {
@@ -7913,6 +12939,7 @@
         },
         "type": "object",
         "required": [
+          "created_at",
           "id",
           "product_id",
           "variant_type_id",
@@ -7933,7 +12960,8 @@
           "id": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"
@@ -8030,6 +13058,15 @@
         ],
         "title": "ProductVariantState"
       },
+      "ProgressStatus": {
+        "type": "string",
+        "enum": [
+          "not_started",
+          "in_progress",
+          "completed"
+        ],
+        "title": "ProgressStatus"
+      },
       "ProviderType": {
         "type": "string",
         "enum": [
@@ -8041,20 +13078,15 @@
       "PublicUserRead": {
         "properties": {
           "created_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "format": "date-time",
             "title": "Created At"
           },
           "updated_at": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "format": "date-time"
               },
               {
                 "type": "null"
@@ -8114,6 +13146,9 @@
           }
         },
         "type": "object",
+        "required": [
+          "created_at"
+        ],
         "title": "PublicUserRead"
       },
       "RefreshTokenRequest": {
@@ -8163,20 +13198,6 @@
       },
       "ReviewCreate": {
         "properties": {
-          "type": {
-            "$ref": "#/components/schemas/ReviewType"
-          },
-          "entity_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Entity Id"
-          },
           "rating": {
             "type": "integer",
             "maximum": 5.0,
@@ -8192,7 +13213,6 @@
         },
         "type": "object",
         "required": [
-          "type",
           "rating",
           "text"
         ],
@@ -8226,14 +13246,8 @@
             "$ref": "#/components/schemas/ReviewType"
           },
           "entity_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "format": "uuid",
             "title": "Entity Id"
           },
           "rating": {
@@ -8265,6 +13279,7 @@
         "type": "object",
         "required": [
           "type",
+          "entity_id",
           "rating",
           "text",
           "id",
@@ -8275,57 +13290,59 @@
       },
       "ReviewReadPublic": {
         "properties": {
-          "type": {
-            "$ref": "#/components/schemas/ReviewType"
-          },
-          "entity_id": {
+          "created_at": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Entity Id"
+            "title": "Created At"
           },
-          "rating": {
-            "type": "integer",
-            "maximum": 5.0,
-            "minimum": 1.0,
-            "title": "Rating"
-          },
-          "text": {
-            "type": "string",
-            "maxLength": 1000,
-            "minLength": 1,
-            "title": "Text"
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
           },
           "id": {
             "type": "string",
             "format": "uuid",
             "title": "Id"
           },
-          "status": {
-            "$ref": "#/components/schemas/ReviewStatus"
+          "rating": {
+            "type": "integer",
+            "title": "Rating"
           },
-          "created_at": {
+          "text": {
             "type": "string",
-            "format": "date-time",
-            "title": "Created At"
+            "title": "Text"
+          },
+          "user": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReviewUserInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
         "required": [
-          "type",
-          "rating",
-          "text",
           "id",
-          "status",
-          "created_at"
+          "rating",
+          "text"
         ],
-        "title": "ReviewReadPublic",
-        "description": "Public version without sensitive info"
+        "title": "ReviewReadPublic"
       },
       "ReviewStatus": {
         "type": "string",
@@ -8345,16 +13362,6 @@
       },
       "ReviewUpdate": {
         "properties": {
-          "status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ReviewStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "rating": {
             "anyOf": [
               {
@@ -8380,10 +13387,56 @@
               }
             ],
             "title": "Text"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReviewStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
         "title": "ReviewUpdate"
+      },
+      "ReviewUserInfo": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "avatar": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "ReviewUserInfo"
       },
       "Role": {
         "type": "string",
@@ -8618,6 +13671,222 @@
         ],
         "title": "SuccessResponse[CartItemRead]"
       },
+      "SuccessResponse_CourseCategoryRead_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseCategoryRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[CourseCategoryRead]"
+      },
+      "SuccessResponse_CourseCurriculumRead_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseCurriculumRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[CourseCurriculumRead]"
+      },
+      "SuccessResponse_CourseEnrollmentRead_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseEnrollmentRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[CourseEnrollmentRead]"
+      },
+      "SuccessResponse_CourseLessonReadWithVideo_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseLessonReadWithVideo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[CourseLessonReadWithVideo]"
+      },
+      "SuccessResponse_CourseLessonRead_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseLessonRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[CourseLessonRead]"
+      },
+      "SuccessResponse_CourseProgressRead_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseProgressRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[CourseProgressRead]"
+      },
       "SuccessResponse_CourseRead_": {
         "properties": {
           "success": {
@@ -8653,6 +13922,78 @@
           "message"
         ],
         "title": "SuccessResponse[CourseRead]"
+      },
+      "SuccessResponse_CourseSectionRead_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseSectionRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[CourseSectionRead]"
+      },
+      "SuccessResponse_CourseStatsRead_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CourseStatsRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[CourseStatsRead]"
       },
       "SuccessResponse_DetailedHealthData_": {
         "properties": {
@@ -8725,6 +14066,78 @@
           "message"
         ],
         "title": "SuccessResponse[HomePageConfig]"
+      },
+      "SuccessResponse_InitVideoUploadResponse_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InitVideoUploadResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[InitVideoUploadResponse]"
+      },
+      "SuccessResponse_LessonProgressDetail_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LessonProgressDetail"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[LessonProgressDetail]"
       },
       "SuccessResponse_NoneType_": {
         "properties": {
@@ -9080,6 +14493,42 @@
         ],
         "title": "SuccessResponse[TokenResponse]"
       },
+      "SuccessResponse_Union_ReviewRead__NoneType__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReviewRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[Union[ReviewRead, NoneType]]"
+      },
       "SuccessResponse_UserProfileRead_": {
         "properties": {
           "success": {
@@ -9302,46 +14751,6 @@
         ],
         "title": "SuccessResponse[dict[str, int]]"
       },
-      "SuccessResponse_dict_str__str__": {
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          },
-          "status": {
-            "type": "integer",
-            "title": "Status",
-            "default": 200
-          },
-          "message": {
-            "type": "string",
-            "title": "Message"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          }
-        },
-        "type": "object",
-        "required": [
-          "message"
-        ],
-        "title": "SuccessResponse[dict[str, str]]"
-      },
       "SuccessResponse_list_AddressRead__": {
         "properties": {
           "success": {
@@ -9421,6 +14830,206 @@
           "message"
         ],
         "title": "SuccessResponse[list[CartItemRead]]"
+      },
+      "SuccessResponse_list_CourseCategoryRead__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CourseCategoryRead"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[list[CourseCategoryRead]]"
+      },
+      "SuccessResponse_list_CourseEnrollmentRead__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CourseEnrollmentRead"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[list[CourseEnrollmentRead]]"
+      },
+      "SuccessResponse_list_CourseLessonRead__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CourseLessonRead"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[list[CourseLessonRead]]"
+      },
+      "SuccessResponse_list_CourseSectionRead__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CourseSectionRead"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[list[CourseSectionRead]]"
+      },
+      "SuccessResponse_list_LessonProgressRead__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LessonProgressRead"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[list[LessonProgressRead]]"
       },
       "SuccessResponse_list_ProductImageRead__": {
         "properties": {
@@ -9502,86 +15111,6 @@
         ],
         "title": "SuccessResponse[list[ProductVariantRead]]"
       },
-      "SuccessResponse_list_ReviewReadPublic__": {
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          },
-          "status": {
-            "type": "integer",
-            "title": "Status",
-            "default": 200
-          },
-          "message": {
-            "type": "string",
-            "title": "Message"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/ReviewReadPublic"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          }
-        },
-        "type": "object",
-        "required": [
-          "message"
-        ],
-        "title": "SuccessResponse[list[ReviewReadPublic]]"
-      },
-      "SuccessResponse_list_ReviewRead__": {
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          },
-          "status": {
-            "type": "integer",
-            "title": "Status",
-            "default": 200
-          },
-          "message": {
-            "type": "string",
-            "title": "Message"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/ReviewRead"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          }
-        },
-        "type": "object",
-        "required": [
-          "message"
-        ],
-        "title": "SuccessResponse[list[ReviewRead]]"
-      },
       "SuccessResponse_list_WishlistRead__": {
         "properties": {
           "success": {
@@ -9662,49 +15191,6 @@
           "message"
         ],
         "title": "SuccessResponse[list[dict]]"
-      },
-      "SuccessResponse_list_dict_str__str___": {
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          },
-          "status": {
-            "type": "integer",
-            "title": "Status",
-            "default": 200
-          },
-          "message": {
-            "type": "string",
-            "title": "Message"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "items": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          }
-        },
-        "type": "object",
-        "required": [
-          "message"
-        ],
-        "title": "SuccessResponse[list[dict[str, str]]]"
       },
       "TestimonialItem": {
         "properties": {
@@ -9863,20 +15349,15 @@
       "UserProfileRead": {
         "properties": {
           "created_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "format": "date-time",
             "title": "Created At"
           },
           "updated_at": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "format": "date-time"
               },
               {
                 "type": "null"
@@ -9895,7 +15376,7 @@
             "minLength": 2,
             "title": "Full Name",
             "examples": [
-              "User"
+              "John Doe"
             ]
           },
           "email": {
@@ -9953,6 +15434,7 @@
         },
         "type": "object",
         "required": [
+          "created_at",
           "full_name",
           "email",
           "is_active",
@@ -9965,20 +15447,15 @@
       "UserRead": {
         "properties": {
           "created_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "format": "date-time",
             "title": "Created At"
           },
           "updated_at": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "format": "date-time"
               },
               {
                 "type": "null"
@@ -9997,7 +15474,7 @@
             "minLength": 2,
             "title": "Full Name",
             "examples": [
-              "User"
+              "John Doe"
             ]
           },
           "email": {
@@ -10048,6 +15525,7 @@
         },
         "type": "object",
         "required": [
+          "created_at",
           "full_name",
           "email",
           "is_active",
@@ -10056,6 +15534,47 @@
           "role"
         ],
         "title": "UserRead"
+      },
+      "UserUpdate": {
+        "properties": {
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "profile_picture": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Picture"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "UserUpdate"
       },
       "ValidationError": {
         "properties": {
@@ -10142,20 +15661,15 @@
       "VariantTypeRead": {
         "properties": {
           "created_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "format": "date-time",
             "title": "Created At"
           },
           "updated_at": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "format": "date-time"
               },
               {
                 "type": "null"
@@ -10193,6 +15707,7 @@
         },
         "type": "object",
         "required": [
+          "created_at",
           "id",
           "name",
           "slug",
@@ -10305,7 +15820,8 @@
           "product_id": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"
@@ -10316,7 +15832,8 @@
           "course_id": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"
@@ -10333,7 +15850,8 @@
           "product_id": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"
@@ -10344,7 +15862,8 @@
           "course_id": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string",
+                "format": "uuid"
               },
               {
                 "type": "null"

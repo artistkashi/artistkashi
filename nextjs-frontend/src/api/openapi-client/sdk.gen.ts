@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { AddToCartData, AddToCartErrors, AddToCartResponses, AddToWishlistData, AddToWishlistErrors, AddToWishlistResponses, AdminStatsData, AdminStatsErrors, AdminStatsResponses, ArchiveProductData, ArchiveProductErrors, ArchiveProductResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, CoursesGetCourseData, CoursesGetCourseErrors, CoursesGetCourseResponses, CoursesListCoursesData, CoursesListCoursesErrors, CoursesListCoursesResponses, CreateAddressData, CreateAddressErrors, CreateAddressResponses, CreateCategoryData, CreateCategoryErrors, CreateCategoryResponses, CreateMediumData, CreateMediumErrors, CreateMediumResponses, CreateOrderData, CreateOrderErrors, CreateOrderResponses, CreateProductData, CreateProductErrors, CreateProductResponses, CreateReviewData, CreateReviewErrors, CreateReviewResponses, CreateVariantTypeData, CreateVariantTypeErrors, CreateVariantTypeResponses, DeleteAddressData, DeleteAddressErrors, DeleteAddressResponses, DeleteCategoryData, DeleteCategoryErrors, DeleteCategoryResponses, DeleteMediumData, DeleteMediumErrors, DeleteMediumResponses, DeleteProductData, DeleteProductErrors, DeleteProductResponses, DeleteReviewData, DeleteReviewErrors, DeleteReviewResponses, DeleteVariantTypeData, DeleteVariantTypeErrors, DeleteVariantTypeResponses, FeaturedProductsData, FeaturedProductsErrors, FeaturedProductsResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetCategoryData, GetCategoryErrors, GetCategoryResponses, GetCourseData, GetCourseErrors, GetCourseResponses, GetHomePageSettingsData, GetHomePageSettingsErrors, GetHomePageSettingsResponses, GetImageData, GetImageErrors, GetImageResponses, GetMediumData, GetMediumErrors, GetMediumResponses, GetMyCartData, GetMyCartErrors, GetMyCartResponses, GetMyReviewsData, GetMyReviewsErrors, GetMyReviewsResponses, GetMyWishlistData, GetMyWishlistErrors, GetMyWishlistResponses, GetOrderDetailsData, GetOrderDetailsErrors, GetOrderDetailsResponses, GetProductBySlugData, GetProductBySlugErrors, GetProductBySlugResponses, GetProductData, GetProductErrors, GetProductImagesData, GetProductImagesErrors, GetProductImagesResponses, GetProductResponses, GetReviewDetailData, GetReviewDetailErrors, GetReviewDetailResponses, GetUserData, GetUserErrors, GetUserResponses, GetVariantData, GetVariantErrors, GetVariantResponses, GetVariantTypeData, GetVariantTypeErrors, GetVariantTypeResponses, HealthCheckData, HealthCheckDetailedData, HealthCheckDetailedErrors, HealthCheckDetailedResponses, HealthCheckErrors, HealthCheckResponses, ListAddressesData, ListAddressesErrors, ListAddressesResponses, ListAllReviewsData, ListAllReviewsErrors, ListAllReviewsResponses, ListCategoriesData, ListCategoriesErrors, ListCategoriesResponses, ListCoursesData, ListCoursesErrors, ListCoursesResponses, ListMediumsData, ListMediumsErrors, ListMediumsResponses, ListMyOrdersData, ListMyOrdersErrors, ListMyOrdersResponses, ListOrdersData, ListOrdersErrors, ListOrdersResponses, ListProductsData, ListProductsErrors, ListProductsResponses, ListProfilesData, ListProfilesErrors, ListProfilesResponses, ListReviewsData, ListReviewsErrors, ListReviewsResponses, ListUsersData, ListUsersErrors, ListUsersResponses, ListVariantsData, ListVariantsErrors, ListVariantsResponses, ListVariantTypesData, ListVariantTypesErrors, ListVariantTypesResponses, LoginData, LoginErrors, LoginResponses, LogoutAllData, LogoutAllErrors, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, MeData, MeErrors, MeResponses, OrdersGetOrderDetailsData, OrdersGetOrderDetailsErrors, OrdersGetOrderDetailsResponses, OverviewData, OverviewErrors, OverviewResponses, ProductsGetProductData, ProductsGetProductErrors, ProductsGetProductResponses, ProductsListProductsData, ProductsListProductsErrors, ProductsListProductsResponses, PublishProductData, PublishProductErrors, PublishProductResponses, ReadMyAddressesData, ReadMyAddressesErrors, ReadMyAddressesResponses, ReadOwnProfileData, ReadOwnProfileErrors, ReadOwnProfileResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, RemoveFromCartData, RemoveFromCartErrors, RemoveFromCartResponses, RemoveFromWishlistData, RemoveFromWishlistErrors, RemoveFromWishlistResponses, RequestVerificationData, RequestVerificationErrors, RequestVerificationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, SearchProductsData, SearchProductsErrors, SearchProductsResponses, UpdateAddressData, UpdateAddressErrors, UpdateAddressResponses, UpdateCartItemData, UpdateCartItemErrors, UpdateCartItemResponses, UpdateCategoryData, UpdateCategoryErrors, UpdateCategoryResponses, UpdateHomePageSettingsData, UpdateHomePageSettingsErrors, UpdateHomePageSettingsResponses, UpdateMediumData, UpdateMediumErrors, UpdateMediumResponses, UpdateOrderStatusData, UpdateOrderStatusErrors, UpdateOrderStatusResponses, UpdateProductData, UpdateProductErrors, UpdateProductResponses, UpdateReviewData, UpdateReviewErrors, UpdateReviewResponses, UpdateVariantTypeData, UpdateVariantTypeErrors, UpdateVariantTypeResponses, VerifyEmailData, VerifyEmailErrors, VerifyEmailResponses, VerifyPaymentData, VerifyPaymentErrors, VerifyPaymentResponses } from './types.gen';
+import type { AddToCartData, AddToCartErrors, AddToCartResponses, AddToWishlistData, AddToWishlistErrors, AddToWishlistResponses, AdminEnrollUserData, AdminEnrollUserErrors, AdminEnrollUserResponses, AdminStatsData, AdminStatsErrors, AdminStatsResponses, ArchiveProductData, ArchiveProductErrors, ArchiveProductResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, ConfirmVideoUploadData, ConfirmVideoUploadErrors, ConfirmVideoUploadResponses, ContinueWatchingData, ContinueWatchingErrors, ContinueWatchingResponses, CoursesGetCourseData, CoursesGetCourseErrors, CoursesGetCourseResponses, CoursesListCoursesData, CoursesListCoursesErrors, CoursesListCoursesResponses, CreateAddressData, CreateAddressErrors, CreateAddressResponses, CreateCategoryData, CreateCategoryErrors, CreateCategoryResponses, CreateCourseCategoryData, CreateCourseCategoryErrors, CreateCourseCategoryResponses, CreateCourseData, CreateCourseErrors, CreateCourseResponses, CreateCourseReviewData, CreateCourseReviewErrors, CreateCourseReviewResponses, CreateLessonData, CreateLessonErrors, CreateLessonResponses, CreateMediumData, CreateMediumErrors, CreateMediumResponses, CreateOrderData, CreateOrderErrors, CreateOrderResponses, CreateProductData, CreateProductErrors, CreateProductResponses, CreateSectionData, CreateSectionErrors, CreateSectionResponses, CreateVariantTypeData, CreateVariantTypeErrors, CreateVariantTypeResponses, DeleteAddressData, DeleteAddressErrors, DeleteAddressResponses, DeleteCategoryData, DeleteCategoryErrors, DeleteCategoryResponses, DeleteCourseCategoryData, DeleteCourseCategoryErrors, DeleteCourseCategoryResponses, DeleteCourseData, DeleteCourseErrors, DeleteCourseResponses, DeleteCourseReviewData, DeleteCourseReviewErrors, DeleteCourseReviewResponses, DeleteEnrollmentData, DeleteEnrollmentErrors, DeleteEnrollmentResponses, DeleteLessonData, DeleteLessonErrors, DeleteLessonResponses, DeleteMediumData, DeleteMediumErrors, DeleteMediumResponses, DeleteOwnAccountData, DeleteOwnAccountErrors, DeleteOwnAccountResponses, DeleteProductData, DeleteProductErrors, DeleteProductResponses, DeleteReviewData, DeleteReviewErrors, DeleteReviewResponses, DeleteSectionData, DeleteSectionErrors, DeleteSectionResponses, DeleteVariantTypeData, DeleteVariantTypeErrors, DeleteVariantTypeResponses, EnrollInCourseData, EnrollInCourseErrors, EnrollInCourseResponses, FeatureCourseData, FeatureCourseErrors, FeatureCourseResponses, FeaturedProductsData, FeaturedProductsErrors, FeaturedProductsResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetAuthProvidersData, GetAuthProvidersErrors, GetAuthProvidersResponses, GetCategoryData, GetCategoryErrors, GetCategoryResponses, GetCourseBySlugData, GetCourseBySlugErrors, GetCourseBySlugResponses, GetCourseCategoryData, GetCourseCategoryErrors, GetCourseCategoryResponses, GetCourseCurriculumData, GetCourseCurriculumErrors, GetCourseCurriculumResponses, GetCourseData, GetCourseErrors, GetCourseProgressData, GetCourseProgressErrors, GetCourseProgressResponses, GetCourseResponses, GetCourseStatsData, GetCourseStatsErrors, GetCourseStatsResponses, GetEnrollmentData, GetEnrollmentErrors, GetEnrollmentResponses, GetEnrollmentStatusData, GetEnrollmentStatusErrors, GetEnrollmentStatusResponses, GetHomePageSettingsData, GetHomePageSettingsErrors, GetHomePageSettingsResponses, GetImageData, GetImageErrors, GetImageResponses, GetLessonData, GetLessonErrors, GetLessonProgressData, GetLessonProgressErrors, GetLessonProgressResponses, GetLessonResponses, GetLessonVideoData, GetLessonVideoErrors, GetLessonVideoResponses, GetMediumData, GetMediumErrors, GetMediumResponses, GetMyCartData, GetMyCartErrors, GetMyCartResponses, GetMyCourseReviewData, GetMyCourseReviewErrors, GetMyCourseReviewResponses, GetMyWishlistData, GetMyWishlistErrors, GetMyWishlistResponses, GetOrderDetailsData, GetOrderDetailsErrors, GetOrderDetailsResponses, GetProductBySlugData, GetProductBySlugErrors, GetProductBySlugResponses, GetProductData, GetProductErrors, GetProductImagesData, GetProductImagesErrors, GetProductImagesResponses, GetProductResponses, GetReviewDetailData, GetReviewDetailErrors, GetReviewDetailResponses, GetUserData, GetUserErrors, GetUserResponses, GetVariantData, GetVariantErrors, GetVariantResponses, GetVariantTypeData, GetVariantTypeErrors, GetVariantTypeResponses, GoogleAuthData, GoogleAuthErrors, GoogleAuthResponses, HealthCheckData, HealthCheckDetailedData, HealthCheckDetailedErrors, HealthCheckDetailedResponses, HealthCheckErrors, HealthCheckResponses, InitVideoUploadData, InitVideoUploadErrors, InitVideoUploadResponses, ListAddressesData, ListAddressesErrors, ListAddressesResponses, ListAllReviewsData, ListAllReviewsErrors, ListAllReviewsResponses, ListCategoriesData, ListCategoriesErrors, ListCategoriesResponses, ListCourseCategoriesData, ListCourseCategoriesErrors, ListCourseCategoriesResponses, ListCourseReviewsData, ListCourseReviewsErrors, ListCourseReviewsResponses, ListCoursesData, ListCoursesErrors, ListCoursesResponses, ListEnrollmentsData, ListEnrollmentsErrors, ListEnrollmentsResponses, ListMediumsData, ListMediumsErrors, ListMediumsResponses, ListMyEnrollmentsData, ListMyEnrollmentsErrors, ListMyEnrollmentsResponses, ListMyOrdersData, ListMyOrdersErrors, ListMyOrdersResponses, ListOrdersData, ListOrdersErrors, ListOrdersResponses, ListProductsData, ListProductsErrors, ListProductsResponses, ListProfilesData, ListProfilesErrors, ListProfilesResponses, ListPublicCourseCategoriesData, ListPublicCourseCategoriesErrors, ListPublicCourseCategoriesResponses, ListUsersData, ListUsersErrors, ListUsersResponses, ListVariantsData, ListVariantsErrors, ListVariantsResponses, ListVariantTypesData, ListVariantTypesErrors, ListVariantTypesResponses, LoginData, LoginErrors, LoginResponses, LogoutAllData, LogoutAllErrors, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, MeData, MeErrors, MeResponses, MoveLessonData, MoveLessonErrors, MoveLessonResponses, OrdersGetOrderDetailsData, OrdersGetOrderDetailsErrors, OrdersGetOrderDetailsResponses, OverviewData, OverviewErrors, OverviewResponses, ProductsGetProductData, ProductsGetProductErrors, ProductsGetProductResponses, ProductsListProductsData, ProductsListProductsErrors, ProductsListProductsResponses, PublishCourseData, PublishCourseErrors, PublishCourseResponses, PublishProductData, PublishProductErrors, PublishProductResponses, ReadMyAddressesData, ReadMyAddressesErrors, ReadMyAddressesResponses, ReadOwnProfileData, ReadOwnProfileErrors, ReadOwnProfileResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, RemoveFromCartData, RemoveFromCartErrors, RemoveFromCartResponses, RemoveFromWishlistData, RemoveFromWishlistErrors, RemoveFromWishlistResponses, ReorderLessonsData, ReorderLessonsErrors, ReorderLessonsResponses, ReorderSectionsData, ReorderSectionsErrors, ReorderSectionsResponses, RequestVerificationData, RequestVerificationErrors, RequestVerificationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, SearchProductsData, SearchProductsErrors, SearchProductsResponses, SetPasswordData, SetPasswordErrors, SetPasswordResponses, UnenrollFromCourseData, UnenrollFromCourseErrors, UnenrollFromCourseResponses, UnfeatureCourseData, UnfeatureCourseErrors, UnfeatureCourseResponses, UnpublishCourseData, UnpublishCourseErrors, UnpublishCourseResponses, UpdateAddressData, UpdateAddressErrors, UpdateAddressResponses, UpdateCartItemData, UpdateCartItemErrors, UpdateCartItemResponses, UpdateCategoryData, UpdateCategoryErrors, UpdateCategoryResponses, UpdateCourseCategoryData, UpdateCourseCategoryErrors, UpdateCourseCategoryResponses, UpdateCourseData, UpdateCourseErrors, UpdateCourseResponses, UpdateCourseReviewData, UpdateCourseReviewErrors, UpdateCourseReviewResponses, UpdateHomePageSettingsData, UpdateHomePageSettingsErrors, UpdateHomePageSettingsResponses, UpdateLessonData, UpdateLessonErrors, UpdateLessonProgressData, UpdateLessonProgressErrors, UpdateLessonProgressResponses, UpdateLessonResponses, UpdateMediumData, UpdateMediumErrors, UpdateMediumResponses, UpdateOrderStatusData, UpdateOrderStatusErrors, UpdateOrderStatusResponses, UpdateOwnProfileData, UpdateOwnProfileErrors, UpdateOwnProfileResponses, UpdateProductData, UpdateProductErrors, UpdateProductResponses, UpdateReviewData, UpdateReviewErrors, UpdateReviewResponses, UpdateSectionData, UpdateSectionErrors, UpdateSectionResponses, UpdateVariantTypeData, UpdateVariantTypeErrors, UpdateVariantTypeResponses, VerifyEmailData, VerifyEmailErrors, VerifyEmailResponses, VerifyPaymentData, VerifyPaymentErrors, VerifyPaymentResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -419,6 +419,64 @@ export const getImage = <ThrowOnError extends boolean = false>(options: Options<
 });
 
 /**
+ * List Course Categories
+ */
+export const listCourseCategories = <ThrowOnError extends boolean = false>(options?: Options<ListCourseCategoriesData, ThrowOnError>) => (options?.client ?? client).get<ListCourseCategoriesResponses, ListCourseCategoriesErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/course-categories',
+    ...options
+});
+
+/**
+ * Create Course Category
+ */
+export const createCourseCategory = <ThrowOnError extends boolean = false>(options: Options<CreateCourseCategoryData, ThrowOnError>) => (options.client ?? client).post<CreateCourseCategoryResponses, CreateCourseCategoryErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/course-categories',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete Course Category
+ */
+export const deleteCourseCategory = <ThrowOnError extends boolean = false>(options: Options<DeleteCourseCategoryData, ThrowOnError>) => (options.client ?? client).delete<DeleteCourseCategoryResponses, DeleteCourseCategoryErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/course-categories/{category_id}',
+    ...options
+});
+
+/**
+ * Get Course Category
+ */
+export const getCourseCategory = <ThrowOnError extends boolean = false>(options: Options<GetCourseCategoryData, ThrowOnError>) => (options.client ?? client).get<GetCourseCategoryResponses, GetCourseCategoryErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/course-categories/{category_id}',
+    ...options
+});
+
+/**
+ * Update Course Category
+ */
+export const updateCourseCategory = <ThrowOnError extends boolean = false>(options: Options<UpdateCourseCategoryData, ThrowOnError>) => (options.client ?? client).put<UpdateCourseCategoryResponses, UpdateCourseCategoryErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/course-categories/{category_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * List Courses
  */
 export const listCourses = <ThrowOnError extends boolean = false>(options?: Options<ListCoursesData, ThrowOnError>) => (options?.client ?? client).get<ListCoursesResponses, ListCoursesErrors, ThrowOnError>({
@@ -429,13 +487,293 @@ export const listCourses = <ThrowOnError extends boolean = false>(options?: Opti
 });
 
 /**
+ * Create Course
+ */
+export const createCourse = <ThrowOnError extends boolean = false>(options: Options<CreateCourseData, ThrowOnError>) => (options.client ?? client).post<CreateCourseResponses, CreateCourseErrors, ThrowOnError>({
+    ...formDataBodySerializer,
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses',
+    ...options,
+    headers: {
+        'Content-Type': null,
+        ...options.headers
+    }
+});
+
+/**
+ * Delete Course
+ */
+export const deleteCourse = <ThrowOnError extends boolean = false>(options: Options<DeleteCourseData, ThrowOnError>) => (options.client ?? client).delete<DeleteCourseResponses, DeleteCourseErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{slug}',
+    ...options
+});
+
+/**
  * Get Course
  */
 export const getCourse = <ThrowOnError extends boolean = false>(options: Options<GetCourseData, ThrowOnError>) => (options.client ?? client).get<GetCourseResponses, GetCourseErrors, ThrowOnError>({
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/admin/courses/{course_id}',
+    url: '/api/admin/courses/{slug}',
     ...options
+});
+
+/**
+ * Update Course
+ */
+export const updateCourse = <ThrowOnError extends boolean = false>(options: Options<UpdateCourseData, ThrowOnError>) => (options.client ?? client).put<UpdateCourseResponses, UpdateCourseErrors, ThrowOnError>({
+    ...formDataBodySerializer,
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{slug}',
+    ...options,
+    headers: {
+        'Content-Type': null,
+        ...options.headers
+    }
+});
+
+/**
+ * Publish Course
+ */
+export const publishCourse = <ThrowOnError extends boolean = false>(options: Options<PublishCourseData, ThrowOnError>) => (options.client ?? client).post<PublishCourseResponses, PublishCourseErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{slug}/publish',
+    ...options
+});
+
+/**
+ * Unpublish Course
+ */
+export const unpublishCourse = <ThrowOnError extends boolean = false>(options: Options<UnpublishCourseData, ThrowOnError>) => (options.client ?? client).post<UnpublishCourseResponses, UnpublishCourseErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{slug}/unpublish',
+    ...options
+});
+
+/**
+ * Feature Course
+ */
+export const featureCourse = <ThrowOnError extends boolean = false>(options: Options<FeatureCourseData, ThrowOnError>) => (options.client ?? client).post<FeatureCourseResponses, FeatureCourseErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{slug}/feature',
+    ...options
+});
+
+/**
+ * Unfeature Course
+ */
+export const unfeatureCourse = <ThrowOnError extends boolean = false>(options: Options<UnfeatureCourseData, ThrowOnError>) => (options.client ?? client).post<UnfeatureCourseResponses, UnfeatureCourseErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{slug}/unfeature',
+    ...options
+});
+
+/**
+ * Get Course Stats
+ */
+export const getCourseStats = <ThrowOnError extends boolean = false>(options: Options<GetCourseStatsData, ThrowOnError>) => (options.client ?? client).get<GetCourseStatsResponses, GetCourseStatsErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{course_id}/stats',
+    ...options
+});
+
+/**
+ * List Enrollments
+ */
+export const listEnrollments = <ThrowOnError extends boolean = false>(options?: Options<ListEnrollmentsData, ThrowOnError>) => (options?.client ?? client).get<ListEnrollmentsResponses, ListEnrollmentsErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/enrollments',
+    ...options
+});
+
+/**
+ * Admin Enroll User
+ */
+export const adminEnrollUser = <ThrowOnError extends boolean = false>(options: Options<AdminEnrollUserData, ThrowOnError>) => (options.client ?? client).post<AdminEnrollUserResponses, AdminEnrollUserErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/enrollments',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete Enrollment
+ */
+export const deleteEnrollment = <ThrowOnError extends boolean = false>(options: Options<DeleteEnrollmentData, ThrowOnError>) => (options.client ?? client).delete<DeleteEnrollmentResponses, DeleteEnrollmentErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/enrollments/{enrollment_id}',
+    ...options
+});
+
+/**
+ * Get Enrollment
+ */
+export const getEnrollment = <ThrowOnError extends boolean = false>(options: Options<GetEnrollmentData, ThrowOnError>) => (options.client ?? client).get<GetEnrollmentResponses, GetEnrollmentErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/enrollments/{enrollment_id}',
+    ...options
+});
+
+/**
+ * Create Section
+ */
+export const createSection = <ThrowOnError extends boolean = false>(options: Options<CreateSectionData, ThrowOnError>) => (options.client ?? client).post<CreateSectionResponses, CreateSectionErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{course_id}/sections',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Reorder Sections
+ */
+export const reorderSections = <ThrowOnError extends boolean = false>(options: Options<ReorderSectionsData, ThrowOnError>) => (options.client ?? client).put<ReorderSectionsResponses, ReorderSectionsErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{course_id}/sections/reorder',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete Section
+ */
+export const deleteSection = <ThrowOnError extends boolean = false>(options: Options<DeleteSectionData, ThrowOnError>) => (options.client ?? client).delete<DeleteSectionResponses, DeleteSectionErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{course_id}/sections/{section_id}',
+    ...options
+});
+
+/**
+ * Update Section
+ */
+export const updateSection = <ThrowOnError extends boolean = false>(options: Options<UpdateSectionData, ThrowOnError>) => (options.client ?? client).put<UpdateSectionResponses, UpdateSectionErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{course_id}/sections/{section_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Create Lesson
+ */
+export const createLesson = <ThrowOnError extends boolean = false>(options: Options<CreateLessonData, ThrowOnError>) => (options.client ?? client).post<CreateLessonResponses, CreateLessonErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{course_id}/sections/{section_id}/lessons',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Reorder Lessons
+ */
+export const reorderLessons = <ThrowOnError extends boolean = false>(options: Options<ReorderLessonsData, ThrowOnError>) => (options.client ?? client).put<ReorderLessonsResponses, ReorderLessonsErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{course_id}/sections/{section_id}/lessons/reorder',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete Lesson
+ */
+export const deleteLesson = <ThrowOnError extends boolean = false>(options: Options<DeleteLessonData, ThrowOnError>) => (options.client ?? client).delete<DeleteLessonResponses, DeleteLessonErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{course_id}/sections/{section_id}/lessons/{lesson_id}',
+    ...options
+});
+
+/**
+ * Update Lesson
+ */
+export const updateLesson = <ThrowOnError extends boolean = false>(options: Options<UpdateLessonData, ThrowOnError>) => (options.client ?? client).put<UpdateLessonResponses, UpdateLessonErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{course_id}/sections/{section_id}/lessons/{lesson_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Init Video Upload
+ */
+export const initVideoUpload = <ThrowOnError extends boolean = false>(options: Options<InitVideoUploadData, ThrowOnError>) => (options.client ?? client).post<InitVideoUploadResponses, InitVideoUploadErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{course_id}/lessons/{lesson_id}/video/init',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Confirm Video Upload
+ */
+export const confirmVideoUpload = <ThrowOnError extends boolean = false>(options: Options<ConfirmVideoUploadData, ThrowOnError>) => (options.client ?? client).post<ConfirmVideoUploadResponses, ConfirmVideoUploadErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{course_id}/lessons/{lesson_id}/video/confirm',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Move Lesson
+ */
+export const moveLesson = <ThrowOnError extends boolean = false>(options: Options<MoveLessonData, ThrowOnError>) => (options.client ?? client).put<MoveLessonResponses, MoveLessonErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{course_id}/lessons/{lesson_id}/move',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**
@@ -562,6 +900,43 @@ export const login = <ThrowOnError extends boolean = false>(options: Options<Log
 });
 
 /**
+ * Google Auth
+ */
+export const googleAuth = <ThrowOnError extends boolean = false>(options: Options<GoogleAuthData, ThrowOnError>) => (options.client ?? client).post<GoogleAuthResponses, GoogleAuthErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/api/auth/google',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Set Password
+ */
+export const setPassword = <ThrowOnError extends boolean = false>(options: Options<SetPasswordData, ThrowOnError>) => (options.client ?? client).post<SetPasswordResponses, SetPasswordErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/auth/set-password',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get Auth Providers
+ */
+export const getAuthProviders = <ThrowOnError extends boolean = false>(options?: Options<GetAuthProvidersData, ThrowOnError>) => (options?.client ?? client).get<GetAuthProvidersResponses, GetAuthProvidersErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/auth/providers',
+    ...options
+});
+
+/**
  * Refresh Token
  */
 export const refreshToken = <ThrowOnError extends boolean = false>(options: Options<RefreshTokenData, ThrowOnError>) => (options.client ?? client).post<RefreshTokenResponses, RefreshTokenErrors, ThrowOnError>({
@@ -674,6 +1049,20 @@ export const logoutAll = <ThrowOnError extends boolean = false>(options?: Option
 });
 
 /**
+ * Delete Own Account
+ */
+export const deleteOwnAccount = <ThrowOnError extends boolean = false>(options: Options<DeleteOwnAccountData, ThrowOnError>) => (options.client ?? client).delete<DeleteOwnAccountResponses, DeleteOwnAccountErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/profiles/me',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Read Own Profile
  */
 export const readOwnProfile = <ThrowOnError extends boolean = false>(options?: Options<ReadOwnProfileData, ThrowOnError>) => (options?.client ?? client).get<ReadOwnProfileResponses, ReadOwnProfileErrors, ThrowOnError>({
@@ -681,6 +1070,20 @@ export const readOwnProfile = <ThrowOnError extends boolean = false>(options?: O
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/profiles/me',
     ...options
+});
+
+/**
+ * Update Own Profile
+ */
+export const updateOwnProfile = <ThrowOnError extends boolean = false>(options: Options<UpdateOwnProfileData, ThrowOnError>) => (options.client ?? client).patch<UpdateOwnProfileResponses, UpdateOwnProfileErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/profiles/me',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**
@@ -751,41 +1154,11 @@ export const updateAddress = <ThrowOnError extends boolean = false>(options: Opt
 });
 
 /**
- * List Reviews
- *
- * Get approved reviews (public endpoint).
+ * List Public Course Categories
  */
-export const listReviews = <ThrowOnError extends boolean = false>(options?: Options<ListReviewsData, ThrowOnError>) => (options?.client ?? client).get<ListReviewsResponses, ListReviewsErrors, ThrowOnError>({
+export const listPublicCourseCategories = <ThrowOnError extends boolean = false>(options?: Options<ListPublicCourseCategoriesData, ThrowOnError>) => (options?.client ?? client).get<ListPublicCourseCategoriesResponses, ListPublicCourseCategoriesErrors, ThrowOnError>({
     responseType: 'json',
-    url: '/api/reviews',
-    ...options
-});
-
-/**
- * Create Review
- *
- * Create a new review (requires login).
- */
-export const createReview = <ThrowOnError extends boolean = false>(options: Options<CreateReviewData, ThrowOnError>) => (options.client ?? client).post<CreateReviewResponses, CreateReviewErrors, ThrowOnError>({
-    responseType: 'json',
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/reviews',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Get My Reviews
- *
- * Get current user's reviews.
- */
-export const getMyReviews = <ThrowOnError extends boolean = false>(options?: Options<GetMyReviewsData, ThrowOnError>) => (options?.client ?? client).get<GetMyReviewsResponses, GetMyReviewsErrors, ThrowOnError>({
-    responseType: 'json',
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/reviews/user/my-reviews',
+    url: '/api/course-categories',
     ...options
 });
 
@@ -799,11 +1172,152 @@ export const coursesListCourses = <ThrowOnError extends boolean = false>(options
 });
 
 /**
+ * Get Course By Slug
+ */
+export const getCourseBySlug = <ThrowOnError extends boolean = false>(options: Options<GetCourseBySlugData, ThrowOnError>) => (options.client ?? client).get<GetCourseBySlugResponses, GetCourseBySlugErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/api/courses/by-slug/{slug}',
+    ...options
+});
+
+/**
  * Get Course
  */
 export const coursesGetCourse = <ThrowOnError extends boolean = false>(options: Options<CoursesGetCourseData, ThrowOnError>) => (options.client ?? client).get<CoursesGetCourseResponses, CoursesGetCourseErrors, ThrowOnError>({
     responseType: 'json',
-    url: '/api/courses/{course_id}',
+    url: '/api/courses/{slug}',
+    ...options
+});
+
+/**
+ * Get Course Curriculum
+ */
+export const getCourseCurriculum = <ThrowOnError extends boolean = false>(options: Options<GetCourseCurriculumData, ThrowOnError>) => (options.client ?? client).get<GetCourseCurriculumResponses, GetCourseCurriculumErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/api/courses/{course_id}/curriculum',
+    ...options
+});
+
+/**
+ * Get Lesson
+ */
+export const getLesson = <ThrowOnError extends boolean = false>(options: Options<GetLessonData, ThrowOnError>) => (options.client ?? client).get<GetLessonResponses, GetLessonErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/courses/{course_id}/lessons/{lesson_id}',
+    ...options
+});
+
+/**
+ * Get Lesson Video
+ */
+export const getLessonVideo = <ThrowOnError extends boolean = false>(options: Options<GetLessonVideoData, ThrowOnError>) => (options.client ?? client).get<GetLessonVideoResponses, GetLessonVideoErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/courses/{course_id}/lessons/{lesson_id}/video',
+    ...options
+});
+
+/**
+ * List Course Reviews
+ */
+export const listCourseReviews = <ThrowOnError extends boolean = false>(options: Options<ListCourseReviewsData, ThrowOnError>) => (options.client ?? client).get<ListCourseReviewsResponses, ListCourseReviewsErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/api/courses/{slug}/reviews',
+    ...options
+});
+
+/**
+ * Create Course Review
+ */
+export const createCourseReview = <ThrowOnError extends boolean = false>(options: Options<CreateCourseReviewData, ThrowOnError>) => (options.client ?? client).post<CreateCourseReviewResponses, CreateCourseReviewErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/courses/{slug}/reviews',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete Course Review
+ *
+ * Delete the current user's review for a course.
+ */
+export const deleteCourseReview = <ThrowOnError extends boolean = false>(options: Options<DeleteCourseReviewData, ThrowOnError>) => (options.client ?? client).delete<DeleteCourseReviewResponses, DeleteCourseReviewErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/courses/{slug}/reviews/my-review',
+    ...options
+});
+
+/**
+ * Get My Course Review
+ */
+export const getMyCourseReview = <ThrowOnError extends boolean = false>(options: Options<GetMyCourseReviewData, ThrowOnError>) => (options.client ?? client).get<GetMyCourseReviewResponses, GetMyCourseReviewErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/courses/{slug}/reviews/my-review',
+    ...options
+});
+
+/**
+ * Update Course Review
+ */
+export const updateCourseReview = <ThrowOnError extends boolean = false>(options: Options<UpdateCourseReviewData, ThrowOnError>) => (options.client ?? client).put<UpdateCourseReviewResponses, UpdateCourseReviewErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/courses/{slug}/reviews/my-review',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List My Enrollments
+ */
+export const listMyEnrollments = <ThrowOnError extends boolean = false>(options?: Options<ListMyEnrollmentsData, ThrowOnError>) => (options?.client ?? client).get<ListMyEnrollmentsResponses, ListMyEnrollmentsErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/enrollments',
+    ...options
+});
+
+/**
+ * Enroll In Course
+ */
+export const enrollInCourse = <ThrowOnError extends boolean = false>(options: Options<EnrollInCourseData, ThrowOnError>) => (options.client ?? client).post<EnrollInCourseResponses, EnrollInCourseErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/enrollments',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Unenroll From Course
+ */
+export const unenrollFromCourse = <ThrowOnError extends boolean = false>(options: Options<UnenrollFromCourseData, ThrowOnError>) => (options.client ?? client).delete<UnenrollFromCourseResponses, UnenrollFromCourseErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/enrollments/{course_id}',
+    ...options
+});
+
+/**
+ * Get Enrollment Status
+ */
+export const getEnrollmentStatus = <ThrowOnError extends boolean = false>(options: Options<GetEnrollmentStatusData, ThrowOnError>) => (options.client ?? client).get<GetEnrollmentStatusResponses, GetEnrollmentStatusErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/enrollments/{course_id}',
     ...options
 });
 
@@ -822,6 +1336,50 @@ export const productsListProducts = <ThrowOnError extends boolean = false>(optio
 export const productsGetProduct = <ThrowOnError extends boolean = false>(options: Options<ProductsGetProductData, ThrowOnError>) => (options.client ?? client).get<ProductsGetProductResponses, ProductsGetProductErrors, ThrowOnError>({
     responseType: 'json',
     url: '/api/products/{slug}',
+    ...options
+});
+
+/**
+ * Get Lesson Progress
+ */
+export const getLessonProgress = <ThrowOnError extends boolean = false>(options: Options<GetLessonProgressData, ThrowOnError>) => (options.client ?? client).get<GetLessonProgressResponses, GetLessonProgressErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/courses/{course_id}/lessons/{lesson_id}/progress',
+    ...options
+});
+
+/**
+ * Update Lesson Progress
+ */
+export const updateLessonProgress = <ThrowOnError extends boolean = false>(options: Options<UpdateLessonProgressData, ThrowOnError>) => (options.client ?? client).put<UpdateLessonProgressResponses, UpdateLessonProgressErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/courses/{course_id}/lessons/{lesson_id}/progress',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get Course Progress
+ */
+export const getCourseProgress = <ThrowOnError extends boolean = false>(options: Options<GetCourseProgressData, ThrowOnError>) => (options.client ?? client).get<GetCourseProgressResponses, GetCourseProgressErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/courses/{course_id}/progress',
+    ...options
+});
+
+/**
+ * Continue Watching
+ */
+export const continueWatching = <ThrowOnError extends boolean = false>(options?: Options<ContinueWatchingData, ThrowOnError>) => (options?.client ?? client).get<ContinueWatchingResponses, ContinueWatchingErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/progress/continue-watching',
     ...options
 });
 
