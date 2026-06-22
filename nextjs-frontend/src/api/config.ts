@@ -4,6 +4,11 @@ client.setConfig({
   throwOnError: true,
 });
 
+if (typeof window === "undefined") {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
+  client.setConfig({ baseURL: new URL(apiUrl).origin });
+}
+
 export const setAuthToken = (token?: string | null) => {
   client.setConfig({
     headers: {

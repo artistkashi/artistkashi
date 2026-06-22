@@ -41,8 +41,8 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { notFound, usePathname, useRouter } from "next/navigation";
-import { createPortal } from "react-dom";
 import { use, useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 function formatDuration(seconds: number | undefined | null): string {
   if (!seconds) return "Self-paced";
@@ -79,7 +79,10 @@ function DemoVideoPlayer({
     const onDur = () => setDuration(video.duration);
     const onPlay = () => setPaused(false);
     const onPause = () => setPaused(true);
-    const onVol = () => { setVolume(video.volume); setMuted(video.muted); };
+    const onVol = () => {
+      setVolume(video.volume);
+      setMuted(video.muted);
+    };
     const onEnded = () => setPaused(true);
     video.addEventListener("timeupdate", onTime);
     video.addEventListener("durationchange", onDur);
@@ -130,7 +133,7 @@ function DemoVideoPlayer({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0, transition: { duration: 0.3 } }}
-        className="fixed inset-0 z-[100] flex flex-col bg-black"
+        className="fixed inset-0 z-100 flex flex-col bg-black"
         onClick={onClose}
       >
         <div
@@ -240,7 +243,10 @@ function DemoVideoPlayer({
                   onClick={() => {
                     const video = videoRef.current;
                     if (!video || !video.duration) return;
-                    video.currentTime = Math.min(video.currentTime + 10, video.duration);
+                    video.currentTime = Math.min(
+                      video.currentTime + 10,
+                      video.duration
+                    );
                   }}
                   className="text-text-muted hover:text-text-main transition-colors shrink-0"
                   title="Forward 10s"
@@ -340,14 +346,7 @@ export default function CourseDetailPage({
           getCourseCurriculum({ path: { course_id: courseId! } })
         );
       } catch {
-        try {
-          const res = await fetch(`/api/courses/${courseId}/curriculum`);
-          if (!res.ok) return null;
-          const json = await res.json();
-          return json?.data ?? null;
-        } catch {
-          return null;
-        }
+        return null;
       }
     },
     enabled: !!courseId,
@@ -559,13 +558,16 @@ export default function CourseDetailPage({
                       </button>
                     </div>
                   )}
-                  {showDemo && course.computed_demo_video_url && typeof document !== "undefined" && createPortal(
-                    <DemoVideoPlayer
-                      url={course.computed_demo_video_url}
-                      onClose={() => setShowDemo(false)}
-                    />,
-                    document.body
-                  )}
+                  {showDemo &&
+                    course.computed_demo_video_url &&
+                    typeof document !== "undefined" &&
+                    createPortal(
+                      <DemoVideoPlayer
+                        url={course.computed_demo_video_url}
+                        onClose={() => setShowDemo(false)}
+                      />,
+                      document.body
+                    )}
                 </div>
                 <div className="p-8">
                   <div className="text-text-main font-extrabold text-4xl mb-1">

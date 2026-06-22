@@ -21,8 +21,10 @@ import { cn } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
+  ArrowRight,
   ChevronLeft,
   ChevronRight,
+  Lock,
   Maximize,
   Menu,
   MessageCircle,
@@ -49,7 +51,6 @@ function formatDuration(seconds: number | undefined | null): string {
     return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
-
 
 async function fetchCourseBySlug(slug: string): Promise<CourseRead> {
   return unwrap(coursesGetCourse({ path: { slug } }));
@@ -136,11 +137,7 @@ function VideoWatermark({
       hour12: true,
     });
 
-    const lines = [
-      `${userName}`,
-      `${userEmail}`,
-      `${dateStr} ${timeStr}`,
-    ];
+    const lines = [`${userName}`, `${userEmail}`, `${dateStr} ${timeStr}`];
 
     const fontSize = Math.max(11, Math.min(14, rect.width / 60));
     ctx.font = `${fontSize}px monospace`;
@@ -197,8 +194,8 @@ function VideoWatermark({
     const diagonalText = `${userName} • ${userEmail}`;
     for (let i = -2; i < 4; i++) {
       for (let j = -2; j < 4; j++) {
-        const dx = i * 200 + ((j % 2) * 100);
-        const dy = j * 80 + ((i % 2) * 40);
+        const dx = i * 200 + (j % 2) * 100;
+        const dy = j * 80 + (i % 2) * 40;
         if (
           dx > -100 &&
           dx < rect.width + 100 &&
@@ -216,12 +213,18 @@ function VideoWatermark({
     drawWatermark();
     const interval = setInterval(() => {
       drawWatermark();
-      if (containerRef.current && !document.body.contains(containerRef.current)) {
+      if (
+        containerRef.current &&
+        !document.body.contains(containerRef.current)
+      ) {
         document.body.appendChild(containerRef.current);
       }
     }, 4000);
     const onResize = () => {
-      if (containerRef.current && document.body.contains(containerRef.current)) {
+      if (
+        containerRef.current &&
+        document.body.contains(containerRef.current)
+      ) {
         drawWatermark();
       }
     };
@@ -434,8 +437,7 @@ export default function CourseLessonPlayerPage({
     enabled: !!courseId && !!user,
   });
 
-  const isEnrolled =
-    user?.role === "admin" || !!enrollmentData?.is_active;
+  const isEnrolled = user?.role === "admin" || !!enrollmentData?.is_active;
 
   const { data: curriculumData } = useQuery({
     queryKey: ["course-curriculum", courseId],
@@ -660,26 +662,15 @@ export default function CourseLessonPlayerPage({
     const handleBeforeUnload = () => {
       const current = progressRef.current;
       if (current <= 0) return;
-      const token = localStorage.getItem("artistkashi_auth_token");
-      if (!token) return;
-      fetch(`/api/courses/${courseId}/lessons/${lessonId}/progress`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          status: "in_progress",
-          watch_seconds: Math.floor(current),
-          resume_position_seconds: Math.floor(current),
-          last_watched_at: new Date().toISOString(),
-        }),
-        keepalive: true,
-      }).catch(() => {});
+      saveProgressMutation.mutate({
+        status: "in_progress",
+        watch_seconds: Math.floor(current),
+        resume_position_seconds: Math.floor(current),
+      });
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [courseId, lessonId]);
+  }, [courseId, lessonId, saveProgressMutation]);
 
   useEffect(() => {
     const handleVisibility = () => {
@@ -750,24 +741,21 @@ export default function CourseLessonPlayerPage({
               {currentLesson?.is_preview === false && !isEnrolled ? (
                 <div className="flex flex-col items-center justify-center gap-4 p-8 text-center">
                   <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center">
-                    <svg className="w-8 h-8 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                    </svg>
+                    <Lock size={32} className="text-gold" />
                   </div>
                   <h3 className="text-text-main text-lg font-semibold">
                     This lesson is locked
                   </h3>
                   <p className="text-text-muted text-sm max-w-md">
-                    Enroll in this course to access all lessons including this one.
+                    Enroll in this course to access all lessons including this
+                    one.
                   </p>
                   <Link
                     href={`/courses/${slug}`}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-dark font-semibold text-sm hover:bg-gold/90 transition-colors"
                   >
                     Enroll Now
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                    </svg>
+                    <ArrowRight size={16} />
                   </Link>
                 </div>
               ) : lessonVideoLoading ? (
@@ -790,7 +778,8 @@ export default function CourseLessonPlayerPage({
                   userName={user?.full_name}
                   userEmail={user?.email}
                   showWatermark={
-                    user?.role === "admin" || currentLesson?.is_preview === false
+                    user?.role === "admin" ||
+                    currentLesson?.is_preview === false
                   }
                 />
               )}

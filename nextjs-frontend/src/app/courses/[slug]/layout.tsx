@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { unwrap } from "@/api/client-service";
+import { coursesGetCourse } from "@/api/openapi-client";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildMetadata, siteUrl } from "@/lib/seo";
 
@@ -8,15 +10,8 @@ type CourseDetailLayoutProps = {
 };
 
 async function fetchCourseBySlug(slug: string) {
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
   try {
-    const res = await fetch(`${apiUrl}/courses/${slug}`, {
-      next: { revalidate: 60 },
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json.data ?? null;
+    return await unwrap(coursesGetCourse({ path: { slug } }));
   } catch {
     return null;
   }

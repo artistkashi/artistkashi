@@ -3,20 +3,18 @@
 import { unwrap, unwrapPaginated } from "@/api/client-service";
 import {
   createProduct,
+  DimensionUnit,
   listCategories,
   listMediums,
   listVariantTypes,
-  updateProduct,
-} from "@/api/openapi-client";
-import {
-  DimensionUnit,
   ProductCategoryRead,
   ProductDetailRead,
   ProductImageState,
   ProductMediumRead,
   ProductStatus,
+  updateProduct,
   VariantTypeRead,
-} from "@/api/openapi-client/types.gen";
+} from "@/api/openapi-client";
 import {
   QuickAddEntityModal,
   type QuickAddEntityType,
@@ -29,7 +27,7 @@ import { getErrorMessage, getValidationErrors } from "@/lib/error-handler";
 import { slugify } from "@/lib/slugify";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronLeft,
@@ -81,7 +79,7 @@ const LAST_TAB = TAB_VALUES[TAB_VALUES.length - 1];
 
 // ─── Zod Schemas ──────────────────────────────────────────────────────────────
 const VariantSchema = z.object({
-  id: z.number().optional(),
+  id: z.string().optional(),
   variant_type_id: z.coerce.number().min(1, "Format type is required"),
   price: z.coerce.number().min(0.01, "Price must be greater than 0"),
   width: z.coerce.number().nullable(),
@@ -1257,21 +1255,22 @@ export default function ProductUploadModal({
                       Proceed
                     </PrimaryBtn>
                   ) : (
-                    <PrimaryBtn
-                      type="button"
-                      disabled={submitting}
-                      onClick={handleSubmit(onSubmit, onInvalid)}
-                      className="w-full px-6 md:px-12 py-3 md:py-3.5 text-2xs gold-glow-lg"
-                    >
-                      {submitting ? (
-                        <div className="luxury-loader luxury-loader-dark loader-sm" />
-                      ) : (
-                        <span className="flex items-center gap-2">
-                          <Save size={14} />
-                          {product ? "Preserve" : "Archive"}
-                        </span>
-                      )}
-                    </PrimaryBtn>
+                      <PrimaryBtn
+                        type="button"
+                        disabled={submitting}
+                        onClick={handleSubmit(onSubmit, onInvalid)}
+                        className="w-full px-6 md:px-12 py-3 md:py-3.5 text-2xs gold-glow-lg"
+                      >
+                        {submitting ? (
+                          <div className="luxury-loader luxury-loader-dark loader-sm" />
+                        ) : (
+                          <span className="flex items-center gap-2">
+                            <Save size={14} />
+                            {product ? "Preserve" : "Archive"}
+                          </span>
+                        )}
+                      </PrimaryBtn>
+                  
                   )}
                 </div>
               </div>
@@ -1281,6 +1280,7 @@ export default function ProductUploadModal({
               entityType={quickAddFor || "category"}
               onClose={() => setQuickAddFor(null)}
               onCreated={(e) => {
+                const now = new Date().toISOString();
                 if (quickAddFor === "category") {
                   setCategories((p) => [
                     ...p,
@@ -1290,8 +1290,8 @@ export default function ProductUploadModal({
                       slug: e.slug,
                       description: null,
                       is_active: true,
-                      created_at: null,
-                      updated_at: null,
+                      created_at: now,
+                      updated_at: now,
                     },
                   ]);
                   setValue("category_id", e.id);
@@ -1303,8 +1303,8 @@ export default function ProductUploadModal({
                       name: e.name,
                       slug: e.slug,
                       is_active: true,
-                      created_at: null,
-                      updated_at: null,
+                      created_at: now,
+                      updated_at: now,
                     },
                   ]);
                   setValue("medium_id", e.id);
@@ -1317,8 +1317,8 @@ export default function ProductUploadModal({
                       slug: e.slug,
                       description: null,
                       is_active: true,
-                      created_at: null,
-                      updated_at: null,
+                      created_at: now,
+                      updated_at: now,
                     },
                   ]);
                   setValue(
@@ -1402,33 +1402,6 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
   )
 );
 TextArea.displayName = "TextArea";
-
-function Checkbox({
-  id,
-  checked,
-  onCheckedChange,
-}: {
-  id: string;
-  checked: boolean;
-  onCheckedChange: (c: boolean) => void;
-}) {
-  return (
-    <CheckboxPrimitive.Root
-      id={id}
-      checked={checked}
-      onCheckedChange={onCheckedChange}
-      className="h-5 w-5 border border-border data-[state=checked]:border-primary transition-all duration-300 bg-surface flex items-center justify-center group/cb hover:border-primary rounded"
-    >
-      <CheckboxPrimitive.Indicator>
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="w-2.5 h-2.5 bg-primary gold-glow rounded-sm"
-        />
-      </CheckboxPrimitive.Indicator>
-    </CheckboxPrimitive.Root>
-  );
-}
 
 function SwitchField({
   label,
