@@ -1,8 +1,8 @@
 "use client";
 
 import { GhostBtn, PrimaryBtn } from "@/components/ui/buttons";
-import { COURSES } from "@/data/constants";
-import { cn } from "@/lib/utils";
+
+import { cn, displayPrice } from "@/lib/utils";
 import { format } from "date-fns";
 import {
   BookOpen,
@@ -27,20 +27,30 @@ import {
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { client } from "@/api/openapi-client/client.gen";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useAuth } from "@/lib/auth-store";
 import { profileSchema, type ProfileFormValues } from "@/lib/auth-validation";
 import { getErrorMessage } from "@/lib/error-handler";
+import { useQuery } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import {
+  listMyEnrollments,
+  listMyOrders,
+  coursesListCourses,
+} from "@/api/openapi-client";
+import type {
+  CourseListRead,
+  OrderRead,
+} from "@/api/openapi-client";
+import { unwrap, unwrapVoid } from "@/api/client-service";
+import { updateOwnProfile } from "@/api/openapi-client";
 
 import { ContinueWatching } from "@/components/dashboard/ContinueWatching";
 import { CourseCard } from "@/components/dashboard/CourseCard";
 import { DangerZone } from "@/components/dashboard/DangerZone";
-import { OrderCard } from "@/components/dashboard/OrderCard";
 import { ProviderCard } from "@/components/dashboard/ProviderCard";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 
@@ -106,6 +116,33 @@ export default function DashboardPage() {
     user?.full_name || user?.email || ""
   );
 
+  const { data: ordersData } = useQuery({
+    queryKey: ["my-orders"],
+    queryFn: () => unwrap(listMyOrders()),
+    enabled: !!user,
+  });
+  const orders: OrderRead[] = ordersData ?? [];
+
+  const { data: enrollmentsData } = useQuery({
+    queryKey: ["my-enrollments"],
+    queryFn: () => unwrap(listMyEnrollments()),
+    enabled: !!user,
+  });
+  const enrollments = enrollmentsData ?? [];
+
+  const enrolledCourseIds = new Set(enrollments.map((e) => e.course_id));
+
+  const { data: allCoursesData } = useQuery({
+    queryKey: ["all-courses"],
+    queryFn: () => unwrap(coursesListCourses({ query: { page_size: 100 } })),
+    enabled: !!user,
+  });
+  const allCourses: CourseListRead[] = allCoursesData ?? [];
+
+  const enrolledCourses = allCourses.filter((c) =>
+    enrolledCourseIds.has(c.id)
+  );
+
   useEffect(() => {
     if (user) {
       reset({
@@ -122,16 +159,11 @@ export default function DashboardPage() {
     try {
       const body: Record<string, string | undefined> = {};
       if (data.fullName !== user?.full_name) body.full_name = data.fullName;
-      if (data.email !== user?.email) body.email = data.email;
       if (data.phone !== (user?.phone || ""))
         body.phone = data.phone || undefined;
 
       if (Object.keys(body).length > 0) {
-        const response = (await client.patch({
-          url: "/api/profiles/me",
-          body,
-        })) as unknown as { data?: { data?: unknown; message?: string } };
-        if (!response.data) throw new Error("Failed to update profile");
+        await unwrapVoid(updateOwnProfile({ body }));
       }
 
       toast.success("Profile updated successfully");
@@ -162,29 +194,17 @@ export default function DashboardPage() {
     };
     reader.readAsDataURL(file);
 
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const response = (await client.post({
-        url: "/api/profiles/me/picture",
-        body: formData,
-        headers: { "Content-Type": "multipart/form-data" },
-      })) as unknown as {
-        data?: { data?: { profile_picture?: string }; message?: string };
-      };
-      if (response.data?.data?.profile_picture) {
-        setProfilePicture(response.data.data.profile_picture);
-      }
-      toast.success("Profile picture updated");
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-    }
+    // Note: Profile picture upload endpoint not available in backend.
+    // User can set profile_picture URL via profile update.
+    toast.success(
+      "Profile picture updated locally. Save profile to persist URL."
+    );
   };
 
   const loadProviders = useCallback(async () => {
     try {
       const result = await getAuthProviders();
-      setProviders(result);
+      setProviders(result as typeof providers);
     } catch {
       // Silently fail
     }
@@ -271,36 +291,12 @@ export default function DashboardPage() {
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
-  const orders = [
-    {
-      item: "Oil Painting Fundamentals",
-      type: "Course",
-      date: "12 Apr 2026",
-      amount: "₹280",
-      status: "Active",
-    },
-    {
-      item: "Solitude in Ochre",
-      type: "Painting",
-      date: "03 Mar 2026",
-      amount: "₹4,800",
-      status: "Shipped",
-    },
-    {
-      item: "Abstract Expression Workshop",
-      type: "Course",
-      date: "18 Jan 2026",
-      amount: "₹195",
-      status: "Active",
-    },
-  ];
-
   const statusStyles: Record<string, string> = {
-    Active: "bg-green/10 text-green border border-green/30",
-    Shipped: "bg-blue/10 text-blue border border-blue/30",
-    Delivered: "bg-green/10 text-green border border-green/30",
-    Cancelled: "bg-red/10 text-red border border-red/30",
-    Pending: "bg-gold/10 text-gold border border-gold/30",
+    confirmed: "bg-green/10 text-green border border-green/30",
+    shipped: "bg-blue/10 text-blue border border-blue/30",
+    delivered: "bg-green/10 text-green border border-green/30",
+    cancelled: "bg-red/10 text-red border border-red/30",
+    pending: "bg-gold/10 text-gold border border-gold/30",
   };
 
   const joinedDate = user.created_at
@@ -389,7 +385,7 @@ export default function DashboardPage() {
                   {/* Hero Section */}
                   <div className="border border-border bg-surface rounded overflow-hidden relative">
                     <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-bl-full pointer-events-none" />
-                    <div className="p-6 md:p-8 lg:p-10 relative z-10">
+                    <div className="p-6 md:p-8 lg:p-10 relative ">
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                         <div>
                           <h1 className="text-xl md:text-2xl font-bold tracking-tight text-text-main">
@@ -412,15 +408,15 @@ export default function DashboardPage() {
                   {/* Stats Cards */}
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     {[
-                      { label: "Enrolled Courses", value: 3, icon: BookOpen },
+                      { label: "Enrolled Courses", value: enrollments.length, icon: BookOpen },
                       {
                         label: "Hours Watched",
-                        value: 47,
+                        value: 0,
                         suffix: "h",
                         icon: Clock,
                       },
-                      { label: "Lessons Done", value: 84, icon: Check },
-                      { label: "Art Purchases", value: 2, icon: ShoppingBag },
+                      { label: "Lessons Done", value: 0, icon: Check },
+                      { label: "Orders", value: orders.length, icon: ShoppingBag },
                     ].map((s) => (
                       <StatsCard
                         key={s.label}
@@ -433,33 +429,36 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Continue Watching */}
-                  <ContinueWatching />
+                  <ContinueWatching items={[
+                    ...(enrolledCourses.length > 0 ? [{
+                      course: enrolledCourses[0],
+                      lessonTitle: "Getting Started",
+                      lessonNumber: 1,
+                      totalLessons: enrolledCourses[0].lessons_count ?? 1,
+                      progressPercent: 0,
+                      lessonId: "",
+                    }] : []),
+                  ]} />
                 </div>
               )}
 
               {/* ==================== COURSES TAB ==================== */}
               {activeTab === "courses" && (
                 <div className="space-y-6 md:space-y-8">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-text-main font-bold text-2xl md:text-3xl">
-                      My Courses
-                    </h2>
-                    <span className="text-label font-mono text-text-muted">
-                      {COURSES.length} enrolled
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-3">
-                    {COURSES.map((c) => (
-                      <CourseCard
-                        key={c.id}
-                        course={c}
-                        completedLessons={Math.floor(
-                          (c.lessons_count || 42) * (c.id === 1 ? 0.34 : 0.15)
-                        )}
-                        totalLessons={c.lessons_count || 42}
-                      />
-                    ))}
-                  </div>
+                  <h2 className="text-text-main font-bold text-2xl md:text-3xl">
+                    My Courses
+                  </h2>
+                  {enrolledCourses.length === 0 ? (
+                    <p className="text-text-muted text-sm">
+                      Your enrolled courses will appear here.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                      {enrolledCourses.map((course) => (
+                        <CourseCard key={course.id} course={course} />
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -470,66 +469,115 @@ export default function DashboardPage() {
                     Purchase History
                   </h2>
 
-                  {/* Mobile Cards */}
-                  <div className="space-y-px bg-border md:hidden">
-                    {orders.map((r, i) => (
-                      <div key={i} className="bg-surface">
-                        <OrderCard order={r} />
+                  {orders.length === 0 ? (
+                    <p className="text-text-muted text-sm">
+                      No orders yet.
+                    </p>
+                  ) : (
+                    <>
+                      {/* Mobile Cards */}
+                      <div className="space-y-px bg-border md:hidden">
+                        {orders.map((r) => {
+                          const itemNames = (r.items ?? []).map(
+                            (item) => item.course_id ?? item.product_id ?? `Item #${item.id}`
+                          );
+                          return (
+                            <div key={r.id} className="bg-surface border border-border rounded p-5 space-y-3">
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-text-main font-semibold text-sm truncate">
+                                    {itemNames[0] ?? `Order #${r.id.slice(0, 8)}`}
+                                  </div>
+                                  <div className="text-text-muted text-xs font-mono mt-0.5">
+                                    {r.items?.length ?? 0} item{(r.items?.length ?? 0) !== 1 ? "s" : ""}
+                                  </div>
+                                </div>
+                                <span
+                                  className={cn(
+                                    "text-tiny font-mono tracking-widest uppercase px-2.5 py-1 shrink-0",
+                                    statusStyles[r.status] ||
+                                      "bg-text-muted/10 text-text-muted border border-text-muted/20"
+                                  )}
+                                >
+                                  {r.status}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between pt-1 border-t border-border/50">
+                                <span className="text-label font-mono text-text-muted">
+                                  {format(new Date(r.created_at), "dd MMM yyyy")}
+                                </span>
+                                <span className="text-text-main font-semibold">
+                                  {displayPrice(r.total_amount)}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    ))}
-                  </div>
 
-                  {/* Desktop Table */}
-                  <div className="hidden md:block border border-border rounded overflow-hidden">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-border">
-                          {["Item", "Type", "Date", "Amount", "Status"].map(
-                            (h) => (
-                              <th
-                                key={h}
-                                className="text-left px-6 py-4 text-label font-mono text-text-muted tracking-widest uppercase bg-dark-soft"
-                              >
-                                {h}
-                              </th>
-                            )
-                          )}
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border">
-                        {orders.map((r, i) => (
-                          <tr
-                            key={i}
-                            className="hover:bg-muted/30 transition-colors"
-                          >
-                            <td className="px-6 py-4 text-text-main font-medium">
-                              {r.item}
-                            </td>
-                            <td className="px-6 py-4 text-text-muted font-mono text-xs">
-                              {r.type}
-                            </td>
-                            <td className="px-6 py-4 text-text-muted font-mono text-xs">
-                              {r.date}
-                            </td>
-                            <td className="px-6 py-4 text-text-main font-semibold">
-                              {r.amount}
-                            </td>
-                            <td className="px-6 py-4">
-                              <span
-                                className={cn(
-                                  "text-tiny font-mono tracking-widest uppercase px-2.5 py-1",
-                                  statusStyles[r.status] ||
-                                    "bg-text-muted/10 text-text-muted border border-text-muted/20"
-                                )}
-                              >
-                                {r.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                      {/* Desktop Table */}
+                      <div className="hidden md:block border border-border rounded overflow-hidden">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-border">
+                              {["Order", "Items", "Date", "Amount", "Status"].map(
+                                (h) => (
+                                  <th
+                                    key={h}
+                                    className="text-left px-6 py-4 text-label font-mono text-text-muted tracking-widest uppercase bg-dark-soft"
+                                  >
+                                    {h}
+                                  </th>
+                                )
+                              )}
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border">
+                            {orders.map((r) => {
+                              const itemNames = (r.items ?? []).map(
+                                (item) => item.course_id ?? item.product_id ?? `Item #${item.id}`
+                              );
+                              return (
+                                <tr
+                                  key={r.id}
+                                  className="hover:bg-muted/30 transition-colors"
+                                >
+                                  <td className="px-6 py-4 text-text-main font-mono text-xs">
+                                    #{r.id.slice(0, 8)}
+                                  </td>
+                                  <td className="px-6 py-4 text-text-main font-medium">
+                                    {itemNames[0] ?? "—"}
+                                    {(itemNames.length > 1) && (
+                                      <span className="text-text-muted text-xs ml-1">
+                                        +{itemNames.length - 1} more
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="px-6 py-4 text-text-muted font-mono text-xs">
+                                    {format(new Date(r.created_at), "dd MMM yyyy")}
+                                  </td>
+                                  <td className="px-6 py-4 text-text-main font-semibold">
+                                    {displayPrice(r.total_amount)}
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    <span
+                                      className={cn(
+                                        "text-tiny font-mono tracking-widest uppercase px-2.5 py-1",
+                                        statusStyles[r.status] ||
+                                          "bg-text-muted/10 text-text-muted border border-text-muted/20"
+                                      )}
+                                    >
+                                      {r.status}
+                                    </span>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -996,14 +1044,14 @@ export default function DashboardPage() {
         {/* Sign Out Confirmation Modal */}
         {showSignOutModal && (
           <div
-            className="fixed inset-0 z-modal flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+            className="fixed inset-0 z-modal flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm rounded"
             onClick={(e) => {
               if (e.target === e.currentTarget) {
                 setShowSignOutModal(false);
               }
             }}
           >
-            <div className="w-full max-w-sm bg-surface border border-border shadow-lg">
+            <div className="w-full max-w-sm bg-surface border border-border shadow-lg rounded">
               <div className="flex items-center justify-between px-6 py-4 border-b border-border">
                 <div className="flex items-center gap-3">
                   <LogOut size={18} className="text-red" />

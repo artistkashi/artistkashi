@@ -31,7 +31,7 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
 
   const featuredPaintings = useMemo(() => {
     const selected = settings.featuredPaintings.items
-      .map((id) => PAINTINGS.find((painting) => painting.id === id))
+      .map((id) => PAINTINGS.find((painting) => painting.id === String(id)))
       .filter((painting): painting is (typeof PAINTINGS)[number] =>
         Boolean(painting)
       );
@@ -40,14 +40,14 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
 
   const featuredCourses = useMemo(() => {
     const selected = settings.featuredCourses.items
-      .map((id) => COURSES.find((course) => course.id === id))
+      .map((id) => COURSES.find((course) => course.id === String(id)))
       .filter((course): course is (typeof COURSES)[number] => Boolean(course));
     return selected.length > 0 ? selected : COURSES.slice(0, 3);
   }, [settings.featuredCourses.items]);
 
   const collectionPaintings = useMemo(() => {
     const selected = settings.collection.items
-      .map((id) => PAINTINGS.find((painting) => painting.id === id))
+      .map((id) => PAINTINGS.find((painting) => painting.id === String(id)))
       .filter((painting): painting is (typeof PAINTINGS)[number] =>
         Boolean(painting)
       );
@@ -56,7 +56,7 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
 
   const bestSellerCourses = useMemo(() => {
     const selected = settings.bestSellers.items
-      .map((id) => COURSES.find((course) => course.id === id))
+      .map((id) => COURSES.find((course) => course.id === String(id)))
       .filter((course): course is (typeof COURSES)[number] => Boolean(course));
     return selected.length > 0 ? selected : COURSES.slice(0, 2);
   }, [settings.bestSellers.items]);
@@ -259,7 +259,7 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
               >
                 <div className="relative overflow-hidden aspect-video">
                   <Image
-                    src={c.image_url || ""}
+                    src={c.thumbnail_url || ""}
                     alt={c.title}
                     fill
                     sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
@@ -283,12 +283,12 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
                 </div>
                 <div className="p-6 border-t border-border">
                   <div className="text-label font-mono text-text-muted tracking-[0.15em] mb-3">
-                    {c.instructor}
+                    {c.category?.name ?? "Masterclass"}
                   </div>
                   <h3 className="text-text-main font-bold text-xl leading-tight mb-2">
                     {c.title}
                   </h3>
-                  <p className="text-text-muted text-sm mb-5">{c.subtitle}</p>
+                  <p className="text-text-muted text-sm mb-5">{c.short_description}</p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4 text-xs font-mono text-text-muted">
                       <span className="flex items-center gap-1.5">
@@ -297,7 +297,7 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
                       </span>
                       <span className="flex items-center gap-1.5">
                         <Clock size={12} />
-                        {c.duration}
+                        {c.total_duration_seconds ? `${Math.floor(c.total_duration_seconds / 3600)}h ${Math.floor((c.total_duration_seconds % 3600) / 60)}m` : "—"}
                       </span>
                     </div>
                     <span className="text-text-main font-bold text-lg">
@@ -486,7 +486,7 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
               >
                 <div className="relative w-24 h-32 shrink-0 overflow-hidden bg-muted">
                   <Image
-                    src={course.image_url || ""}
+                    src={course.thumbnail_url || ""}
                     alt={course.title}
                     fill
                     sizes="96px"

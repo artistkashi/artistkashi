@@ -11,7 +11,7 @@ export function DangerZone() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const { user } = useAuth();
+  useAuth();
   const hasGoogle = false; // Check if user has Google provider
 
   const handleDelete = async () => {

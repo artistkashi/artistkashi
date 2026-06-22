@@ -54,9 +54,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const googleClientId =
-    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-
   return (
     <html lang="en" className={`${inter.variable} ${dmMono.variable}`}>
       <head>

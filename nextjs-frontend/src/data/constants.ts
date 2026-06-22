@@ -1,14 +1,16 @@
 import {
-  ProductCardRead,
-  CourseRead,
-  TestimonialItem,
-  FaqItem,
+  type CourseLevel,
+  type CourseRead,
+  type FaqItem,
+  type ProductCardRead,
+  type TestimonialItem,
 } from "@/api/openapi-client";
-import { CurriculumSection } from "@/types";
+
+const now = new Date().toISOString();
 
 export const PAINTINGS: ProductCardRead[] = [
   {
-    id: 1,
+    id: "1",
     title: "Solitude in Ochre",
     slug: "solitude-in-ochre",
     medium: {
@@ -16,14 +18,16 @@ export const PAINTINGS: ProductCardRead[] = [
       name: "Oil on linen, 120 × 90 cm",
       slug: "oil",
       is_active: true,
+      created_at: now,
     },
     price: "4800",
     primary_image:
       "https://images.unsplash.com/photo-1541512416146-3cf58d6b27cc?w=600&h=750&fit=crop&auto=format",
     is_sold: false,
+    status: "published",
   },
   {
-    id: 2,
+    id: "2",
     title: "The Weight of Silence",
     slug: "the-weight-of-silence",
     medium: {
@@ -31,14 +35,16 @@ export const PAINTINGS: ProductCardRead[] = [
       name: "Oil on canvas, 100 × 80 cm",
       slug: "oil",
       is_active: true,
+      created_at: now,
     },
     price: "3600",
     primary_image:
       "https://images.unsplash.com/photo-1566410824233-a8011929225c?w=600&h=750&fit=crop&auto=format",
     is_sold: false,
+    status: "published",
   },
   {
-    id: 3,
+    id: "3",
     title: "Nocturne No. 7",
     slug: "nocturne-no-7",
     medium: {
@@ -46,48 +52,76 @@ export const PAINTINGS: ProductCardRead[] = [
       name: "Acrylic on board, 60 × 80 cm",
       slug: "acrylic",
       is_active: true,
+      created_at: now,
     },
     price: "2200",
     primary_image:
       "https://images.unsplash.com/photo-1556139930-c23fa4a4f934?w=600&h=750&fit=crop&auto=format",
     is_sold: true,
+    status: "sold_out",
   },
 ];
 
 export const COURSES: CourseRead[] = [
   {
-    id: 1,
+    id: "1",
     title: "Oil Painting Fundamentals",
-    subtitle: "From blank canvas to confident composition",
-    instructor: "Elena Marchetti",
-    duration: "18h 30m",
-    students_count: 2847,
+    slug: "oil-painting-fundamentals",
+    short_description: "From blank canvas to confident composition",
+    level: "beginner" as CourseLevel,
+    language: "English",
+    price: "280",
     lessons_count: 42,
-    rating: 4.9,
-    price: 280,
-    image_url:
+    enrollment_count: 2847,
+    average_rating: 4.9,
+    review_count: 128,
+    thumbnail_url:
       "https://images.unsplash.com/photo-1621975496579-6bd9e8c6ab65?w=700&h=420&fit=crop&auto=format",
-    category: "Oil",
+    computed_thumbnail_url: null,
+    computed_demo_video_url: null,
+    created_at: now,
     description: "Learn the fundamentals of oil painting.",
-    featured: true,
-    is_active: true,
+    is_featured: true,
+    is_published: true,
+    total_duration_seconds: 66600,
+    category: {
+      id: "cat1",
+      name: "Oil Painting",
+      slug: "oil-painting",
+      description: null,
+      is_active: true,
+      created_at: now,
+    },
   },
   {
-    id: 2,
+    id: "2",
     title: "Advanced Portrait Mastery",
-    subtitle: "Light, likeness, and emotional depth in portraiture",
-    instructor: "James Okafor",
-    duration: "26h 15m",
-    students_count: 1203,
+    slug: "advanced-portrait-mastery",
+    short_description: "Light, likeness, and emotional depth in portraiture",
+    level: "advanced" as CourseLevel,
+    language: "English",
+    price: "420",
     lessons_count: 56,
-    rating: 4.8,
-    price: 420,
-    image_url:
+    enrollment_count: 1203,
+    average_rating: 4.8,
+    review_count: 89,
+    thumbnail_url:
       "https://images.unsplash.com/photo-1774126512715-5a8858c579c9?w=700&h=420&fit=crop&auto=format",
-    category: "Portrait",
+    computed_thumbnail_url: null,
+    computed_demo_video_url: null,
+    created_at: now,
     description: "Master the art of portraiture.",
-    featured: false,
-    is_active: true,
+    is_featured: false,
+    is_published: true,
+    total_duration_seconds: 94500,
+    category: {
+      id: "cat2",
+      name: "Portrait",
+      slug: "portrait",
+      description: null,
+      is_active: true,
+      created_at: now,
+    },
   },
 ];
 
@@ -106,17 +140,5 @@ export const FAQ_ITEMS: FaqItem[] = [
     question: "Do I own the artworks I purchase permanently?",
     answer:
       "Yes. Every purchase includes a certificate of provenance, full transfer of ownership, and lifetime access to digital documentation. Physical works ship within 7–14 days in bespoke archival packaging.",
-  },
-];
-
-export const CURRICULUM: CurriculumSection[] = [
-  {
-    section: "01. Foundation",
-    lessons: [
-      "Introduction to the Artist method",
-      "Understanding your materials",
-      "Color theory for oil painters",
-      "The value study system",
-    ],
   },
 ];
