@@ -86,7 +86,7 @@ async def update_address(
 
 @router.delete(
     "/addresses/{address_id}",
-    response_model=SuccessResponse[dict],
+    response_model=SuccessResponse[None],
 )
 async def delete_address(
     address_id: int,
@@ -101,5 +101,4 @@ async def delete_address(
 
     return SuccessResponse(
         message="Address deleted successfully",
-        data={"deleted": True},
     )

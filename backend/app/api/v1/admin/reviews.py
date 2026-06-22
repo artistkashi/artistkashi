@@ -19,7 +19,7 @@ router = APIRouter(tags=["admin-reviews"])
 async def list_all_reviews(
     db: DatabaseDep,
     review_type: Annotated[ReviewType | None, Query()] = None,
-    entity_id: Annotated[int | None, Query()] = None,
+    entity_id: Annotated[UUID | None, Query()] = None,
     status: Annotated[ReviewStatus | None, Query()] = None,
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 50,
@@ -83,7 +83,7 @@ async def update_review(
     return SuccessResponse(message="Review updated successfully", data=review)
 
 
-@router.delete("/reviews/{review_id}", response_model=SuccessResponse[dict])
+@router.delete("/reviews/{review_id}", response_model=SuccessResponse[None])
 async def delete_review(
     review_id: UUID,
     db: DatabaseDep,
@@ -98,4 +98,4 @@ async def delete_review(
         )
 
     await crud_review.delete(db=db, id=review_id)
-    return SuccessResponse(message="Review deleted successfully", data={})
+    return SuccessResponse(message="Review deleted successfully")
