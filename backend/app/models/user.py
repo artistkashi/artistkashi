@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from app.models.address import Address
     from app.models.cart import CartItem
     from app.models.course_enrollment import CourseEnrollment
+    from app.models.course_payment import CoursePayment
     from app.models.lesson_progress import LessonProgress
     from app.models.order import Order
     from app.models.review import Review
@@ -123,6 +124,12 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
 
     lesson_progress: Mapped[list["LessonProgress"]] = relationship(
         "LessonProgress",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
+    course_payments: Mapped[list["CoursePayment"]] = relationship(
+        "CoursePayment",
         back_populates="user",
         cascade="all, delete-orphan",
     )

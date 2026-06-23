@@ -35,7 +35,6 @@ export function Footer() {
             links: [
               { label: "All Courses", href: "/courses" },
               { label: "Course Detail", href: "/courses/1" },
-              { label: "Lesson Player", href: "/lesson-player" },
             ],
           },
           {

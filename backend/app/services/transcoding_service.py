@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import math
 import shutil
 import tempfile
 from pathlib import Path
@@ -62,17 +63,40 @@ async def _get_video_height(source_path: Path) -> int:
     return 0
 
 
+async def get_video_duration(source_path: Path) -> int:
+    try:
+        process = await asyncio.create_subprocess_exec(
+            settings.FFPROBE_PATH,
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+            str(source_path),
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, _ = await process.communicate()
+        if process.returncode == 0 and stdout:
+            duration = float(stdout.decode("utf-8").strip())
+            return math.ceil(duration)
+    except Exception:
+        pass
+    return 0
+
+
 async def transcode_to_1080p(
     source_key: str,
     course_id: str,
     lesson_id: str,
-) -> str:
+) -> tuple[str, int]:
     """
     Transcode a source video to 1080p if it exceeds 1080p resolution.
 
     Downloads the source from S3, checks resolution via ffprobe,
     and transcodes only if the source is >1080p tall.
-    Returns the S3 key of the final video (either the original or transcoded).
+    Returns (S3 key of final video, duration_seconds).
     """
     bucket = settings.S3_BUCKET_NAME
     work_dir = Path(tempfile.mkdtemp(prefix="transcode_"))
@@ -90,9 +114,12 @@ async def transcode_to_1080p(
         height = await _get_video_height(source_path)
         logger.info("Source video height: %d", height)
 
-        if 0 < height <= 1080:
-            logger.info("Source is already ≤1080p, skipping transcode")
-            return source_key
+        duration = await get_video_duration(source_path)
+        logger.info("Source video duration: %d seconds", duration)
+
+        if height == 0 or height <= 1080:
+            logger.info("Source height %d, skipping transcode", height)
+            return source_key, duration
 
         logger.info("Source is %dp, transcoding to 1080p", height)
 
@@ -142,7 +169,7 @@ async def transcode_to_1080p(
         _upload_to_s3(s3, bucket, output_path, new_key)
 
         logger.info("Transcoded video uploaded to %s", new_key)
-        return new_key
+        return new_key, duration
 
     except Exception:
         logger.exception("Transcoding failed for %s", source_key)

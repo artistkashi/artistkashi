@@ -34,12 +34,15 @@ class ProgressService:
         video_duration_seconds: int,
     ) -> tuple[ProgressStatus, datetime | None]:
         now = datetime.now(UTC)
-        if (
-            watch_seconds > 0
-            and video_duration_seconds > 0
-            and (watch_seconds / video_duration_seconds) >= COMPLETION_THRESHOLD
-        ):
-            return ProgressStatus.COMPLETED, now
+        if video_duration_seconds > 0:
+            if (
+                watch_seconds > 0
+                and (watch_seconds / video_duration_seconds) >= COMPLETION_THRESHOLD
+            ):
+                return ProgressStatus.COMPLETED, now
+            if watch_seconds > 0:
+                return ProgressStatus.IN_PROGRESS, None
+            return ProgressStatus.NOT_STARTED, None
         if watch_seconds > 0:
             return ProgressStatus.IN_PROGRESS, None
         return ProgressStatus.NOT_STARTED, None
@@ -72,10 +75,9 @@ class ProgressService:
         )
 
         now = datetime.now(UTC)
-        resolved_watch = min(
-            payload.watch_seconds or 0,
-            lesson.video_duration_seconds,
-        )
+        resolved_watch = payload.watch_seconds or 0
+        if lesson.video_duration_seconds > 0:
+            resolved_watch = min(resolved_watch, lesson.video_duration_seconds)
 
         if existing:
             resolved_watch = max(
@@ -86,15 +88,22 @@ class ProgressService:
             resolved_watch, lesson.video_duration_seconds
         )
 
+        if (
+            payload.status == ProgressStatus.COMPLETED
+            and resolved_status != ProgressStatus.COMPLETED
+        ):
+            resolved_status = ProgressStatus.COMPLETED
+            completed_at = now
+
         if existing:
             update_data = payload.model_dump(mode="python", exclude_unset=True)
             update_data["watch_seconds"] = resolved_watch
             update_data["last_watched_at"] = now
             update_data["status"] = resolved_status
-            if resolved_status == ProgressStatus.COMPLETED and not existing.get(
-                "completed_at"
-            ):
-                update_data["completed_at"] = completed_at
+            if resolved_status == ProgressStatus.COMPLETED:
+                update_data["resume_position_seconds"] = 0
+                if not existing.get("completed_at"):
+                    update_data["completed_at"] = completed_at
 
             await crud_lesson_progress.update(
                 db=session,
@@ -102,12 +111,13 @@ class ProgressService:
                 object=update_data,
             )
         else:
-            resume_position = payload.resume_position_seconds or 0
-
-            resume_position = min(
-                resume_position,
-                lesson.video_duration_seconds,
+            resume_position = (
+                0
+                if resolved_status == ProgressStatus.COMPLETED
+                else (payload.resume_position_seconds or 0)
             )
+            if lesson.video_duration_seconds > 0:
+                resume_position = min(resume_position, lesson.video_duration_seconds)
 
             await crud_lesson_progress.create(
                 db=session,
@@ -322,6 +332,28 @@ class ProgressService:
         )
 
         return result["data"]
+
+    async def get_all_lesson_progresses(
+        self,
+        *,
+        session: AsyncSession,
+        user_id: uuid.UUID,
+        course_id: uuid.UUID,
+    ) -> dict[str, str]:
+        lessons = await crud_course_lesson.get_multi(db=session, course_id=course_id)
+        lesson_ids = [lesson["id"] for lesson in lessons["data"]]
+        if not lesson_ids:
+            return {}
+
+        progresses = await crud_lesson_progress.get_multi(
+            db=session,
+            user_id=user_id,
+            lesson_id__in=lesson_ids,
+            schema_to_select=LessonProgressRead,
+            return_as_model=True,
+        )
+
+        return {str(p.lesson_id): p.status.value for p in progresses["data"]}
 
     async def get_lesson_progress_percentage(
         self,

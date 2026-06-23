@@ -59,12 +59,12 @@ class CourseEnrollment(Base, TimestampMixin):
         nullable=False,
     )
 
-    user: Mapped["User"] = relationship(
+    user: Mapped[User] = relationship(
         "User",
         back_populates="enrollments",
     )
 
-    course: Mapped["Course"] = relationship(
+    course: Mapped[Course] = relationship(
         "Course",
         back_populates="enrollments",
     )

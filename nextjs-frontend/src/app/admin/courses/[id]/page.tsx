@@ -70,8 +70,9 @@ function formatDuration(seconds: number | undefined | null): string {
   if (!seconds) return "—";
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
+  const s = seconds % 60;
+  if (h > 0) return `${h}h ${m}m ${s}s`;
+  return `${m}m ${s}s`;
 }
 
 async function fetchCourseCurriculum(
@@ -899,7 +900,9 @@ function UploadButton({
   courseId: string;
   onRefresh: () => void;
 }) {
-  const [uploadState, setUploadState] = useState<"idle" | "uploading" | "confirming">("idle");
+  const [uploadState, setUploadState] = useState<
+    "idle" | "uploading" | "confirming"
+  >("idle");
   const [uploadProgress, setUploadProgress] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -1080,6 +1083,11 @@ export default function AdminCourseDetailPage({
   const course = curriculumQuery.data;
   const sections = course?.sections ?? [];
   const stats = statsQuery.data;
+  const computedRevenue = stats?.total_revenue
+    ? stats.total_revenue
+    : (stats?.enrollment_count ?? 0) > 0 && course?.price
+      ? stats!.enrollment_count * Number(course.price)
+      : 0;
 
   const refresh = useCallback(() => {
     curriculumQuery.refetch();
@@ -1116,7 +1124,11 @@ export default function AdminCourseDetailPage({
       return unwrap(
         updateCourse({
           path: { slug: course!.slug },
-          body: { payload, thumbnail: data.thumbnail ?? null, demo_video: data.demo_video ?? null },
+          body: {
+            payload,
+            thumbnail: data.thumbnail ?? null,
+            demo_video: data.demo_video ?? null,
+          },
         })
       );
     },
@@ -1236,7 +1248,7 @@ export default function AdminCourseDetailPage({
             <StatBox
               label="Total Revenue"
               value={
-                stats?.total_revenue ? displayPrice(stats.total_revenue) : "—"
+                computedRevenue ? displayPrice(computedRevenue) : displayPrice(0)
               }
             />
           </div>
@@ -1253,7 +1265,7 @@ export default function AdminCourseDetailPage({
           {/* Media preview */}
           {(course.computed_thumbnail_url ||
             course.computed_demo_video_url) && (
-            <div className="border border-border p-6">
+            <div className="border border-border p-6 rounded">
               <div className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-4">
                 Media
               </div>
@@ -1365,30 +1377,60 @@ export default function AdminCourseDetailPage({
               <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-sm">
                 <Field label="Title" value={course.title} />
                 <Field label="Slug" value={course.slug} />
-                <Field label="Level" value={course.level.charAt(0).toUpperCase() + course.level.slice(1)} />
-                <Field label="Language" value={course.language.charAt(0).toUpperCase() + course.language.slice(1)} />
+                <Field
+                  label="Level"
+                  value={
+                    course.level.charAt(0).toUpperCase() + course.level.slice(1)
+                  }
+                />
+                <Field
+                  label="Language"
+                  value={
+                    course.language.charAt(0).toUpperCase() +
+                    course.language.slice(1)
+                  }
+                />
                 <Field label="Price" value={displayPrice(course.price)} />
                 <Field label="Category" value={course.category_id ?? "—"} />
-                <Field label="Featured" value={course.is_featured ? "Yes" : "No"} />
-                <Field label="Published" value={course.is_published ? "Yes" : "No"} />
+                <Field
+                  label="Featured"
+                  value={course.is_featured ? "Yes" : "No"}
+                />
+                <Field
+                  label="Published"
+                  value={course.is_published ? "Yes" : "No"}
+                />
               </div>
-              <Field label="Short Description" value={course.short_description || "—"} />
-              {course.description && <Field label="Full Description" value={course.description} />}
-              {course.welcome_message && <Field label="Welcome Message" value={course.welcome_message} />}
-              {course.whatsapp_channel_url && <Field label="WhatsApp Channel" value={course.whatsapp_channel_url} />}
+              <Field
+                label="Short Description"
+                value={course.short_description || "—"}
+              />
+              {course.description && (
+                <Field label="Full Description" value={course.description} />
+              )}
+              {course.welcome_message && (
+                <Field label="Welcome Message" value={course.welcome_message} />
+              )}
+              {course.whatsapp_channel_url && (
+                <Field
+                  label="WhatsApp Channel"
+                  value={course.whatsapp_channel_url}
+                />
+              )}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {course.what_you_will_learn && course.what_you_will_learn.length > 0 && (
-                  <div>
-                    <div className="font-mono tracking-widest uppercase text-text-muted text-2xs mb-2">
-                      What You Will Learn
+                {course.what_you_will_learn &&
+                  course.what_you_will_learn.length > 0 && (
+                    <div>
+                      <div className="font-mono tracking-widest uppercase text-text-muted text-2xs mb-2">
+                        What You Will Learn
+                      </div>
+                      <ul className="list-disc list-inside text-sm text-text-muted space-y-1">
+                        {course.what_you_will_learn.map((item, i) => (
+                          <li key={i}>{item}</li>
+                        ))}
+                      </ul>
                     </div>
-                    <ul className="list-disc list-inside text-sm text-text-muted space-y-1">
-                      {course.what_you_will_learn.map((item, i) => (
-                        <li key={i}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  )}
                 {course.requirements && course.requirements.length > 0 && (
                   <div>
                     <div className=" font-mono tracking-widest uppercase text-text-muted text-2xs mb-2">
@@ -1475,7 +1517,10 @@ function CurriculumTab({
       {sections.map((section, i) => {
         const isOpen = openSections.includes(section.id);
         return (
-          <div key={section.id} className="border-b border-border last:border-b-0">
+          <div
+            key={section.id}
+            className="border-b border-border last:border-b-0"
+          >
             <button
               onClick={() => toggle(section.id)}
               className="w-full flex items-center justify-between gap-4 px-6 py-4 bg-dark/20 hover:bg-dark/40 transition-colors text-left"
@@ -1493,7 +1538,8 @@ function CurriculumTab({
               </div>
               <div className="flex items-center gap-3 shrink-0">
                 <span className="text-2xs font-mono text-text-muted">
-                  {section.lessons?.length ?? 0} lesson{(section.lessons?.length ?? 0) !== 1 ? "s" : ""}
+                  {section.lessons?.length ?? 0} lesson
+                  {(section.lessons?.length ?? 0) !== 1 ? "s" : ""}
                 </span>
                 <ChevronDown
                   size={14}
@@ -1545,7 +1591,8 @@ function CurriculumTab({
                           "text-2xs font-mono uppercase tracking-wider px-2 py-0.5 rounded-sm border",
                           lesson.status === "ready"
                             ? "text-emerald-400 border-emerald-400/30"
-                            : lesson.status === "processing" && !lesson.video_key
+                            : lesson.status === "processing" &&
+                                !lesson.video_key
                               ? "text-text-muted border-border"
                               : lesson.status === "processing"
                                 ? "text-amber-400 border-amber-400/30"

@@ -6,8 +6,8 @@ This script helps you set up the backend with all dependencies and configuration
 """
 
 import os
-import sys
 import subprocess
+import sys
 from pathlib import Path
 
 

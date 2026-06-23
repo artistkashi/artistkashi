@@ -71,7 +71,8 @@ class CourseLessonRead(TimestampSchemaRead):
     @property
     def computed_thumbnail_url(self) -> str | None:
         if self.thumbnail_key:
-            return f"{settings.S3_PUBLIC_URL}/{settings.S3_BUCKET_NAME}/{self.thumbnail_key}"
+            base = f"{settings.S3_PUBLIC_URL}/{settings.S3_BUCKET_NAME}"
+            return f"{base}/{self.thumbnail_key}"
         return None
 
 

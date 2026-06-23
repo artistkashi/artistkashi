@@ -6,7 +6,6 @@ export type Page =
   | "home"
   | "courses"
   | "course-detail"
-  | "lesson-player"
   | "shop"
   | "product-detail"
   | "dashboard"

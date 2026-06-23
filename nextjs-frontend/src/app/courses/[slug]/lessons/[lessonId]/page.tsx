@@ -3,12 +3,14 @@
 import { unwrap } from "@/api/client-service";
 import type {
   CourseLessonRead,
+  CourseProgressRead,
   CourseRead,
   CourseSectionWithLessonsRead,
 } from "@/api/openapi-client";
 import {
   coursesGetCourse,
   getCourseCurriculum,
+  getAllLessonProgresses,
   getCourseProgress,
   getEnrollmentStatus,
   getLessonProgress,
@@ -22,6 +24,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   ArrowRight,
+  Check,
   ChevronLeft,
   ChevronRight,
   Lock,
@@ -33,6 +36,7 @@ import {
   Play,
   RotateCcw,
   RotateCw,
+  VideoOff,
   Volume1,
   Volume2,
   VolumeX,
@@ -143,34 +147,33 @@ function VideoWatermark({
     ctx.font = `${fontSize}px monospace`;
     ctx.textBaseline = "top";
 
-    const positions = [
-      { x: 16, y: 16, angle: 0 },
-      { x: rect.width - 200, y: 16, angle: 0 },
-      { x: 16, y: rect.height - 80, angle: 0 },
-      { x: rect.width / 2 - 100, y: rect.height / 2 - 40, angle: -0.05 },
-      { x: rect.width - 200, y: rect.height - 80, angle: 0 },
-    ];
-
-    const pos = positions[Math.floor(Math.random() * positions.length)];
+    const textWidth = Math.max(...lines.map((l) => ctx.measureText(l).width));
+    const textHeight = lines.length * fontSize * 1.4;
+    const pad = 20;
+    const pos = {
+      x: pad + Math.random() * Math.max(0, rect.width - textWidth - pad * 2),
+      y: pad + Math.random() * Math.max(0, rect.height - textHeight - pad * 2),
+      angle: (Math.random() - 0.5) * 0.12,
+    };
 
     ctx.save();
-    ctx.translate(pos.x + 100, pos.y + 20);
+    ctx.translate(pos.x, pos.y);
     ctx.rotate(pos.angle);
 
     ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
     const lineHeight = fontSize * 1.4;
     lines.forEach((line, i) => {
-      ctx.fillText(line, -ctx.measureText(line).width / 2, i * lineHeight);
+      ctx.fillText(line, 0, i * lineHeight);
     });
 
     ctx.restore();
 
     ctx.save();
-    ctx.translate(pos.x + 100 + 2, pos.y + 20 + 2);
+    ctx.translate(pos.x + 2, pos.y + 2);
     ctx.rotate(pos.angle);
     ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
     lines.forEach((line, i) => {
-      ctx.fillText(line, -ctx.measureText(line).width / 2, i * lineHeight);
+      ctx.fillText(line, 0, i * lineHeight);
     });
     ctx.restore();
 
@@ -377,7 +380,7 @@ function VideoPlayer({
                   e.stopPropagation();
                   togglePlay();
                 }}
-                className="w-20 h-20 bg-text-main/10 backdrop-blur border border-white/10 flex items-center justify-center hover:bg-gold/20 hover:border-gold/30 transition-all"
+                className="w-16 h-16 bg-text-main/10 backdrop-blur border border-white/10 flex items-center justify-center hover:bg-gold/20 hover:border-gold/30 transition-all rounded"
               >
                 <Play
                   size={28}
@@ -412,6 +415,7 @@ export default function CourseLessonPlayerPage({
   );
   const progressRef = useRef(0);
   const fullscreenRef = useRef<HTMLDivElement>(null);
+  const completedRef = useRef(false);
 
   const { data: course } = useQuery<CourseRead>({
     queryKey: ["course", slug],
@@ -466,13 +470,22 @@ export default function CourseLessonPlayerPage({
     enabled: !!courseId,
   });
 
-  const { data: courseProgress } = useQuery({
+  const { data: courseProgress } = useQuery<CourseProgressRead>({
     queryKey: ["course-progress", courseId],
-    queryFn: async () => {
-      const res = await getCourseProgress({ path: { course_id: courseId! } });
-      return res.data as Record<string, unknown> | undefined;
-    },
+    queryFn: () =>
+      unwrap<CourseProgressRead>(getCourseProgress({ path: { course_id: courseId! } })),
     enabled: !!courseId,
+  });
+
+  const { data: allProgresses } = useQuery<Record<string, string>>({
+    queryKey: ["all-lesson-progresses", courseId],
+    queryFn: async () => {
+      const data = await unwrap(
+        getAllLessonProgresses({ path: { course_id: courseId! } })
+      );
+      return data ?? {};
+    },
+    enabled: !!courseId && isEnrolled,
   });
 
   const saveProgressMutation = useMutation({
@@ -547,6 +560,7 @@ export default function CourseLessonPlayerPage({
   const [videoMuted, setVideoMuted] = useState(false);
   const [isPaused, setIsPaused] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [lastLessonCompleted, setLastLessonCompleted] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -567,6 +581,12 @@ export default function CourseLessonPlayerPage({
     document.addEventListener("fullscreenchange", onChange);
     return () => document.removeEventListener("fullscreenchange", onChange);
   }, []);
+
+  useEffect(() => {
+    if (course?.title) {
+      document.title = course.title;
+    }
+  }, [course?.title]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -636,6 +656,10 @@ export default function CourseLessonPlayerPage({
     (currentTime: number) => {
       if (!courseId || !lessonId) return;
       if (currentTime <= 0) return;
+      if (completedRef.current) {
+        completedRef.current = false;
+        return;
+      }
       saveProgressMutation.mutate({
         status: "in_progress",
         watch_seconds: Math.floor(currentTime),
@@ -647,16 +671,21 @@ export default function CourseLessonPlayerPage({
 
   const handleComplete = useCallback(() => {
     if (!courseId || !lessonId) return;
+    completedRef.current = true;
+    if (!nextLesson) {
+      setLastLessonCompleted(true);
+    }
     saveProgressMutation.mutate({
       status: "completed",
       watch_seconds: Math.floor(progressRef.current),
-      resume_position_seconds: Math.floor(progressRef.current),
+      resume_position_seconds: 0,
     });
     queryClient.invalidateQueries({ queryKey: ["course-progress", courseId] });
     queryClient.invalidateQueries({
       queryKey: ["lesson-progress", courseId, lessonId],
     });
-  }, [courseId, lessonId, saveProgressMutation, queryClient]);
+    queryClient.invalidateQueries({ queryKey: ["all-lesson-progresses", courseId] });
+  }, [courseId, lessonId, saveProgressMutation, queryClient, nextLesson]);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -702,11 +731,7 @@ export default function CourseLessonPlayerPage({
   if (!user) return null;
 
   const totalLessons = lessonsList.length;
-  const progressData = (courseProgress ?? {}) as Record<string, unknown>;
-  const completedCount =
-    typeof progressData.completed_count === "number"
-      ? progressData.completed_count
-      : undefined;
+  const completedCount = courseProgress?.completed_lessons;
   const progressPercent =
     completedCount != null && totalLessons > 0
       ? Math.round((completedCount / totalLessons) * 100)
@@ -765,6 +790,18 @@ export default function CourseLessonPlayerPage({
                     Loading lesson...
                   </span>
                 </div>
+              ) : currentLesson && !currentLesson.computed_video_url ? (
+                <div className="flex flex-col items-center justify-center gap-4 p-8 text-center">
+                  <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center">
+                    <VideoOff size={32} className="text-text-muted" />
+                  </div>
+                  <h3 className="text-text-main text-lg font-semibold">
+                    Video Not Available
+                  </h3>
+                  <p className="text-text-muted text-sm max-w-md">
+                    This lesson does not have a video yet. Check back later.
+                  </p>
+                </div>
               ) : (
                 <VideoPlayer
                   videoUrl={currentLesson?.computed_video_url}
@@ -779,6 +816,7 @@ export default function CourseLessonPlayerPage({
                   userEmail={user?.email}
                   showWatermark={
                     user?.role === "admin" ||
+                    isEnrolled ||
                     currentLesson?.is_preview === false
                   }
                 />
@@ -958,6 +996,14 @@ export default function CourseLessonPlayerPage({
                       {nextLesson.lesson.title}
                       <ChevronRight size={12} />
                     </Link>
+                  ) : completedCount === totalLessons || lastLessonCompleted ? (
+                    <Link
+                      href={`/courses/${slug}`}
+                      className="inline-flex items-center gap-1.5 text-label font-mono text-xs text-gold hover:text-gold/80 transition-colors"
+                    >
+                      <span>Course Complete</span>
+                      <ArrowRight size={12} />
+                    </Link>
                   ) : (
                     <span className="text-text-muted/40 text-label font-mono text-xs flex items-center gap-1">
                       Next
@@ -995,6 +1041,7 @@ export default function CourseLessonPlayerPage({
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
             isEnrolled={isEnrolled}
+            allProgresses={allProgresses}
           />
 
           <MobileSidebarToggle
@@ -1018,6 +1065,7 @@ function Sidebar({
   isOpen,
   onClose,
   isEnrolled,
+  allProgresses,
 }: {
   course: CourseRead | undefined;
   sections: CourseSectionWithLessonsRead[];
@@ -1029,6 +1077,7 @@ function Sidebar({
   isOpen: boolean;
   onClose: () => void;
   isEnrolled: boolean;
+  allProgresses: Record<string, string> | undefined;
 }) {
   return (
     <>
@@ -1048,7 +1097,7 @@ function Sidebar({
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        <div className="hidden lg:flex items-center justify-between p-4 lg:p-5 border-b border-border">
+        <div className="hidden lg:flex items-center justify-between p-4 lg:p-5 ">
           <Link
             href={`/courses/${courseSlug}`}
             className="text-text-main font-semibold text-sm hover:text-gold transition-colors truncate"
@@ -1068,8 +1117,7 @@ function Sidebar({
             <X size={18} />
           </button>
         </div>
-
-        {progressPercent > 0 && (
+        {isEnrolled && (
           <div className="px-4 lg:px-5 py-3 border-b border-border">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-label font-mono text-text-muted">
@@ -1094,7 +1142,7 @@ function Sidebar({
               No curriculum available.
             </div>
           )}
-          {sections.map((section) => {
+          {sections.map((section, si) => {
             const sectionLessons = (section.lessons ?? []).filter(
               (l) => isEnrolled || l.is_preview
             );
@@ -1125,15 +1173,28 @@ function Sidebar({
                 </button>
                 {isExpanded && (
                   <div className="bg-dark-soft">
-                    {sectionLessons.map((lesson) => {
+                    {sectionLessons.map((lesson, idx) => {
+                      const prevCount = sections
+                        .slice(0, si)
+                        .reduce(
+                          (sum, s) =>
+                            sum +
+                            (s.lessons ?? []).filter(
+                              (l) => isEnrolled || l.is_preview
+                            ).length,
+                          0
+                        );
+                      const globalIdx = prevCount + idx + 1;
                       const isActive = lesson.id === currentLessonId;
                       const hasVideo = !!lesson.computed_video_url;
+                      const isCompleted =
+                        allProgresses?.[lesson.id] === "completed";
                       const linkHref = `/courses/${courseSlug}/lessons/${lesson.id}`;
                       const content = (
                         <>
                           <div
                             className={cn(
-                              "w-6 h-6 shrink-0 border flex items-center justify-center",
+                              "w-6 h-6 shrink-0 border flex items-center justify-center rounded",
                               isActive
                                 ? "border-gold bg-gold/10"
                                 : "border-border"
@@ -1151,10 +1212,12 @@ function Sidebar({
                                   className="ml-0.5"
                                   fill="currentColor"
                                 />
+                              ) : isCompleted ? (
+                                <Check size={9} className="text-green-400" />
                               ) : hasVideo ? (
                                 ""
                               ) : (
-                                String(sectionLessons.indexOf(lesson) + 1)
+                                <X size={9} className="text-text-muted" />
                               )}
                             </span>
                           </div>
@@ -1167,7 +1230,7 @@ function Sidebar({
                                   : "text-text-muted"
                               )}
                             >
-                              {lesson.title}
+                              {globalIdx}. {lesson.title}
                             </div>
                             {lesson.video_duration_seconds != null &&
                               lesson.video_duration_seconds > 0 && (

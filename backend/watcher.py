@@ -13,7 +13,7 @@ LOCK_FILE = "/tmp/watcher.lock"
 
 def check_single_instance():
     if os.path.exists(LOCK_FILE):
-        with open(LOCK_FILE, "r") as f:
+        with open(LOCK_FILE) as f:
             old_pid = f.read().strip()
         try:
             os.kill(int(old_pid), 0)

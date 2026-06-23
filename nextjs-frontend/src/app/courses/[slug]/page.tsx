@@ -3,18 +3,24 @@
 import { unwrap } from "@/api/client-service";
 import type {
   CourseCurriculumRead,
+  CourseProgressRead,
+  CoursePurchaseResponse,
   CourseRead,
   CourseSectionWithLessonsRead,
 } from "@/api/openapi-client";
 import {
   coursesGetCourse,
   getCourseCurriculum,
+  getCourseProgress,
   getEnrollmentStatus,
+  initiateCoursePurchase,
+  verifyCoursePayment,
 } from "@/api/openapi-client";
 import { GhostBtn, PrimaryBtn } from "@/components/ui/buttons";
 import { CourseReviewsSection } from "@/components/ui/CourseReviewsSection";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { RevealBlock } from "@/components/ui/misc";
+import { ModalType, StatusModal } from "@/components/ui/StatusModal";
 import { useAuth } from "@/lib/auth-store";
 import { getSafeReturnTo } from "@/lib/auth-utils";
 import { cn, displayPrice } from "@/lib/utils";
@@ -320,6 +326,20 @@ export default function CourseDetailPage({
   const { slug } = use(params);
   const [openSection, setOpenSection] = useState<number | null>(0);
   const [showDemo, setShowDemo] = useState(false);
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    type: ModalType;
+    title: string;
+    message: string;
+    actionText?: string;
+    onAction?: () => void;
+  }>({
+    isOpen: false,
+    type: "success",
+    title: "",
+    message: "",
+  });
   const { user } = useAuth();
 
   const router = useRouter();
@@ -361,6 +381,17 @@ export default function CourseDetailPage({
 
   const isEnrolled = !!enrollment;
 
+  const { data: courseProgress } = useQuery<CourseProgressRead>({
+    queryKey: ["course-progress", courseId],
+    queryFn: () =>
+      unwrap<CourseProgressRead>(
+        getCourseProgress({ path: { course_id: courseId! } })
+      ),
+    enabled: !!courseId && isEnrolled,
+  });
+
+  const isCourseCompleted = (courseProgress?.progress_percentage ?? 0) >= 100;
+
   const sections: CourseSectionWithLessonsRead[] =
     curriculumData?.sections ?? [];
 
@@ -377,7 +408,14 @@ export default function CourseDetailPage({
       router.push(loginHref);
       return;
     }
-    router.push("/lesson-player");
+    const firstLesson = sections
+      .flatMap((s) => s.lessons ?? [])
+      .find((l) => l.computed_video_url);
+    if (firstLesson) {
+      router.push(`/courses/${slug}/lessons/${firstLesson.id}`);
+    } else {
+      router.push(`/courses/${slug}`);
+    }
   };
 
   const goToPreviewLesson = () => {
@@ -394,6 +432,104 @@ export default function CourseDetailPage({
         return;
       }
     }
+  };
+
+  const handleBuyCourse = async () => {
+    if (!user) {
+      router.push(loginHref);
+      return;
+    }
+    setIsPurchasing(true);
+    try {
+      const result = await unwrap(initiateCoursePurchase({ path: { slug } }));
+      handleRazorpayPayment(result);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to initiate purchase";
+      setModalConfig({
+        isOpen: true,
+        type: "error",
+        title: "Purchase Failed",
+        message,
+        actionText: "TRY AGAIN",
+      });
+    } finally {
+      setIsPurchasing(false);
+    }
+  };
+
+  const handleRazorpayPayment = (purchase: CoursePurchaseResponse) => {
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      amount: purchase.amount,
+      currency: "INR",
+      name: "ArtistKashi",
+      description: purchase.course_title,
+      order_id: purchase.razorpay_order_id,
+      handler: async function (response: {
+        razorpay_order_id: string;
+        razorpay_payment_id: string;
+        razorpay_signature: string;
+      }) {
+        try {
+          await unwrap(
+            verifyCoursePayment({
+              path: { slug },
+              body: {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              },
+            })
+          );
+
+          setModalConfig({
+            isOpen: true,
+            type: "success",
+            title: "Enrolled Successfully",
+            message: "You are now enrolled in this course. Start learning now!",
+            actionText: "START LEARNING",
+            onAction: () => {
+              setModalConfig((prev) => ({ ...prev, isOpen: false }));
+              router.push(`/courses/${slug}/lessons`);
+            },
+          });
+
+          window.location.reload();
+        } catch (err: unknown) {
+          setModalConfig({
+            isOpen: true,
+            type: "error",
+            title: "Verification Failed",
+            message:
+              err instanceof Error
+                ? err.message
+                : "Payment verification failed. If money was deducted, please contact support.",
+            actionText: "CONTACT SUPPORT",
+            onAction: () => {
+              setModalConfig((prev) => ({ ...prev, isOpen: false }));
+              router.push("/contact");
+            },
+          });
+        }
+      },
+      prefill: {
+        name: user?.full_name,
+        email: user?.email,
+      },
+      theme: {
+        color: "#D4AF37",
+      },
+      modal: {
+        ondismiss: () => {
+          setIsPurchasing(false);
+        },
+      },
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rzp = new (window as any).Razorpay(options);
+    rzp.open();
   };
 
   useEffect(() => {
@@ -548,7 +684,7 @@ export default function CourseDetailPage({
                     <div className="absolute inset-0 flex items-center justify-center">
                       <button
                         onClick={() => setShowDemo(true)}
-                        className="w-16 h-16 bg-black/40 backdrop-blur-md border border-white/30 flex items-center justify-center hover:bg-gold/30 hover:border-gold/50 transition-all shadow-lg cursor-pointer"
+                        className="w-16 h-16 bg-black/40 backdrop-blur-md border border-white/30 flex items-center justify-center hover:bg-gold/30 hover:border-gold/50 transition-all shadow-lg cursor-pointer rounded"
                       >
                         <Play
                           size={22}
@@ -597,14 +733,64 @@ export default function CourseDetailPage({
                     )}
                   </div>
 
-                  <PrimaryBtn
-                    type="button"
-                    onClick={goToLesson}
-                    className="w-full justify-center mb-4"
-                  >
-                    Enroll Now <ArrowRight size={16} />
-                  </PrimaryBtn>
-                  {hasPreviewLesson && (
+                  {isEnrolled ? (
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-2xs font-mono text-gold uppercase tracking-widest">
+                          {isCourseCompleted
+                            ? "Course Completed"
+                            : "Course Progress"}
+                        </span>
+                        <span className="text-2xs font-mono text-text-muted">
+                          {courseProgress?.completed_lessons ?? 0}/
+                          {courseProgress?.total_lessons ?? totalLessons}{" "}
+                          lessons
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-border rounded-full overflow-hidden mb-4">
+                        <div
+                          className="h-full bg-gold rounded-full transition-all duration-700"
+                          style={{
+                            width: `${courseProgress?.progress_percentage ?? 0}%`,
+                          }}
+                        />
+                      </div>
+                      <PrimaryBtn
+                        type="button"
+                        onClick={goToLesson}
+                        className="w-full justify-center"
+                      >
+                        {isCourseCompleted ? (
+                          <>
+                            Watch Again <RotateCcw size={16} />
+                          </>
+                        ) : (
+                          <>
+                            Continue Watching <ArrowRight size={16} />
+                          </>
+                        )}
+                      </PrimaryBtn>
+                    </div>
+                  ) : Number(course.price) > 0 ? (
+                    <PrimaryBtn
+                      type="button"
+                      onClick={handleBuyCourse}
+                      disabled={isPurchasing}
+                      className="w-full justify-center mb-4"
+                    >
+                      {isPurchasing ? "PREPARING..." : "Buy Now"}{" "}
+                      <ArrowRight size={16} />
+                    </PrimaryBtn>
+                  ) : (
+                    <PrimaryBtn
+                      type="button"
+                      onClick={goToLesson}
+                      className="w-full justify-center mb-4"
+                    >
+                      Enroll Now <ArrowRight size={16} />
+                    </PrimaryBtn>
+                  )}
+                  {!isEnrolled && hasPreviewLesson && (
                     <GhostBtn
                       type="button"
                       onClick={goToPreviewLesson}
@@ -678,107 +864,114 @@ export default function CourseDetailPage({
                   Curriculum coming soon.
                 </div>
               )}
-              {sections.map((s, i) => (
-                <div
-                  key={s.id}
-                  className="border-b border-border last:border-b-0"
-                >
-                  <button
-                    onClick={() => setOpenSection(openSection === i ? null : i)}
-                    className="w-full flex items-center justify-between p-6 text-left hover:bg-muted-light transition-colors"
+              {sections.map((s, i) => {
+                const prevLessonsCount = sections
+                  .slice(0, i)
+                  .reduce((sum, sec) => sum + (sec.lessons?.length ?? 0), 0);
+                return (
+                  <div
+                    key={s.id}
+                    className="border-b border-border last:border-b-0"
                   >
-                    <div>
-                      <div className="text-label font-mono text-gold tracking-widest mb-1">
-                        Section {i + 1}
-                      </div>
-                      <span className="text-text-main font-semibold">
-                        {s.title}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-label font-mono text-text-muted">
-                        {s.lessons?.length ?? 0} lessons
-                      </span>
-                      {openSection === i ? (
-                        <Minus size={14} className="text-text-muted" />
-                      ) : (
-                        <Plus size={14} className="text-text-muted" />
-                      )}
-                    </div>
-                  </button>
-                  <AnimatePresence>
-                    {openSection === i && (
-                      <motion.div
-                        initial={{ height: 0 }}
-                        animate={{ height: "auto" }}
-                        exit={{ height: 0 }}
-                        transition={{ duration: 0.35 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="bg-dark-soft border-t border-border">
-                          {s.lessons?.map((l) => {
-                            const hasVideo = !!l.computed_video_url;
-                            const isPlayable =
-                              (l.is_preview || isEnrolled) && hasVideo;
-                            const linkHref = l.is_preview
-                              ? `/courses/${course.slug}/lessons/${l.id}`
-                              : user
-                                ? `/courses/${course.slug}/lessons/${l.id}`
-                                : loginHref;
-                            const content = (
-                              <>
-                                <div className="w-8 h-8 bg-muted border border-border flex items-center justify-center shrink-0">
-                                  {hasVideo ? (
-                                    <Play
-                                      size={11}
-                                      className="text-text-muted ml-0.5"
-                                    />
-                                  ) : (
-                                    <span className="text-tiny font-mono text-text-muted">
-                                      {Array.isArray(s.lessons)
-                                        ? s.lessons.indexOf(l) + 1
-                                        : ""}
-                                    </span>
-                                  )}
-                                </div>
-                                <span
-                                  className={`text-sm transition-colors ${isPlayable ? "text-blue-400 underline decoration-blue-400/40 underline-offset-2" : "text-text-muted"}`}
-                                >
-                                  {l.title}
-                                </span>
-                                <span className="ml-auto text-label font-mono text-text-muted">
-                                  {formatDuration(l.video_duration_seconds)}
-                                </span>
-                              </>
-                            );
-                            return isPlayable ? (
-                              <Link
-                                key={l.id}
-                                href={linkHref}
-                                className="w-full flex items-center gap-4 px-6 py-4 text-left hover:bg-muted-light transition-colors border-b border-border last:border-b-0"
-                              >
-                                {content}
-                              </Link>
-                            ) : (
-                              <div
-                                key={l.id}
-                                className="w-full flex items-center gap-4 px-6 py-4 text-left opacity-60 border-b border-border last:border-b-0 cursor-default"
-                              >
-                                {content}
-                              </div>
-                            );
-                          })}
-                          {(!s.lessons || s.lessons.length === 0) && (
-                            <div className="px-6 py-4 text-text-muted text-sm">
-                              No lessons yet.
-                            </div>
-                          )}
+                    <button
+                      onClick={() =>
+                        setOpenSection(openSection === i ? null : i)
+                      }
+                      className="w-full flex items-center justify-between p-6 text-left hover:bg-muted-light transition-colors"
+                    >
+                      <div>
+                        <div className="text-label font-mono text-gold tracking-widest mb-1">
+                          Section {i + 1}
                         </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ))}
+                        <span className="text-text-main font-semibold">
+                          {s.title}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="text-label font-mono text-text-muted">
+                          {s.lessons?.length ?? 0} lessons
+                        </span>
+                        {openSection === i ? (
+                          <Minus size={14} className="text-text-muted" />
+                        ) : (
+                          <Plus size={14} className="text-text-muted" />
+                        )}
+                      </div>
+                    </button>
+                    <AnimatePresence>
+                      {openSection === i && (
+                        <motion.div
+                          initial={{ height: 0 }}
+                          animate={{ height: "auto" }}
+                          exit={{ height: 0 }}
+                          transition={{ duration: 0.35 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="bg-dark-soft border-t border-border">
+                            {s.lessons?.map((l, li) => {
+                              const lessonNumber = prevLessonsCount + li + 1;
+                              const hasVideo = !!l.computed_video_url;
+                              const isPlayable =
+                                (l.is_preview || isEnrolled) && hasVideo;
+                              const linkHref = l.is_preview
+                                ? `/courses/${course.slug}/lessons/${l.id}`
+                                : user
+                                  ? `/courses/${course.slug}/lessons/${l.id}`
+                                  : loginHref;
+                              const content = (
+                                <>
+                                  <div className="w-8 h-8 bg-muted border border-border flex items-center justify-center shrink-0">
+                                    {hasVideo ? (
+                                      <Play
+                                        size={11}
+                                        className="text-text-muted ml-0.5"
+                                      />
+                                    ) : (
+                                      <X
+                                        size={11}
+                                        className="text-text-muted"
+                                      />
+                                    )}
+                                  </div>
+                                  <span
+                                    className={`text-sm transition-colors ${isPlayable ? "text-blue-400 underline decoration-blue-400/40 underline-offset-2" : "text-text-muted"}`}
+                                  >
+                                    {lessonNumber}. {l.title}
+                                  </span>
+                                  <span className="ml-auto text-label font-mono text-text-muted">
+                                    {formatDuration(l.video_duration_seconds)}
+                                  </span>
+                                </>
+                              );
+                              return isPlayable ? (
+                                <Link
+                                  key={l.id}
+                                  href={linkHref}
+                                  className="w-full flex items-center gap-4 px-6 py-4 text-left hover:bg-muted-light transition-colors border-b border-border last:border-b-0"
+                                >
+                                  {content}
+                                </Link>
+                              ) : (
+                                <div
+                                  key={l.id}
+                                  className="w-full flex items-center gap-4 px-6 py-4 text-left opacity-60 border-b border-border last:border-b-0 cursor-default"
+                                >
+                                  {content}
+                                </div>
+                              );
+                            })}
+                            {(!s.lessons || s.lessons.length === 0) && (
+                              <div className="px-6 py-4 text-text-muted text-sm">
+                                No lessons yet.
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </RevealBlock>
@@ -792,6 +985,18 @@ export default function CourseDetailPage({
           />
         </RevealBlock>
       </div>
+
+      <script src="https://checkout.razorpay.com/v1/checkout.js" async />
+
+      <StatusModal
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig((prev) => ({ ...prev, isOpen: false }))}
+        type={modalConfig.type}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        actionText={modalConfig.actionText}
+        onAction={modalConfig.onAction}
+      />
     </main>
   );
 }

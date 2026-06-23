@@ -441,7 +441,7 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
                 {settings.videoCta.title}
               </h2>
               <Link
-                href="/lesson-player"
+                href="/courses"
                 className="group flex items-center gap-4"
               >
                 <div className="w-16 h-16 bg-text-main/10 backdrop-blur-md border border-text-main/20 flex items-center justify-center group-hover:bg-gold/20 group-hover:border-gold/40 transition-all duration-300">

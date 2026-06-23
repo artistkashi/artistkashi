@@ -7,6 +7,7 @@ from .admin import router as admin_router
 from .auth import router as auth_router
 from .cart import router as cart_router
 from .course_categories import router as course_categories_router
+from .course_payments import router as course_payments_router
 from .course_reviews import router as course_reviews_router
 from .courses import router as courses_router
 from .enrollments import router as enrollments_router
@@ -26,11 +27,12 @@ router.include_router(auth_router)
 router.include_router(users_router)
 router.include_router(addresses_router)
 router.include_router(course_categories_router)
+router.include_router(progress_router)
 router.include_router(courses_router)
+router.include_router(course_payments_router)
 router.include_router(course_reviews_router)
 router.include_router(enrollments_router)
 router.include_router(products_router)
-router.include_router(progress_router)
 router.include_router(orders_router)
 router.include_router(cart_router)
 router.include_router(wishlist_router)

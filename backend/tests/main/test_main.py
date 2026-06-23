@@ -2,8 +2,8 @@ import pytest
 from fastapi import status
 from sqlalchemy import select
 
-from app.core.exceptions import ErrorCode
 from app.core.config import settings
+from app.core.exceptions import ErrorCode
 from app.models import User
 
 

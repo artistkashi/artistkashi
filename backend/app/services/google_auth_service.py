@@ -57,12 +57,12 @@ def verify_google_token(credential: str) -> GoogleUserData:
         raise ServiceException(
             service="Google",
             message=f"Invalid Google token: {e}",
-        )
+        ) from e
     except Exception as e:
         raise ServiceException(
             service="Google",
             message=f"Google token verification failed: {e}",
-        )
+        ) from e
 
     if info.get("iss") not in (
         "accounts.google.com",

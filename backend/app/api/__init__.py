@@ -1,2 +1,2 @@
-from .v1 import router
+from .v1 import router as router
 

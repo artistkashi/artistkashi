@@ -89,7 +89,9 @@ class StorageService:
         }
 
         if file.content_type not in allowed_types:
-            raise ValidationException("Only MP4, WEBM, OGG, MOV and AVI videos are allowed")
+            raise ValidationException(
+                "Only MP4, WEBM, OGG, MOV and AVI videos are allowed"
+            )
 
         s3_key = await self._upload(file, folder, key=key)
         return f"{settings.S3_PUBLIC_URL}/{self.bucket}/{s3_key}"
@@ -163,8 +165,10 @@ class StorageService:
             },
             ExpiresIn=expires_in,
         )
-        # boto3 generates URL with the internal endpoint (S3_ENDPOINT_URL, e.g. http://minio:9000)
-        # but the browser needs the externally-accessible public URL (S3_PUBLIC_URL, e.g. http://localhost:9000)
+        # boto3 generates URL with the internal endpoint
+        # (S3_ENDPOINT_URL, e.g. http://minio:9000) but the browser
+        # needs the externally-accessible public URL
+        # (S3_PUBLIC_URL, e.g. http://localhost:9000)
         return url.replace(settings.S3_ENDPOINT_URL, settings.S3_PUBLIC_URL, 1)
 
     async def delete_file(self, key: str) -> bool:

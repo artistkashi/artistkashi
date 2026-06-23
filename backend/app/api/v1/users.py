@@ -4,15 +4,20 @@ from fastapi import APIRouter, Query
 from fastcrud import compute_offset
 
 from app.api.dependencies import CurrentUserDep, DatabaseDep
+from app.core.auth.security import verify_password
+from app.core.exceptions import UnauthorizedException
 from app.core.pagination import build_paginated_response
 from app.crud.user import crud_user
 from app.schemas.address import AddressRead
 from app.schemas.responses import PaginatedResponse, SuccessResponse
-from app.schemas.user import PublicUserRead, UserProfileRead, UserUpdate, DeleteAccountRequest
+from app.schemas.user import (
+    DeleteAccountRequest,
+    PublicUserRead,
+    UserProfileRead,
+    UserUpdate,
+)
 from app.services.address_service import address_service
 from app.services.user_service import user_service
-from app.core.exceptions import UnauthorizedException
-from app.core.auth.security import verify_password
 
 router = APIRouter(tags=["users"])
 
@@ -106,7 +111,8 @@ async def delete_own_account(
 
     if not user.hashed_password:
         raise UnauthorizedException(
-            "This account uses Google Sign-In. Please set a password first or contact support."
+            "This account uses Google Sign-In. "
+            "Please set a password first or contact support."
         )
 
     if not verify_password(payload.password, user.hashed_password):

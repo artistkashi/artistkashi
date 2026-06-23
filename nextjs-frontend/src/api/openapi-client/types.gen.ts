@@ -522,7 +522,7 @@ export type CourseCategoryRead = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -787,7 +787,7 @@ export type CourseEnrollmentRead = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -860,7 +860,7 @@ export type CourseLessonRead = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -923,7 +923,7 @@ export type CourseLessonReadWithVideo = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -1132,6 +1132,24 @@ export type CourseListRead = {
 };
 
 /**
+ * CoursePaymentVerificationRequest
+ */
+export type CoursePaymentVerificationRequest = {
+    /**
+     * Razorpay Order Id
+     */
+    razorpay_order_id: string;
+    /**
+     * Razorpay Payment Id
+     */
+    razorpay_payment_id: string;
+    /**
+     * Razorpay Signature
+     */
+    razorpay_signature: string;
+};
+
+/**
  * CourseProgressRead
  */
 export type CourseProgressRead = {
@@ -1151,6 +1169,28 @@ export type CourseProgressRead = {
      * Progress Percentage
      */
     progress_percentage: number;
+};
+
+/**
+ * CoursePurchaseResponse
+ */
+export type CoursePurchaseResponse = {
+    /**
+     * Razorpay Order Id
+     */
+    razorpay_order_id: string;
+    /**
+     * Amount
+     */
+    amount: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Course Title
+     */
+    course_title: string;
 };
 
 /**
@@ -1294,7 +1334,7 @@ export type CourseSectionRead = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -1350,7 +1390,7 @@ export type CourseSectionWithLessonsRead = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -1723,7 +1763,7 @@ export type LessonProgressRead = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -3132,7 +3172,7 @@ export type ReviewRead = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -3168,7 +3208,7 @@ export type ReviewReadPublic = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -3483,6 +3523,26 @@ export type SuccessResponseCourseProgressRead = {
      */
     message: string;
     data?: CourseProgressRead | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[CoursePurchaseResponse]
+ */
+export type SuccessResponseCoursePurchaseResponse = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: CoursePurchaseResponse | null;
     meta?: Meta;
 };
 
@@ -3975,6 +4035,31 @@ export type SuccessResponseDictStrInt = {
      */
     data?: {
         [key: string]: number;
+    } | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[dict[str, str]]
+ */
+export type SuccessResponseDictStrStr = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: {
+        [key: string]: string;
     } | null;
     meta?: Meta;
 };
@@ -4773,7 +4858,7 @@ export type CourseLessonReadWritable = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -4828,7 +4913,7 @@ export type CourseLessonReadWithVideoWritable = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -5099,7 +5184,7 @@ export type CourseSectionWithLessonsReadWritable = {
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
     /**
      * Updated At
      */
@@ -8668,6 +8753,164 @@ export type ListPublicCourseCategoriesResponses = {
 
 export type ListPublicCourseCategoriesResponse = ListPublicCourseCategoriesResponses[keyof ListPublicCourseCategoriesResponses];
 
+export type GetAllLessonProgressesData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/courses/{course_id}/lessons/progress';
+};
+
+export type GetAllLessonProgressesErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetAllLessonProgressesError = GetAllLessonProgressesErrors[keyof GetAllLessonProgressesErrors];
+
+export type GetAllLessonProgressesResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseDictStrStr;
+};
+
+export type GetAllLessonProgressesResponse = GetAllLessonProgressesResponses[keyof GetAllLessonProgressesResponses];
+
+export type GetLessonProgressData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Lesson Id
+         */
+        lesson_id: string;
+    };
+    query?: never;
+    url: '/api/courses/{course_id}/lessons/{lesson_id}/progress';
+};
+
+export type GetLessonProgressErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetLessonProgressError = GetLessonProgressErrors[keyof GetLessonProgressErrors];
+
+export type GetLessonProgressResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseLessonProgressDetail;
+};
+
+export type GetLessonProgressResponse = GetLessonProgressResponses[keyof GetLessonProgressResponses];
+
+export type UpdateLessonProgressData = {
+    body: LessonProgressUpdate;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+        /**
+         * Lesson Id
+         */
+        lesson_id: string;
+    };
+    query?: never;
+    url: '/api/courses/{course_id}/lessons/{lesson_id}/progress';
+};
+
+export type UpdateLessonProgressErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type UpdateLessonProgressError = UpdateLessonProgressErrors[keyof UpdateLessonProgressErrors];
+
+export type UpdateLessonProgressResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseLessonProgressDetail;
+};
+
+export type UpdateLessonProgressResponse = UpdateLessonProgressResponses[keyof UpdateLessonProgressResponses];
+
+export type GetCourseProgressData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/courses/{course_id}/progress';
+};
+
+export type GetCourseProgressErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetCourseProgressError = GetCourseProgressErrors[keyof GetCourseProgressErrors];
+
+export type GetCourseProgressResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseProgressRead;
+};
+
+export type GetCourseProgressResponse = GetCourseProgressResponses[keyof GetCourseProgressResponses];
+
+export type ContinueWatchingData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/progress/continue-watching';
+};
+
+export type ContinueWatchingErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type ContinueWatchingError = ContinueWatchingErrors[keyof ContinueWatchingErrors];
+
+export type ContinueWatchingResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseListLessonProgressRead;
+};
+
+export type ContinueWatchingResponse = ContinueWatchingResponses[keyof ContinueWatchingResponses];
+
 export type CoursesListCoursesData = {
     body?: never;
     path?: never;
@@ -8841,6 +9084,66 @@ export type GetLessonVideoResponses = {
 };
 
 export type GetLessonVideoResponse = GetLessonVideoResponses[keyof GetLessonVideoResponses];
+
+export type InitiateCoursePurchaseData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/courses/{slug}/purchase';
+};
+
+export type InitiateCoursePurchaseErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type InitiateCoursePurchaseError = InitiateCoursePurchaseErrors[keyof InitiateCoursePurchaseErrors];
+
+export type InitiateCoursePurchaseResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCoursePurchaseResponse;
+};
+
+export type InitiateCoursePurchaseResponse = InitiateCoursePurchaseResponses[keyof InitiateCoursePurchaseResponses];
+
+export type VerifyCoursePaymentData = {
+    body: CoursePaymentVerificationRequest;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/courses/{slug}/verify-payment';
+};
+
+export type VerifyCoursePaymentErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type VerifyCoursePaymentError = VerifyCoursePaymentErrors[keyof VerifyCoursePaymentErrors];
+
+export type VerifyCoursePaymentResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseEnrollmentRead;
+};
+
+export type VerifyCoursePaymentResponse = VerifyCoursePaymentResponses[keyof VerifyCoursePaymentResponses];
 
 export type ListCourseReviewsData = {
     body?: never;
@@ -9174,134 +9477,6 @@ export type ProductsGetProductResponses = {
 };
 
 export type ProductsGetProductResponse = ProductsGetProductResponses[keyof ProductsGetProductResponses];
-
-export type GetLessonProgressData = {
-    body?: never;
-    path: {
-        /**
-         * Course Id
-         */
-        course_id: string;
-        /**
-         * Lesson Id
-         */
-        lesson_id: string;
-    };
-    query?: never;
-    url: '/api/courses/{course_id}/lessons/{lesson_id}/progress';
-};
-
-export type GetLessonProgressErrors = {
-    /**
-     * Validation Error
-     */
-    422: ErrorResponse;
-};
-
-export type GetLessonProgressError = GetLessonProgressErrors[keyof GetLessonProgressErrors];
-
-export type GetLessonProgressResponses = {
-    /**
-     * Successful Response
-     */
-    200: SuccessResponseLessonProgressDetail;
-};
-
-export type GetLessonProgressResponse = GetLessonProgressResponses[keyof GetLessonProgressResponses];
-
-export type UpdateLessonProgressData = {
-    body: LessonProgressUpdate;
-    path: {
-        /**
-         * Course Id
-         */
-        course_id: string;
-        /**
-         * Lesson Id
-         */
-        lesson_id: string;
-    };
-    query?: never;
-    url: '/api/courses/{course_id}/lessons/{lesson_id}/progress';
-};
-
-export type UpdateLessonProgressErrors = {
-    /**
-     * Validation Error
-     */
-    422: ErrorResponse;
-};
-
-export type UpdateLessonProgressError = UpdateLessonProgressErrors[keyof UpdateLessonProgressErrors];
-
-export type UpdateLessonProgressResponses = {
-    /**
-     * Successful Response
-     */
-    200: SuccessResponseLessonProgressDetail;
-};
-
-export type UpdateLessonProgressResponse = UpdateLessonProgressResponses[keyof UpdateLessonProgressResponses];
-
-export type GetCourseProgressData = {
-    body?: never;
-    path: {
-        /**
-         * Course Id
-         */
-        course_id: string;
-    };
-    query?: never;
-    url: '/api/courses/{course_id}/progress';
-};
-
-export type GetCourseProgressErrors = {
-    /**
-     * Validation Error
-     */
-    422: ErrorResponse;
-};
-
-export type GetCourseProgressError = GetCourseProgressErrors[keyof GetCourseProgressErrors];
-
-export type GetCourseProgressResponses = {
-    /**
-     * Successful Response
-     */
-    200: SuccessResponseCourseProgressRead;
-};
-
-export type GetCourseProgressResponse = GetCourseProgressResponses[keyof GetCourseProgressResponses];
-
-export type ContinueWatchingData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/api/progress/continue-watching';
-};
-
-export type ContinueWatchingErrors = {
-    /**
-     * Validation Error
-     */
-    422: ErrorResponse;
-};
-
-export type ContinueWatchingError = ContinueWatchingErrors[keyof ContinueWatchingErrors];
-
-export type ContinueWatchingResponses = {
-    /**
-     * Successful Response
-     */
-    200: SuccessResponseListLessonProgressRead;
-};
-
-export type ContinueWatchingResponse = ContinueWatchingResponses[keyof ContinueWatchingResponses];
 
 export type ListMyOrdersData = {
     body?: never;

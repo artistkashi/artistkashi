@@ -48,21 +48,18 @@ async def _process_video_background(
                 object={"status": LessonStatus.PROCESSING},
             )
 
-        new_key = await transcode_to_1080p(
-            source_key=source_key,
-            course_id=course_id,
-            lesson_id=lesson_id,
+        new_key, duration = await transcode_to_1080p(
+            source_key=source_key, course_id=course_id, lesson_id=lesson_id
         )
 
         async with get_async_session_context() as session:
-            update = {"status": LessonStatus.READY}
+            update = {"status": LessonStatus.READY, "video_duration_seconds": duration}
             if new_key != source_key:
                 update["video_key"] = new_key
                 await storage_service.delete_file(source_key)
-            await crud_course_lesson.update(
-                db=session,
-                id=lesson_id,
-                object=update,
+            await crud_course_lesson.update(db=session, id=lesson_id, object=update)
+            await lesson_service._recalculate_course_duration(
+                session=session, course_id=uuid.UUID(course_id)
             )
 
         logger.info("Video processing complete for lesson %s", lesson_id)
@@ -72,9 +69,7 @@ async def _process_video_background(
         try:
             async with get_async_session_context() as session:
                 await crud_course_lesson.update(
-                    db=session,
-                    id=lesson_id,
-                    object={"status": LessonStatus.FAILED},
+                    db=session, id=lesson_id, object={"status": LessonStatus.FAILED}
                 )
         except Exception:
             logger.exception("Failed to update lesson status to FAILED")
@@ -93,10 +88,7 @@ async def create_lesson(
     await course_service.get_course(session=session, course_id=course_id)
     await section_service.get_section(session=session, section_id=section_id)
     lesson = await lesson_service.create_lesson(
-        session=session,
-        course_id=course_id,
-        section_id=section_id,
-        payload=payload,
+        session=session, course_id=course_id, section_id=section_id, payload=payload
     )
     return SuccessResponse(message="Lesson created successfully", data=lesson)
 

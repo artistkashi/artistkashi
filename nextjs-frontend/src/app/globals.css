@@ -295,7 +295,7 @@
 
 /* Dark */
 .luxury-loader-dark {
-  --loader-color: var(---color-dark);
+  --loader-color: #0a0a0aa8;
   --loader-shadow: rgba(10, 10, 10, 0.35);
 }
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Query
 
@@ -18,6 +19,26 @@ from app.services.lesson_service import lesson_service
 from app.services.progress_service import progress_service
 
 router = APIRouter(tags=["progress"])
+
+
+@router.get(
+    "/courses/{course_id}/lessons/progress",
+    response_model=SuccessResponse[dict[str, str]]
+)
+async def get_all_lesson_progresses(
+    course_id: uuid.UUID, session: DatabaseDep, current_user: CurrentUserDep
+):
+    await require_enrollment(
+        course_id=course_id, session=session, current_user=current_user
+    )
+
+    progresses = await progress_service.get_all_lesson_progresses(
+        session=session, user_id=current_user.id, course_id=course_id
+    )
+
+    return SuccessResponse(
+        message="Lesson progresses retrieved successfully", data=progresses
+    )
 
 
 @router.put(
@@ -38,30 +59,22 @@ async def update_lesson_progress(
         )
 
     progress = await progress_service.create_or_update_progress(
-        session=session,
-        user_id=current_user.id,
-        lesson_id=lesson_id,
-        payload=payload,
+        session=session, user_id=current_user.id, lesson_id=lesson_id, payload=payload
     )
 
     percentage = await progress_service.get_lesson_progress_percentage(
-        session=session,
-        user_id=current_user.id,
-        lesson_id=lesson_id,
+        session=session, user_id=current_user.id, lesson_id=lesson_id
     )
 
     return SuccessResponse(
         message="Progress updated successfully",
-        data=LessonProgressDetail(
-            progress=progress,
-            progress_percentage=percentage,
-        ),
+        data=LessonProgressDetail(progress=progress, progress_percentage=percentage),
     )
 
 
 @router.get(
     "/courses/{course_id}/lessons/{lesson_id}/progress",
-    response_model=SuccessResponse[LessonProgressDetail],
+    response_model=SuccessResponse[LessonProgressDetail]
 )
 async def get_lesson_progress(
     course_id: uuid.UUID,
@@ -78,13 +91,13 @@ async def get_lesson_progress(
     progress = await progress_service.get_progress_or_none(
         session=session,
         user_id=current_user.id,
-        lesson_id=lesson_id,
+        lesson_id=lesson_id
     )
 
     percentage = await progress_service.get_lesson_progress_percentage(
         session=session,
         user_id=current_user.id,
-        lesson_id=lesson_id,
+        lesson_id=lesson_id
     )
 
     if not progress:
@@ -95,6 +108,7 @@ async def get_lesson_progress(
             status=ProgressStatus.NOT_STARTED,
             watch_seconds=0,
             resume_position_seconds=0,
+            created_at=datetime.now(UTC),
         )
 
     return SuccessResponse(

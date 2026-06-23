@@ -123,7 +123,7 @@ export function CourseCardGrid({ course, delay = 0 }: CourseCardProps) {
             <span className="text-primary font-bold text-2xl italic">
               {displayPrice(course.price)}
             </span>
-            <span className="text-text-muted text-2xs font-mono uppercase tracking-widest flex items-center gap-2 group-hover:text-primary transition-colors border-b border-transparent hover:border-primary/40 pb-0.5">
+            <span className="text-text-muted text-xs font-mono uppercase tracking-widest flex items-center gap-2 group-hover:text-primary transition-colors border-b border-transparent group-hover:border-primary pb-0.5">
               Enroll <Play size={10} className="fill-current" />
             </span>
           </div>
@@ -187,10 +187,10 @@ export function CourseCardListItem({ course, delay = 0 }: CourseCardProps) {
           )}
         </div>
         <div className="flex flex-col items-end justify-center gap-1 pr-5 shrink-0">
-          <span className="text-primary font-bold text-lg italic whitespace-nowrap leading-none">
+          <span className="text-primary font-bold text-lg italic whitespace-nowrap leading-none mb-4">
             {displayPrice(course.price)}
           </span>
-          <span className="text-text-muted text-2xs font-mono uppercase tracking-widest flex items-center gap-1.5 group-hover:text-primary transition-colors border-b border-transparent hover:border-primary/40 pb-0.5 leading-none">
+          <span className="text-text-muted text-xs font-mono uppercase tracking-widest flex items-center gap-1.5 group-hover:text-primary transition-colors border-b border-transparent group-hover:border-primary pb-0.5 leading-none ">
             Enroll <Play size={9} className="fill-current" />
           </span>
         </div>

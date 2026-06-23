@@ -24,8 +24,8 @@ from app.crud.course import (
 )
 from app.models.course import Course
 from app.models.course_category import CourseCategory
+from app.models.course_payment import CoursePayment, CoursePaymentStatus
 from app.models.course_section import CourseSection
-from app.models.order import Order, OrderItem, PaymentStatus
 from app.models.review import ReviewType
 from app.schemas.course import (
     CourseCreate,
@@ -483,13 +483,9 @@ class CourseService:
             course_id=course_id,
         )
 
-        stmt = (
-            select(func.sum(OrderItem.price))
-            .join(Order, OrderItem.order_id == Order.id)
-            .where(
-                OrderItem.course_id == course_id,
-                Order.payment_status == PaymentStatus.PAID,
-            )
+        stmt = select(func.sum(CoursePayment.amount)).where(
+            CoursePayment.course_id == course_id,
+            CoursePayment.status == CoursePaymentStatus.PAID,
         )
         result = await session.execute(stmt)
         total_revenue = result.scalar() or Decimal("0.00")

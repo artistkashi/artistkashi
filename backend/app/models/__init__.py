@@ -5,6 +5,7 @@ from app.models.course import Course
 from app.models.course_category import CourseCategory
 from app.models.course_enrollment import CourseEnrollment
 from app.models.course_lesson import CourseLesson
+from app.models.course_payment import CoursePayment
 from app.models.course_section import CourseSection
 from app.models.lesson_progress import LessonProgress
 from app.models.order import Order, OrderItem
@@ -36,6 +37,7 @@ __all__ = [
     "CourseSection",
     "CourseLesson",
     "CourseEnrollment",
+    "CoursePayment",
     "LessonProgress",
     "Product",
     "ProductCategory",

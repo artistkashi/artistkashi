@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from app.models.course_category import CourseCategory
     from app.models.course_enrollment import CourseEnrollment
     from app.models.course_lesson import CourseLesson
+    from app.models.course_payment import CoursePayment
     from app.models.course_section import CourseSection
 
 
@@ -101,4 +102,8 @@ class Course(Base, TimestampMixin, SoftDeleteMixin):
 
     enrollments: Mapped[list[CourseEnrollment]] = relationship(
         "CourseEnrollment", back_populates="course", cascade="all, delete-orphan"
+    )
+
+    payments: Mapped[list[CoursePayment]] = relationship(
+        "CoursePayment", back_populates="course", cascade="all, delete-orphan"
     )

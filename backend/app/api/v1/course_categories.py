@@ -12,7 +12,10 @@ from app.schemas.responses import SuccessResponse
 router = APIRouter(tags=["course-categories"])
 
 
-@router.get("/course-categories", response_model=SuccessResponse[list[CourseCategoryRead]])
+@router.get(
+    "/course-categories",
+    response_model=SuccessResponse[list[CourseCategoryRead]],
+)
 async def list_public_course_categories(
     session: DatabaseDep,
 ) -> Any:
@@ -23,4 +26,6 @@ async def list_public_course_categories(
         return_as_model=True,
     )
     data = result.get("data", []) if isinstance(result, dict) else result
-    return SuccessResponse(message="Course categories retrieved successfully", data=data)
+    return SuccessResponse(
+        message="Course categories retrieved successfully", data=data
+    )
