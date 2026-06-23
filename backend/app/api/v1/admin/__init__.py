@@ -4,6 +4,7 @@ from app.core.auth.dependencies import get_current_admin
 from app.schemas.responses import SuccessResponse
 
 from . import course_categories as course_categories_module
+from . import course_payments as course_payments_module
 from . import courses as courses_module
 from . import dashboard as dashboard_module
 from . import enrollments as enrollments_module
@@ -38,4 +39,5 @@ router.include_router(sections_module.router)
 router.include_router(lessons_module.router)
 router.include_router(dashboard_module.router)
 router.include_router(orders_module.router)
+router.include_router(course_payments_module.router)
 router.include_router(reviews_module.router)

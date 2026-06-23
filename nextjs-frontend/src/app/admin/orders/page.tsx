@@ -2,8 +2,10 @@
 
 import { unwrap, unwrapPaginated } from "@/api/client-service";
 import {
-  AdminOrderRead,
+  AdminCoursePaymentRead,
+  AdminOrderDetailRead,
   getOrderDetails,
+  listCoursePayments,
   listOrders,
   OrderDashboardRead,
   OrderStatus,
@@ -92,10 +94,11 @@ export default function AdminOrdersPage() {
 
   const [filters, setFilters] = useState<OrderFilters>(EMPTY_FILTERS);
 
-  const [selectedOrder, setSelectedOrder] = useState<AdminOrderRead | null>(
+  const [selectedOrder, setSelectedOrder] = useState<AdminOrderDetailRead | null>(
     null
   );
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"orders" | "course-payments">("orders");
   const queryClient = useQueryClient();
 
   const { data, isLoading, isFetching } = useQuery({
@@ -125,6 +128,18 @@ export default function AdminOrdersPage() {
         })
       ),
     placeholderData: keepPreviousData,
+  });
+
+  const { data: coursePaymentsData, isLoading: cpLoading } = useQuery({
+    queryKey: ["admin", "course-payments", page],
+    queryFn: () =>
+      unwrapPaginated(
+        listCoursePayments({
+          query: { page, page_size: pageSize },
+        })
+      ),
+    placeholderData: keepPreviousData,
+    enabled: activeTab === "course-payments",
   });
 
   const handleViewDetails = async (orderId: string) => {
@@ -599,143 +614,210 @@ export default function AdminOrdersPage() {
           <h1 className="text-4xl font-black text-text-main tracking-tighter uppercase leading-none">
             Acquisition <span className="text-gold italic">Archive</span>
           </h1>
+          <div className="flex items-center gap-6 mt-4">
+            <button
+              onClick={() => setActiveTab("orders")}
+              className={cn(
+                "text-xs font-mono uppercase tracking-[0.2em] pb-2 border-b-2 transition-all",
+                activeTab === "orders"
+                  ? "text-gold border-gold"
+                  : "text-text-muted border-transparent hover:text-text-main"
+              )}
+            >
+              Orders
+            </button>
+            <button
+              onClick={() => setActiveTab("course-payments")}
+              className={cn(
+                "text-xs font-mono uppercase tracking-[0.2em] pb-2 border-b-2 transition-all",
+                activeTab === "course-payments"
+                  ? "text-gold border-gold"
+                  : "text-text-muted border-transparent hover:text-text-main"
+              )}
+            >
+              Course Payments
+            </button>
+          </div>
           <p className="text-text-muted text-xs mt-3 uppercase font-mono tracking-[0.3em] flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-gold rounded-full animate-pulse" />
-            Total Volume: {data?.pagination.total_items || 0} Records
+            {activeTab === "orders"
+              ? `Total Orders: ${data?.pagination.total_items || 0} Records`
+              : `Total Payments: ${coursePaymentsData?.pagination.total_items || 0} Records`}
           </p>
         </div>
-        <div className="flex items-center justify-end gap-4 w-full md:w-auto">
-          <button
-            onClick={handleRefresh}
-            disabled={isDataLoading}
-            className="p-3 bg-dark border border-border/40 text-text-muted hover:text-gold hover:border-gold/40 transition-all rounded-sm disabled:opacity-50 group"
-            title="Refresh Archive"
-          >
-            <RefreshCw
-              size={16}
-              className={cn(isDataLoading && "animate-spin")}
-            />
-          </button>
-          <GhostBtn
-            onClick={handleExport}
-            className="px-6 py-3 text-2xs flex items-center gap-2 border-border/40 hover:border-gold/50 tracking-widest transition-all"
-          >
-            <Download size={14} /> EXPORT MANIFEST
-          </GhostBtn>
-        </div>
-      </div>
-
-      {/* Header Search & Filter Bar */}
-      <div className="flex items-stretch gap-2 lg:gap-4 mb-1 shrink-0 px-1">
-        <div className="flex-1 relative group">
-          <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none z-10">
-            <Search
-              size={18}
-              className="text-text-muted group-focus-within:text-gold transition-colors"
-            />
-          </div>
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => {
-              setSearchInput(e.target.value);
-              if (e.target.value === "") {
-                setSearch("");
-                setPage(1);
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                setSearch(searchInput);
-                setPage(1);
-              }
-            }}
-            placeholder="Search archive and hit enter..."
-            className="w-full focus:border-gold/50! px-14 py-4 text-sm text-text-main outline-none placeholder:text-text-muted/50 transition-all rounded-sm backdrop-blur-sm glass-input"
-          />
-        </div>
-
-        <button
-          onClick={() => setIsFilterModalOpen(true)}
-          className={cn(
-            "flex items-center justify-center gap-3 px-5 lg:px-8 py-4 border rounded-sm transition-all font-mono text-xs uppercase tracking-widest min-w-14 glass-input",
-            activeFilterCount > 0
-              ? "bg-gold/10! border-gold! text-gold"
-              : "bg-surface/50 border-border/60 text-text-muted hover:border-gold/30! hover:text-text-main"
-          )}
-          title="Toggle Filters"
-        >
-          <Filter size={16} />
-          <span className="hidden lg:inline">Filters</span>
-          {activeFilterCount > 0 && (
-            <span className="lg:ml-1 bg-gold text-dark px-1.5 py-0.5 rounded-full text-2xs font-bold">
-              {activeFilterCount}
-            </span>
-          )}
-        </button>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="flex-1 lg:overflow-y-auto lg:custom-scrollbar px-1 relative group">
-        {/* Progress Loading Overlay (Shared) */}
-        <AnimatePresence>
-          {isDataLoading && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 z-20 bg-dark/60 backdrop-blur-xs flex flex-col items-center justify-center gap-4 rounded-sm"
+        {activeTab === "orders" && (
+          <div className="flex items-center justify-end gap-4 w-full md:w-auto">
+            <button
+              onClick={handleRefresh}
+              disabled={isDataLoading}
+              className="p-3 bg-dark border border-border/40 text-text-muted hover:text-gold hover:border-gold/40 transition-all rounded-sm disabled:opacity-50 group"
+              title="Refresh Archive"
             >
-              <div className="luxury-loader luxury-loader-gold loader-lg" />
-              <p className="text-2xs font-mono text-gold uppercase tracking-[0.4em] animate-pulse">
-                Synchronizing Archive
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Desktop Data Table (1024px+) */}
-        <div className="hidden lg:block">
-          <DataTable
-            columns={desktopColumns}
-            data={orders}
-            isLoading={isDataLoading}
-          />
-        </div>
-
-        {/* Tablet Compact Table (768px - 1024px) */}
-        <div className="hidden md:block lg:hidden">
-          <DataTable
-            columns={tabletColumns}
-            data={orders}
-            isLoading={isDataLoading}
-          />
-        </div>
-
-        {/* Mobile Card Layout (<768px) */}
-        <div className="md:hidden space-y-6">
-          {orders.length === 0 && !isDataLoading ? (
-            <div className="p-20 text-center bg-surface/30 border border-border/60 rounded-sm">
-              <div className="flex flex-col items-center gap-4 opacity-40">
-                <ShoppingBag size={40} className="text-text-muted" />
-                <p className="text-xs font-mono text-text-muted uppercase tracking-[0.2em]">
-                  No records found.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="grid gap-6">
-              {orders.map((order) => (
-                <MobileOrderCard
-                  key={order.id}
-                  order={order}
-                  onViewDetails={handleViewDetails}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+              <RefreshCw
+                size={16}
+                className={cn(isDataLoading && "animate-spin")}
+              />
+            </button>
+            <GhostBtn
+              onClick={handleExport}
+              className="px-6 py-3 text-2xs flex items-center gap-2 border-border/40 hover:border-gold/50 tracking-widest transition-all"
+            >
+              <Download size={14} /> EXPORT MANIFEST
+            </GhostBtn>
+          </div>
+        )}
       </div>
+
+      {activeTab === "orders" ? (
+        <>
+          {/* Header Search & Filter Bar */}
+          <div className="flex items-stretch gap-2 lg:gap-4 mb-1 shrink-0 px-1">
+            <div className="flex-1 relative group">
+              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none z-10">
+                <Search
+                  size={18}
+                  className="text-text-muted group-focus-within:text-gold transition-colors"
+                />
+              </div>
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => {
+                  setSearchInput(e.target.value);
+                  if (e.target.value === "") {
+                    setSearch("");
+                    setPage(1);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setSearch(searchInput);
+                    setPage(1);
+                  }
+                }}
+                placeholder="Search archive and hit enter..."
+                className="w-full focus:border-gold/50! px-14 py-4 text-sm text-text-main outline-none placeholder:text-text-muted/50 transition-all rounded-sm backdrop-blur-sm glass-input"
+              />
+            </div>
+
+            <button
+              onClick={() => setIsFilterModalOpen(true)}
+              className={cn(
+                "flex items-center justify-center gap-3 px-5 lg:px-8 py-4 border rounded-sm transition-all font-mono text-xs uppercase tracking-widest min-w-14 glass-input",
+                activeFilterCount > 0
+                  ? "bg-gold/10! border-gold! text-gold"
+                  : "bg-surface/50 border-border/60 text-text-muted hover:border-gold/30! hover:text-text-main"
+              )}
+              title="Toggle Filters"
+            >
+              <Filter size={16} />
+              <span className="hidden lg:inline">Filters</span>
+              {activeFilterCount > 0 && (
+                <span className="lg:ml-1 bg-gold text-dark px-1.5 py-0.5 rounded-full text-2xs font-bold">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="flex-1 lg:overflow-y-auto lg:custom-scrollbar px-1 relative group">
+            {/* Progress Loading Overlay (Shared) */}
+            <AnimatePresence>
+              {isDataLoading && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-20 bg-dark/60 backdrop-blur-xs flex flex-col items-center justify-center gap-4 rounded-sm"
+                >
+                  <div className="luxury-loader luxury-loader-gold loader-lg" />
+                  <p className="text-2xs font-mono text-gold uppercase tracking-[0.4em] animate-pulse">
+                    Synchronizing Archive
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Desktop Data Table (1024px+) */}
+            <div className="hidden lg:block">
+              <DataTable
+                columns={desktopColumns}
+                data={orders}
+                isLoading={isDataLoading}
+              />
+            </div>
+
+            {/* Tablet Compact Table (768px - 1024px) */}
+            <div className="hidden md:block lg:hidden">
+              <DataTable
+                columns={tabletColumns}
+                data={orders}
+                isLoading={isDataLoading}
+              />
+            </div>
+
+            {/* Mobile Card Layout (<768px) */}
+            <div className="md:hidden space-y-6">
+              {orders.length === 0 && !isDataLoading ? (
+                <div className="p-20 text-center bg-surface/30 border border-border/60 rounded-sm">
+                  <div className="flex flex-col items-center gap-4 opacity-40">
+                    <ShoppingBag size={40} className="text-text-muted" />
+                    <p className="text-xs font-mono text-text-muted uppercase tracking-[0.2em]">
+                      No records found.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid gap-6">
+                  {orders.map((order) => (
+                    <MobileOrderCard
+                      key={order.id}
+                      order={order}
+                      onViewDetails={handleViewDetails}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      ) : (
+        /* Course Payments View */
+        <div className="flex-1 lg:overflow-y-auto lg:custom-scrollbar px-1 relative group">
+          <AnimatePresence>
+            {cpLoading && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-20 bg-dark/60 backdrop-blur-xs flex flex-col items-center justify-center gap-4 rounded-sm"
+              >
+                <div className="luxury-loader luxury-loader-gold loader-lg" />
+                <p className="text-2xs font-mono text-gold uppercase tracking-[0.4em] animate-pulse">
+                  Loading Payments
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="space-y-4">
+            {coursePaymentsData?.data?.map((payment) => (
+              <CoursePaymentCard key={payment.id} payment={payment} />
+            ))}
+            {!coursePaymentsData?.data?.length && !cpLoading && (
+              <div className="p-20 text-center bg-surface/30 border border-border/60 rounded-sm">
+                <div className="flex flex-col items-center gap-4 opacity-40">
+                  <ShoppingBag size={40} className="text-text-muted" />
+                  <p className="text-xs font-mono text-text-muted uppercase tracking-[0.2em]">
+                    No course payments found.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Advanced Pagination - Anchored to bottom on desktop, flow on mobile */}
       <div className="px-6 py-4 md:py-2 border border-border/40 bg-dark/40 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4 rounded-sm shadow-2xl shrink-0">
@@ -1180,7 +1262,7 @@ function OrderDetailsModal({
   onUpdateStatus,
   isUpdating,
 }: {
-  order: AdminOrderRead;
+  order: AdminOrderDetailRead;
   onClose: () => void;
   onUpdateStatus: (status: OrderStatus) => void;
   isUpdating: boolean;
@@ -1305,16 +1387,26 @@ function OrderDetailsModal({
                       </div>
 
                       <div>
-                        <p className="text-xs font-bold text-text-main uppercase">
-                          {item.product_id
-                            ? `Product ID: ${item.product_id}`
-                            : `Course ID: ${item.course_id}`}
-                        </p>
-
-                        {item.variant_id && (
-                          <p className="text-2xs text-text-muted font-mono tracking-widest uppercase">
-                            Variant: {item.variant_id}
-                          </p>
+                        {item.course_title ? (
+                          <>
+                            <p className="text-xs font-bold text-text-main uppercase">
+                              {item.course_title}
+                            </p>
+                            <p className="text-2xs text-gold font-mono tracking-widest uppercase">
+                              Course Enrollment
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-xs font-bold text-text-main uppercase">
+                              {item.product_title || `Product ID: ${item.product_id}`}
+                            </p>
+                            {item.variant_name && (
+                              <p className="text-2xs text-text-muted font-mono tracking-widest uppercase">
+                                {item.variant_name}
+                              </p>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>
@@ -1378,6 +1470,60 @@ function OrderDetailsModal({
           </GhostBtn>
         </div>
       </motion.div>
+    </div>
+  );
+}
+
+// ─── Course Payment Card ─────────────────────────────────────────────────────
+
+function CoursePaymentCard({
+  payment,
+}: {
+  payment: AdminCoursePaymentRead;
+}) {
+  const statusColorMap: Record<string, string> = {
+    paid: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+    pending: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+    failed: "text-red-400 bg-red-500/10 border-red-500/20",
+    refunded: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
+  };
+
+  return (
+    <div className="bg-surface border border-border p-4 rounded-sm hover:border-gold/30 transition-all">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4 min-w-0 flex-1">
+          <div className="w-10 h-10 bg-gold/10 border border-gold/20 flex items-center justify-center text-gold font-bold text-sm shrink-0">
+            {payment.course_title?.charAt(0) || "C"}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-text-main uppercase truncate">
+              {payment.course_title || `Course ${payment.course_id}`}
+            </p>
+            <p className="text-2xs text-text-muted font-mono truncate">
+              {payment.user_full_name || "Unknown"} · {payment.user_email || ""}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 shrink-0">
+          <div className="text-right">
+            <p className="text-sm font-bold text-gold font-mono">
+              {displayPrice(payment.amount)}
+            </p>
+            <p className="text-2xs text-text-muted font-mono whitespace-nowrap">
+              {format(new Date(payment.created_at), "dd MMM yyyy")}
+            </p>
+          </div>
+          <span
+            className={cn(
+              "px-3 py-1 rounded-full text-2xs font-mono font-bold uppercase tracking-wider border",
+              statusColorMap[payment.status] || statusColorMap.pending
+            )}
+          >
+            {payment.status}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

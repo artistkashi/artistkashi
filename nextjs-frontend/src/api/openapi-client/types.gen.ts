@@ -179,9 +179,75 @@ export type AddressUpdate = {
 };
 
 /**
- * AdminOrderRead
+ * AdminCoursePaymentRead
  */
-export type AdminOrderRead = {
+export type AdminCoursePaymentRead = {
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Razorpay Order Id
+     */
+    razorpay_order_id: string;
+    /**
+     * Razorpay Payment Id
+     */
+    razorpay_payment_id?: string | null;
+    /**
+     * Razorpay Signature
+     */
+    razorpay_signature?: string | null;
+    /**
+     * Amount
+     */
+    amount: string;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Paid At
+     */
+    paid_at?: string | null;
+    /**
+     * User Full Name
+     */
+    user_full_name?: string | null;
+    /**
+     * User Email
+     */
+    user_email?: string | null;
+    /**
+     * Course Title
+     */
+    course_title?: string | null;
+    /**
+     * Course Slug
+     */
+    course_slug?: string | null;
+};
+
+/**
+ * AdminOrderDetailRead
+ */
+export type AdminOrderDetailRead = {
     /**
      * Created At
      */
@@ -223,7 +289,7 @@ export type AdminOrderRead = {
     /**
      * Items
      */
-    items?: Array<OrderItemRead>;
+    items?: Array<OrderItemDetailRead>;
     user?: PublicUserRead | null;
 };
 
@@ -1943,6 +2009,56 @@ export type OrderItemBase = {
 };
 
 /**
+ * OrderItemDetailRead
+ */
+export type OrderItemDetailRead = {
+    /**
+     * Product Id
+     */
+    product_id?: string | null;
+    /**
+     * Variant Id
+     */
+    variant_id?: string | null;
+    /**
+     * Course Id
+     */
+    course_id?: string | null;
+    /**
+     * Quantity
+     */
+    quantity?: number;
+    /**
+     * Price
+     */
+    price: string;
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Order Id
+     */
+    order_id: string;
+    /**
+     * Course Title
+     */
+    course_title?: string | null;
+    /**
+     * Course Slug
+     */
+    course_slug?: string | null;
+    /**
+     * Product Title
+     */
+    product_title?: string | null;
+    /**
+     * Variant Name
+     */
+    variant_name?: string | null;
+};
+
+/**
  * OrderItemRead
  */
 export type OrderItemRead = {
@@ -2065,6 +2181,30 @@ export type PaginatedResponseAddressRead = {
      * Data
      */
     data?: Array<AddressRead>;
+    pagination: Pagination;
+    meta?: Meta;
+};
+
+/**
+ * PaginatedResponse[AdminCoursePaymentRead]
+ */
+export type PaginatedResponseAdminCoursePaymentRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<AdminCoursePaymentRead>;
     pagination: Pagination;
     meta?: Meta;
 };
@@ -3327,9 +3467,9 @@ export type SuccessResponseAddressRead = {
 };
 
 /**
- * SuccessResponse[AdminOrderRead]
+ * SuccessResponse[AdminOrderDetailRead]
  */
-export type SuccessResponseAdminOrderRead = {
+export type SuccessResponseAdminOrderDetailRead = {
     /**
      * Success
      */
@@ -3342,7 +3482,7 @@ export type SuccessResponseAdminOrderRead = {
      * Message
      */
     message: string;
-    data?: AdminOrderRead | null;
+    data?: AdminOrderDetailRead | null;
     meta?: Meta;
 };
 
@@ -7950,7 +8090,7 @@ export type GetOrderDetailsResponses = {
     /**
      * Successful Response
      */
-    200: SuccessResponseAdminOrderRead;
+    200: SuccessResponseAdminOrderDetailRead;
 };
 
 export type GetOrderDetailsResponse = GetOrderDetailsResponses[keyof GetOrderDetailsResponses];
@@ -7984,6 +8124,40 @@ export type UpdateOrderStatusResponses = {
 };
 
 export type UpdateOrderStatusResponse = UpdateOrderStatusResponses[keyof UpdateOrderStatusResponses];
+
+export type ListCoursePaymentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+    };
+    url: '/api/admin/course-payments';
+};
+
+export type ListCoursePaymentsErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type ListCoursePaymentsError = ListCoursePaymentsErrors[keyof ListCoursePaymentsErrors];
+
+export type ListCoursePaymentsResponses = {
+    /**
+     * Successful Response
+     */
+    200: PaginatedResponseAdminCoursePaymentRead;
+};
+
+export type ListCoursePaymentsResponse = ListCoursePaymentsResponses[keyof ListCoursePaymentsResponses];
 
 export type ListAllReviewsData = {
     body?: never;

@@ -29,6 +29,13 @@ class OrderItemRead(OrderItemBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class OrderItemDetailRead(OrderItemRead):
+    course_title: str | None = None
+    course_slug: str | None = None
+    product_title: str | None = None
+    variant_name: str | None = None
+
+
 # ─── Order Schemas ──────────────────────────────────────────────────────────
 
 
@@ -68,6 +75,11 @@ class OrderRead(OrderBase, TimestampSchemaRead):
 
 class AdminOrderRead(OrderRead):
     user: PublicUserRead | None = None
+
+
+class AdminOrderDetailRead(OrderRead):
+    user: PublicUserRead | None = None
+    items: list[OrderItemDetailRead] = []
 
 
 class OrderDashboardRead(TimestampSchemaRead):

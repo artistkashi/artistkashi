@@ -48,3 +48,10 @@ class CoursePaymentRead(TimestampSchemaRead):
     amount: Decimal
     status: str
     paid_at: datetime | None = None
+
+
+class AdminCoursePaymentRead(CoursePaymentRead):
+    user_full_name: str | None = None
+    user_email: str | None = None
+    course_title: str | None = None
+    course_slug: str | None = None

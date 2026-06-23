@@ -3979,7 +3979,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse_AdminOrderRead_"
+                  "$ref": "#/components/schemas/SuccessResponse_AdminOrderDetailRead_"
                 }
               }
             }
@@ -4037,6 +4037,65 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SuccessResponse_OrderRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/course-payments": {
+      "get": {
+        "tags": [
+          "ADMIN",
+          "admin-course-payments"
+        ],
+        "summary": "List Course Payments",
+        "operationId": "list_course_payments",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_AdminCoursePaymentRead_"
                 }
               }
             }
@@ -7448,7 +7507,145 @@
         "type": "object",
         "title": "AddressUpdate"
       },
-      "AdminOrderRead": {
+      "AdminCoursePaymentRead": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "razorpay_order_id": {
+            "type": "string",
+            "title": "Razorpay Order Id"
+          },
+          "razorpay_payment_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Razorpay Payment Id"
+          },
+          "razorpay_signature": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Razorpay Signature"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Amount"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "paid_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paid At"
+          },
+          "user_full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Full Name"
+          },
+          "user_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Email"
+          },
+          "course_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Title"
+          },
+          "course_slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Slug"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "id",
+          "user_id",
+          "course_id",
+          "razorpay_order_id",
+          "amount",
+          "status"
+        ],
+        "title": "AdminCoursePaymentRead"
+      },
+      "AdminOrderDetailRead": {
         "properties": {
           "created_at": {
             "type": "string",
@@ -7528,7 +7725,7 @@
           },
           "items": {
             "items": {
-              "$ref": "#/components/schemas/OrderItemRead"
+              "$ref": "#/components/schemas/OrderItemDetailRead"
             },
             "type": "array",
             "title": "Items",
@@ -7554,7 +7751,7 @@
           "payment_status",
           "total_amount"
         ],
-        "title": "AdminOrderRead"
+        "title": "AdminOrderDetailRead"
       },
       "AuthProvidersResponse": {
         "properties": {
@@ -10953,6 +11150,116 @@
         ],
         "title": "OrderItemBase"
       },
+      "OrderItemDetailRead": {
+        "properties": {
+          "product_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Id"
+          },
+          "variant_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variant Id"
+          },
+          "course_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Id"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity",
+            "default": 1
+          },
+          "price": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Price"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "order_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Order Id"
+          },
+          "course_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Title"
+          },
+          "course_slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Slug"
+          },
+          "product_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Title"
+          },
+          "variant_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variant Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "price",
+          "id",
+          "order_id"
+        ],
+        "title": "OrderItemDetailRead"
+      },
       "OrderItemRead": {
         "properties": {
           "product_id": {
@@ -11212,6 +11519,43 @@
           "pagination"
         ],
         "title": "PaginatedResponse[AddressRead]"
+      },
+      "PaginatedResponse_AdminCoursePaymentRead_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/AdminCoursePaymentRead"
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "pagination"
+        ],
+        "title": "PaginatedResponse[AdminCoursePaymentRead]"
       },
       "PaginatedResponse_CourseCategoryRead_": {
         "properties": {
@@ -13654,7 +13998,7 @@
         ],
         "title": "SuccessResponse[AddressRead]"
       },
-      "SuccessResponse_AdminOrderRead_": {
+      "SuccessResponse_AdminOrderDetailRead_": {
         "properties": {
           "success": {
             "type": "boolean",
@@ -13673,7 +14017,7 @@
           "data": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/AdminOrderRead"
+                "$ref": "#/components/schemas/AdminOrderDetailRead"
               },
               {
                 "type": "null"
@@ -13688,7 +14032,7 @@
         "required": [
           "message"
         ],
-        "title": "SuccessResponse[AdminOrderRead]"
+        "title": "SuccessResponse[AdminOrderDetailRead]"
       },
       "SuccessResponse_AuthProvidersResponse_": {
         "properties": {

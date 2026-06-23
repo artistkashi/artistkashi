@@ -3,7 +3,9 @@ from uuid import UUID
 
 import razorpay
 from fastcrud import CountConfig, JoinConfig, compute_offset
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from app.core.config import settings
 from app.core.exceptions import (
@@ -17,12 +19,13 @@ from app.crud.product import crud_product_variant
 from app.models.order import Order, OrderItem, OrderStatus, PaymentStatus
 from app.models.user import User
 from app.schemas.order import (
+    AdminOrderDetailRead,
     AdminOrderRead,
     OrderCreate,
     OrderCreateDB,
     OrderDashboardRead,
     OrderItemCreate,
-    OrderItemRead,
+    OrderItemDetailRead,
     OrderListParams,
     OrderRead,
     PaymentVerificationRequest,
@@ -329,43 +332,39 @@ class OrderService:
         )
         return orders_data
 
-    async def get_order_details(
-        self, *, session: AsyncSession, order_id: str
-    ) -> AdminOrderRead:
-        order = await crud_order.get_joined(
-            db=session,
-            id=order_id,
-            schema_to_select=AdminOrderRead,
-            return_as_model=True,
-            nest_joins=True,
-            joins_config=[
-                JoinConfig(
-                    model=User,
-                    join_on=Order.user_id == User.id,
-                    schema_to_select=PublicUserRead,
-                    join_type="left",
-                    join_prefix="user",
-                ),
-                JoinConfig(
-                    model=OrderItem,
-                    join_on=Order.id == OrderItem.order_id,
-                    schema_to_select=OrderItemRead,
-                    join_type="left",
-                    join_prefix="items",
-                    # this needs to return a LIST not a single nested object
-                    # since one order has many items
-                ),
-            ],
-        )
-
-        if not order:
-            raise NotFoundException(
-                resource="Order",
-                identifier=order_id,
-                error_code=ErrorCode.ORDER_NOT_FOUND,
+    async def get_order_detail_with_items(
+        self, db: AsyncSession, order_id: UUID
+    ) -> AdminOrderDetailRead | None:
+        stmt = (
+            select(Order)
+            .options(
+                joinedload(Order.user),
+                joinedload(Order.items).joinedload(OrderItem.course),
+                joinedload(Order.items).joinedload(OrderItem.product),
+                joinedload(Order.items).joinedload(OrderItem.variant),
             )
+            .where(Order.id == order_id)
+        )
+        result = await db.execute(stmt)
+        order = result.unique().scalar_one_or_none()
+        if not order:
+            return None
 
-        return order
+        order_data = AdminOrderDetailRead.model_validate(order)
+        detail_items: list[OrderItemDetailRead] = []
+        for item in order.items:
+            base = OrderItemDetailRead.model_validate(item)
+            if item.course:
+                base.course_title = item.course.title
+                base.course_slug = item.course.slug
+            if item.product:
+                base.product_title = item.product.title
+            if item.variant:
+                base.variant_name = item.variant.sku or str(item.variant.id)
+            detail_items.append(base)
+
+        order_data.items = detail_items
+        return order_data
 
 
 order_service = OrderService()
