@@ -100,13 +100,13 @@ export default function ForgotPasswordPage() {
                     {...register("email")}
                     type="email"
                     className={cn(
-                      "w-full bg-muted-light border text-text-main px-4 py-3 focus:outline-none focus:border-gold transition-colors",
-                      errors.email ? "border-red-500" : "border-border"
+                      "w-full glass-input rounded text-text-main px-4 py-3 focus:outline-none focus:border-gold transition-colors",
+                      errors.email ? "border-danger" : "border-border"
                     )}
                     placeholder="collector@email.com"
                   />
                   {errors.email && (
-                    <p className="mt-1 text-xs text-red-500 font-mono">
+                    <p className="mt-1 text-xs text-danger font-mono">
                       {errors.email.message}
                     </p>
                   )}

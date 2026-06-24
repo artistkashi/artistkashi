@@ -10,6 +10,7 @@ import {
   ChevronRight,
   LayoutDashboard,
   Library,
+  Loader2,
   LogOut,
   Menu,
   Package,
@@ -19,6 +20,7 @@ import {
   Settings,
   ShoppingBag,
   Users,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -32,6 +34,8 @@ export default function AdminLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false); // For mobile
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // For desktop
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -64,18 +68,21 @@ export default function AdminLayout({
   ];
 
   const handleLogout = async () => {
+    setIsSigningOut(true);
     try {
       await logout();
       router.push("/");
-      toast.success("Logged out successfully");
     } catch (error) {
       toast.error(getErrorMessage(error));
+    } finally {
+      setIsSigningOut(false);
+      setShowSignOutModal(false);
     }
   };
 
   return (
     <AuthGuard allowedRoles={["admin"]}>
-      <div className="h-screen bg-transparent flex overflow-hidden relative z-10">
+      <div className="h-screen bg-transparent flex overflow-hidden relative">
         {/* Mobile Sidebar Overlay */}
         {sidebarOpen && (
           <div
@@ -210,9 +217,9 @@ export default function AdminLayout({
             </div>
 
             <button
-              onClick={handleLogout}
+              onClick={() => setShowSignOutModal(true)}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-text-muted hover:text-red-500 hover:bg-red-500/5 transition-all",
+                "w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-text-muted hover:text-danger hover:bg-danger/5 transition-all",
                 sidebarCollapsed ? "justify-center gap-0 mt-2" : "mt-0"
               )}
             >
@@ -298,6 +305,62 @@ export default function AdminLayout({
           </main>
         </div>
       </div>
+
+      {/* Sign Out Confirmation Modal */}
+      {showSignOutModal && (
+        <div
+          className="fixed inset-0 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm rounded"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowSignOutModal(false);
+            }
+          }}
+        >
+          <div className="w-full max-w-sm bg-surface border border-border shadow-lg rounded">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+              <div className="flex items-center gap-3">
+                <LogOut size={18} className="text-danger" />
+                <h3 className="text-text-main font-bold text-base">Sign Out</h3>
+              </div>
+              <button
+                onClick={() => setShowSignOutModal(false)}
+                className="text-text-muted hover:text-text-main transition-colors"
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-text-muted text-sm">
+                Are you sure you want to sign out? You will need to sign in
+                again to access the admin panel.
+              </p>
+            </div>
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
+              <button
+                type="button"
+                onClick={() => setShowSignOutModal(false)}
+                disabled={isSigningOut}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-border text-text-muted text-xs font-mono tracking-widest uppercase hover:text-text-main hover:border-gold/50 transition-colors rounded disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLogout}
+                disabled={isSigningOut}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-danger/10 border border-danger/30 text-danger text-xs font-mono tracking-widest uppercase hover:bg-danger/20 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSigningOut ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <LogOut size={14} />
+                )}
+                {isSigningOut ? "Signing out..." : "Sign Out"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AuthGuard>
   );
 }

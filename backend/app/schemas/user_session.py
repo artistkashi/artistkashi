@@ -10,11 +10,15 @@ class UserSessionCreate(BaseModel):
     expires_at: datetime
     user_agent: str | None = None
     ip_address: str | None = None
+    device_info: str | None = None
 
 
 class UserSessionRead(BaseModel):
     id: int
     refresh_token_jti: str
+    user_agent: str | None = None
+    ip_address: str | None = None
+    device_info: str | None = None
     revoked: bool
     expires_at: datetime
     last_activity: datetime

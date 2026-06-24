@@ -2,6 +2,7 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.auth.device import parse_user_agent
 from app.core.auth.password_policy import validate_password_rules
 from app.core.auth.security import (
     create_access_token,
@@ -20,6 +21,8 @@ from app.core.auth.security import (
 from app.core.exceptions import (
     ConflictException,
     ErrorCode,
+    ForbiddenException,
+    NotFoundException,
     UnauthorizedException,
     ValidationException,
 )
@@ -34,7 +37,7 @@ from app.schemas.auth_provider import (
     UserAuthProviderRead,
 )
 from app.schemas.user import UserCreate, UserCreateDB, UserRead, UserReadDB
-from app.schemas.user_session import UserSessionCreate
+from app.schemas.user_session import UserSessionCreate, UserSessionRead
 from app.services.email.email import (
     send_reset_password_email,
     send_verification_email,
@@ -42,6 +45,8 @@ from app.services.email.email import (
 )
 from app.services.google_auth_service import verify_google_token
 from app.services.user_service import user_service
+
+MAX_SESSIONS = 3
 
 
 class AuthService:
@@ -124,6 +129,9 @@ class AuthService:
         *,
         session: AsyncSession,
         payload: LoginRequest,
+        user_agent: str | None = None,
+        ip_address: str | None = None,
+        force: bool = False,
     ) -> TokenResponse:
 
         user = await user_service.get_by_email(
@@ -152,14 +160,25 @@ class AuthService:
         if user.deleted_at is not None or not user.is_active:
             raise UnauthorizedException("This account has been deleted")
 
-        return await self._issue_tokens(session=session, user=user)
+        return await self._issue_tokens(
+            session=session,
+            user=user,
+            user_agent=user_agent,
+            ip_address=ip_address,
+            force=force,
+        )
 
     async def _issue_tokens(
         self,
         *,
         session: AsyncSession,
         user: UserReadDB,
+        user_agent: str | None = None,
+        ip_address: str | None = None,
+        force: bool = False,
     ) -> TokenResponse:
+        await self._enforce_max_sessions(session=session, user_id=user.id, force=force)
+
         access_token = create_access_token(
             user_id=user.id,
         )
@@ -180,6 +199,9 @@ class AuthService:
                 user_id=user.id,
                 refresh_token_jti=get_token_jti(refresh_payload),
                 expires_at=get_token_expiry(refresh_payload),
+                user_agent=user_agent,
+                ip_address=ip_address,
+                device_info=parse_user_agent(user_agent),
             ),
         )
         return TokenResponse(
@@ -193,6 +215,8 @@ class AuthService:
         *,
         session: AsyncSession,
         credential: str,
+        user_agent: str | None = None,
+        ip_address: str | None = None,
     ) -> TokenResponse:
         # SECURITY: Verify the Google ID token server-side.
         # The email is extracted from the verified token, NOT from the client.
@@ -215,7 +239,12 @@ class AuthService:
             )
             if not user or user.deleted_at is not None:
                 raise UnauthorizedException("Account has been deleted")
-            return await self._issue_tokens(session=session, user=user)
+            return await self._issue_tokens(
+                session=session,
+                user=user,
+                user_agent=user_agent,
+                ip_address=ip_address,
+            )
 
         # CASE 3: User exists by email but no Google provider linked
         existing_user = await user_service.get_by_email(
@@ -373,6 +402,8 @@ class AuthService:
         self,
         refresh_token: str,
         session: AsyncSession,
+        user_agent: str | None = None,
+        ip_address: str | None = None,
     ) -> TokenResponse:
 
         payload = decode_refresh_token(refresh_token)
@@ -426,6 +457,9 @@ class AuthService:
                 user_id=user_id,
                 refresh_token_jti=get_token_jti(new_payload),
                 expires_at=get_token_expiry(new_payload),
+                user_agent=user_agent,
+                ip_address=ip_address,
+                device_info=parse_user_agent(user_agent),
             ),
         )
         return TokenResponse(
@@ -656,4 +690,123 @@ class AuthService:
             object={
                 "revoked": True,
             },
+        )
+
+    async def _cleanup_sessions(
+        self,
+        *,
+        session: AsyncSession,
+        user_id: UUID | None = None,
+    ) -> None:
+        from datetime import UTC, datetime, timedelta
+
+        from sqlalchemy.exc import NoResultFound
+
+        cutoff = datetime.now(UTC) - timedelta(days=30)
+        filters: dict = {
+            "revoked": True,
+            "expires_at__lt": cutoff,
+        }
+        if user_id is not None:
+            filters["user_id"] = user_id
+
+        try:
+            await crud_user_session.delete(
+                db=session,
+                allow_multiple=True,
+                **filters,
+            )
+        except NoResultFound:
+            pass
+
+    async def _enforce_max_sessions(
+        self,
+        *,
+        session: AsyncSession,
+        user_id: UUID,
+        force: bool = False,
+    ) -> None:
+        from datetime import UTC, datetime
+
+        await self._cleanup_sessions(session=session, user_id=user_id)
+
+        result = await crud_user_session.get_multi(
+            db=session,
+            user_id=user_id,
+            revoked=False,
+            return_as_model=True,
+            schema_to_select=UserSessionRead,
+        )
+        active = result.get("data", []) or []
+
+        now = datetime.now(UTC)
+        expired = [s for s in active if s.expires_at < now]
+        for s in expired:
+            await crud_user_session.update(
+                db=session,
+                id=s.id,
+                object={"revoked": True},
+            )
+
+        active = [s for s in active if s.expires_at >= now]
+
+        if len(active) < MAX_SESSIONS:
+            return
+
+        if not force:
+            raise ConflictException(
+                message=(
+                    f"Maximum of {MAX_SESSIONS} concurrent sessions reached."
+                    f"Please log out from another device first."
+                ),
+                error_code=ErrorCode.MAX_SESSIONS_REACHED,
+            )
+
+        active.sort(key=lambda s: s.last_activity)
+        sessions_to_revoke = active[:-1]
+        for s in sessions_to_revoke:
+            await crud_user_session.update(
+                db=session,
+                id=s.id,
+                object={"revoked": True},
+            )
+
+    async def list_sessions(
+        self,
+        *,
+        session: AsyncSession,
+        user_id: UUID,
+    ) -> list[UserSessionRead]:
+        await self._cleanup_sessions(session=session, user_id=user_id)
+        result = await crud_user_session.get_multi(
+            db=session,
+            user_id=user_id,
+            revoked=False,
+            schema_to_select=UserSessionRead,
+            return_as_model=True,
+        )
+        data = result.get("data", []) or []
+        data.sort(key=lambda s: s.last_activity, reverse=True)
+        return data
+
+    async def revoke_session(
+        self,
+        *,
+        session: AsyncSession,
+        session_id: int,
+        user_id: UUID,
+    ) -> None:
+        session_record = await crud_user_session.get(
+            db=session,
+            id=session_id,
+            schema_to_select=UserSessionRead,
+        )
+        if not session_record:
+            raise NotFoundException("Session not found")
+        if session_record.user_id != user_id:
+            raise ForbiddenException("You can only revoke your own sessions")
+        await crud_user_session.update(
+            db=session,
+            id=session_id,
+            object={"revoked": True},
         )

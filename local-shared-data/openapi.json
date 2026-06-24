@@ -194,21 +194,166 @@
           "ADMIN",
           "ADMIN-USERS"
         ],
-        "summary": "List Users",
-        "operationId": "list_users",
+        "summary": "List Admin Users",
+        "operationId": "list_admin_users",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "name": "is_active",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Is Active"
+            }
+          },
+          {
+            "name": "is_deleted",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Is Deleted"
+            }
+          },
+          {
+            "name": "is_verified",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Is Verified"
+            }
+          },
+          {
+            "name": "provider_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(password|google|both)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Provider Type"
+            }
+          },
+          {
+            "name": "sort_columns",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(full_name|created_at)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Columns"
+            }
+          },
+          {
+            "name": "sort_orders",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(asc|desc)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Orders"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse_list_dict__"
+                  "$ref": "#/components/schemas/PaginatedResponse_AdminUserListRead_"
                 }
               }
             }
           },
           "422": {
-            "description": "Error 422",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -217,12 +362,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ]
+        }
       }
     },
     "/api/admin/users/{user_id}": {
@@ -231,8 +371,8 @@
           "ADMIN",
           "ADMIN-USERS"
         ],
-        "summary": "Get User",
-        "operationId": "get_user",
+        "summary": "Get Admin User Detail",
+        "operationId": "get_admin_user_detail",
         "security": [
           {
             "OAuth2PasswordBearer": []
@@ -245,6 +385,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "uuid",
               "title": "User Id"
             }
           }
@@ -255,7 +396,66 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponse_dict_"
+                  "$ref": "#/components/schemas/SuccessResponse_AdminUserDetailRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users/{user_id}/status": {
+      "patch": {
+        "tags": [
+          "ADMIN",
+          "ADMIN-USERS"
+        ],
+        "summary": "Update User Status",
+        "operationId": "update_user_status",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_NoneType_"
                 }
               }
             }
@@ -4537,15 +4737,27 @@
         ],
         "summary": "Login",
         "operationId": "login",
+        "parameters": [
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Force"
+            }
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/x-www-form-urlencoded": {
               "schema": {
                 "$ref": "#/components/schemas/Body_auth-login"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -5056,6 +5268,89 @@
             "OAuth2PasswordBearer": []
           }
         ]
+      }
+    },
+    "/api/auth/sessions": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "List Sessions",
+        "operationId": "list_sessions",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_UserSessionRead__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/auth/sessions/{session_id}": {
+      "delete": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Revoke Session",
+        "operationId": "revoke_session",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/profiles/me": {
@@ -7861,6 +8156,291 @@
         ],
         "title": "AdminOrderDetailRead"
       },
+      "AdminUserDetailRead": {
+        "properties": {
+          "deleted_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At"
+          },
+          "is_deleted": {
+            "type": "boolean",
+            "title": "Is Deleted",
+            "default": false
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "profile_picture": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Picture"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "is_verified": {
+            "type": "boolean",
+            "title": "Is Verified"
+          },
+          "is_superuser": {
+            "type": "boolean",
+            "title": "Is Superuser"
+          },
+          "last_login_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Login At"
+          },
+          "auth_providers": {
+            "items": {
+              "$ref": "#/components/schemas/UserAuthProviderRead"
+            },
+            "type": "array",
+            "title": "Auth Providers"
+          },
+          "addresses": {
+            "items": {
+              "$ref": "#/components/schemas/AddressRead"
+            },
+            "type": "array",
+            "title": "Addresses"
+          },
+          "orders_count": {
+            "type": "integer",
+            "title": "Orders Count",
+            "default": 0
+          },
+          "enrollments_count": {
+            "type": "integer",
+            "title": "Enrollments Count",
+            "default": 0
+          },
+          "products_spent": {
+            "type": "string",
+            "title": "Products Spent",
+            "default": "0.00"
+          },
+          "courses_spent": {
+            "type": "string",
+            "title": "Courses Spent",
+            "default": "0.00"
+          },
+          "total_spent": {
+            "type": "string",
+            "title": "Total Spent",
+            "default": "0.00"
+          },
+          "provider_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Type",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "email",
+          "full_name",
+          "role",
+          "is_active",
+          "is_verified",
+          "is_superuser",
+          "provider_type"
+        ],
+        "title": "AdminUserDetailRead"
+      },
+      "AdminUserListRead": {
+        "properties": {
+          "deleted_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At"
+          },
+          "is_deleted": {
+            "type": "boolean",
+            "title": "Is Deleted",
+            "default": false
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "profile_picture": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Picture"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "is_verified": {
+            "type": "boolean",
+            "title": "Is Verified"
+          },
+          "is_superuser": {
+            "type": "boolean",
+            "title": "Is Superuser"
+          },
+          "last_login_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Login At"
+          },
+          "provider_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Type",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "email",
+          "full_name",
+          "role",
+          "is_active",
+          "is_verified",
+          "is_superuser",
+          "provider_type"
+        ],
+        "title": "AdminUserListRead"
+      },
       "AuthProvidersResponse": {
         "properties": {
           "providers": {
@@ -10484,14 +11064,18 @@
       "DeleteAccountRequest": {
         "properties": {
           "password": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Password"
           }
         },
         "type": "object",
-        "required": [
-          "password"
-        ],
         "title": "DeleteAccountRequest"
       },
       "DetailedHealthData": {
@@ -11664,6 +12248,43 @@
           "pagination"
         ],
         "title": "PaginatedResponse[AdminCoursePaymentRead]"
+      },
+      "PaginatedResponse_AdminUserListRead_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/AdminUserListRead"
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "pagination"
+        ],
+        "title": "PaginatedResponse[AdminUserListRead]"
       },
       "PaginatedResponse_CourseCategoryRead_": {
         "properties": {
@@ -14142,6 +14763,42 @@
         ],
         "title": "SuccessResponse[AdminOrderDetailRead]"
       },
+      "SuccessResponse_AdminUserDetailRead_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AdminUserDetailRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[AdminUserDetailRead]"
+      },
       "SuccessResponse_AuthProvidersResponse_": {
         "properties": {
           "success": {
@@ -15288,44 +15945,6 @@
         ],
         "title": "SuccessResponse[WishlistRead]"
       },
-      "SuccessResponse_dict_": {
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          },
-          "status": {
-            "type": "integer",
-            "title": "Status",
-            "default": 200
-          },
-          "message": {
-            "type": "string",
-            "title": "Message"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          }
-        },
-        "type": "object",
-        "required": [
-          "message"
-        ],
-        "title": "SuccessResponse[dict]"
-      },
       "SuccessResponse_dict_str__int__": {
         "properties": {
           "success": {
@@ -15766,6 +16385,46 @@
         ],
         "title": "SuccessResponse[list[ProductVariantRead]]"
       },
+      "SuccessResponse_list_UserSessionRead__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/UserSessionRead"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[list[UserSessionRead]]"
+      },
       "SuccessResponse_list_WishlistRead__": {
         "properties": {
           "success": {
@@ -15805,47 +16464,6 @@
           "message"
         ],
         "title": "SuccessResponse[list[WishlistRead]]"
-      },
-      "SuccessResponse_list_dict__": {
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "title": "Success",
-            "default": true
-          },
-          "status": {
-            "type": "integer",
-            "title": "Status",
-            "default": 200
-          },
-          "message": {
-            "type": "string",
-            "title": "Message"
-          },
-          "data": {
-            "anyOf": [
-              {
-                "items": {
-                  "additionalProperties": true,
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/Meta"
-          }
-        },
-        "type": "object",
-        "required": [
-          "message"
-        ],
-        "title": "SuccessResponse[list[dict]]"
       },
       "TestimonialItem": {
         "properties": {
@@ -15908,6 +16526,19 @@
           "refresh_token"
         ],
         "title": "TokenResponse"
+      },
+      "UpdateUserStatusRequest": {
+        "properties": {
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "is_active"
+        ],
+        "title": "UpdateUserStatusRequest"
       },
       "UserAuthProviderRead": {
         "properties": {
@@ -16003,6 +16634,22 @@
       },
       "UserProfileRead": {
         "properties": {
+          "deleted_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At"
+          },
+          "is_deleted": {
+            "type": "boolean",
+            "title": "Is Deleted",
+            "default": false
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -16101,6 +16748,22 @@
       },
       "UserRead": {
         "properties": {
+          "deleted_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At"
+          },
+          "is_deleted": {
+            "type": "boolean",
+            "title": "Is Deleted",
+            "default": false
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -16189,6 +16852,80 @@
           "role"
         ],
         "title": "UserRead"
+      },
+      "UserSessionRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "refresh_token_jti": {
+            "type": "string",
+            "title": "Refresh Token Jti"
+          },
+          "user_agent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Agent"
+          },
+          "ip_address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ip Address"
+          },
+          "device_info": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Info"
+          },
+          "revoked": {
+            "type": "boolean",
+            "title": "Revoked"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          },
+          "last_activity": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Activity"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "refresh_token_jti",
+          "revoked",
+          "expires_at",
+          "last_activity",
+          "user_id"
+        ],
+        "title": "UserSessionRead"
       },
       "UserUpdate": {
         "properties": {

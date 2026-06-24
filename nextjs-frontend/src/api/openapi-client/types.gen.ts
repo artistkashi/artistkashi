@@ -4585,6 +4585,29 @@ export type SuccessResponseListProductVariantRead = {
 };
 
 /**
+ * SuccessResponse[list[UserSessionRead]]
+ */
+export type SuccessResponseListUserSessionRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<UserSessionRead> | null;
+    meta?: Meta;
+};
+
+/**
  * SuccessResponse[list[WishlistRead]]
  */
 export type SuccessResponseListWishlistRead = {
@@ -4822,6 +4845,48 @@ export type UserRead = {
      */
     is_superuser: boolean;
     role: Role;
+};
+
+/**
+ * UserSessionRead
+ */
+export type UserSessionRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Refresh Token Jti
+     */
+    refresh_token_jti: string;
+    /**
+     * User Agent
+     */
+    user_agent?: string | null;
+    /**
+     * Ip Address
+     */
+    ip_address?: string | null;
+    /**
+     * Device Info
+     */
+    device_info?: string | null;
+    /**
+     * Revoked
+     */
+    revoked: boolean;
+    /**
+     * Expires At
+     */
+    expires_at: string;
+    /**
+     * Last Activity
+     */
+    last_activity: string;
+    /**
+     * User Id
+     */
+    user_id: string;
 };
 
 /**
@@ -8778,7 +8843,12 @@ export type RegisterResponse = RegisterResponses[keyof RegisterResponses];
 export type LoginData = {
     body: BodyAuthLogin;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Force
+         */
+        force?: boolean;
+    };
     url: '/api/auth/login';
 };
 
@@ -9099,6 +9169,61 @@ export type LogoutAllResponses = {
 };
 
 export type LogoutAllResponse = LogoutAllResponses[keyof LogoutAllResponses];
+
+export type ListSessionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/sessions';
+};
+
+export type ListSessionsErrors = {
+    /**
+     * Error 422
+     */
+    422: ErrorResponse;
+};
+
+export type ListSessionsError = ListSessionsErrors[keyof ListSessionsErrors];
+
+export type ListSessionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseListUserSessionRead;
+};
+
+export type ListSessionsResponse = ListSessionsResponses[keyof ListSessionsResponses];
+
+export type RevokeSessionData = {
+    body?: never;
+    path: {
+        /**
+         * Session Id
+         */
+        session_id: number;
+    };
+    query?: never;
+    url: '/api/auth/sessions/{session_id}';
+};
+
+export type RevokeSessionErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type RevokeSessionError = RevokeSessionErrors[keyof RevokeSessionErrors];
+
+export type RevokeSessionResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseNoneType;
+};
+
+export type RevokeSessionResponse = RevokeSessionResponses[keyof RevokeSessionResponses];
 
 export type DeleteOwnAccountData = {
     body: DeleteAccountRequest;

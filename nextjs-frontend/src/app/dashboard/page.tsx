@@ -27,32 +27,30 @@ import {
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { unwrap, unwrapVoid } from "@/api/client-service";
+import type { CourseListRead, OrderRead } from "@/api/openapi-client";
+import {
+  coursesListCourses,
+  listMyEnrollments,
+  listMyOrders,
+  updateOwnProfile,
+} from "@/api/openapi-client";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useAuth } from "@/lib/auth-store";
 import { profileSchema, type ProfileFormValues } from "@/lib/auth-validation";
 import { getErrorMessage } from "@/lib/error-handler";
-import { useQuery } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  listMyEnrollments,
-  listMyOrders,
-  coursesListCourses,
-} from "@/api/openapi-client";
-import type {
-  CourseListRead,
-  OrderRead,
-} from "@/api/openapi-client";
-import { unwrap, unwrapVoid } from "@/api/client-service";
-import { updateOwnProfile } from "@/api/openapi-client";
 
+import { AddressManager } from "@/components/dashboard/AddressManager";
 import { ContinueWatching } from "@/components/dashboard/ContinueWatching";
 import { CourseCard } from "@/components/dashboard/CourseCard";
-import { AddressManager } from "@/components/dashboard/AddressManager";
 import { DangerZone } from "@/components/dashboard/DangerZone";
 import { ProviderCard } from "@/components/dashboard/ProviderCard";
+import { SessionManager } from "@/components/dashboard/SessionManager";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 
 export default function DashboardPage() {
@@ -140,9 +138,7 @@ export default function DashboardPage() {
   });
   const allCourses: CourseListRead[] = allCoursesData ?? [];
 
-  const enrolledCourses = allCourses.filter((c) =>
-    enrolledCourseIds.has(c.id)
-  );
+  const enrolledCourses = allCourses.filter((c) => enrolledCourseIds.has(c.id));
 
   useEffect(() => {
     if (user) {
@@ -409,7 +405,11 @@ export default function DashboardPage() {
                   {/* Stats Cards */}
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     {[
-                      { label: "Enrolled Courses", value: enrollments.length, icon: BookOpen },
+                      {
+                        label: "Enrolled Courses",
+                        value: enrollments.length,
+                        icon: BookOpen,
+                      },
                       {
                         label: "Hours Watched",
                         value: 0,
@@ -417,7 +417,11 @@ export default function DashboardPage() {
                         icon: Clock,
                       },
                       { label: "Lessons Done", value: 0, icon: Check },
-                      { label: "Orders", value: orders.length, icon: ShoppingBag },
+                      {
+                        label: "Orders",
+                        value: orders.length,
+                        icon: ShoppingBag,
+                      },
                     ].map((s) => (
                       <StatsCard
                         key={s.label}
@@ -430,16 +434,23 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Continue Watching */}
-                  <ContinueWatching items={[
-                    ...(enrolledCourses.length > 0 ? [{
-                      course: enrolledCourses[0],
-                      lessonTitle: "Getting Started",
-                      lessonNumber: 1,
-                      totalLessons: enrolledCourses[0].lessons_count ?? 1,
-                      progressPercent: 0,
-                      lessonId: "",
-                    }] : []),
-                  ]} />
+                  <ContinueWatching
+                    items={[
+                      ...(enrolledCourses.length > 0
+                        ? [
+                            {
+                              course: enrolledCourses[0],
+                              lessonTitle: "Getting Started",
+                              lessonNumber: 1,
+                              totalLessons:
+                                enrolledCourses[0].lessons_count ?? 1,
+                              progressPercent: 0,
+                              lessonId: "",
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
                 </div>
               )}
 
@@ -471,26 +482,32 @@ export default function DashboardPage() {
                   </h2>
 
                   {orders.length === 0 ? (
-                    <p className="text-text-muted text-sm">
-                      No orders yet.
-                    </p>
+                    <p className="text-text-muted text-sm">No orders yet.</p>
                   ) : (
                     <>
                       {/* Mobile Cards */}
                       <div className="space-y-px bg-border md:hidden">
                         {orders.map((r) => {
                           const itemNames = (r.items ?? []).map(
-                            (item) => item.course_id ?? item.product_id ?? `Item #${item.id}`
+                            (item) =>
+                              item.course_id ??
+                              item.product_id ??
+                              `Item #${item.id}`
                           );
                           return (
-                            <div key={r.id} className="bg-surface border border-border rounded p-5 space-y-3">
+                            <div
+                              key={r.id}
+                              className="bg-surface border border-border rounded p-5 space-y-3"
+                            >
                               <div className="flex items-start justify-between gap-4">
                                 <div className="min-w-0 flex-1">
                                   <div className="text-text-main font-semibold text-sm truncate">
-                                    {itemNames[0] ?? `Order #${r.id.slice(0, 8)}`}
+                                    {itemNames[0] ??
+                                      `Order #${r.id.slice(0, 8)}`}
                                   </div>
                                   <div className="text-text-muted text-xs font-mono mt-0.5">
-                                    {r.items?.length ?? 0} item{(r.items?.length ?? 0) !== 1 ? "s" : ""}
+                                    {r.items?.length ?? 0} item
+                                    {(r.items?.length ?? 0) !== 1 ? "s" : ""}
                                   </div>
                                 </div>
                                 <span
@@ -505,7 +522,10 @@ export default function DashboardPage() {
                               </div>
                               <div className="flex items-center justify-between pt-1 border-t border-border/50">
                                 <span className="text-label font-mono text-text-muted">
-                                  {format(new Date(r.created_at), "dd MMM yyyy")}
+                                  {format(
+                                    new Date(r.created_at),
+                                    "dd MMM yyyy"
+                                  )}
                                 </span>
                                 <span className="text-text-main font-semibold">
                                   {displayPrice(r.total_amount)}
@@ -521,22 +541,29 @@ export default function DashboardPage() {
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="border-b border-border">
-                              {["Order", "Items", "Date", "Amount", "Status"].map(
-                                (h) => (
-                                  <th
-                                    key={h}
-                                    className="text-left px-6 py-4 text-label font-mono text-text-muted tracking-widest uppercase bg-dark-soft"
-                                  >
-                                    {h}
-                                  </th>
-                                )
-                              )}
+                              {[
+                                "Order",
+                                "Items",
+                                "Date",
+                                "Amount",
+                                "Status",
+                              ].map((h) => (
+                                <th
+                                  key={h}
+                                  className="text-left px-6 py-4 text-label font-mono text-text-muted tracking-widest uppercase bg-dark-soft"
+                                >
+                                  {h}
+                                </th>
+                              ))}
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-border">
                             {orders.map((r) => {
                               const itemNames = (r.items ?? []).map(
-                                (item) => item.course_id ?? item.product_id ?? `Item #${item.id}`
+                                (item) =>
+                                  item.course_id ??
+                                  item.product_id ??
+                                  `Item #${item.id}`
                               );
                               return (
                                 <tr
@@ -548,14 +575,17 @@ export default function DashboardPage() {
                                   </td>
                                   <td className="px-6 py-4 text-text-main font-medium">
                                     {itemNames[0] ?? "—"}
-                                    {(itemNames.length > 1) && (
+                                    {itemNames.length > 1 && (
                                       <span className="text-text-muted text-xs ml-1">
                                         +{itemNames.length - 1} more
                                       </span>
                                     )}
                                   </td>
                                   <td className="px-6 py-4 text-text-muted font-mono text-xs">
-                                    {format(new Date(r.created_at), "dd MMM yyyy")}
+                                    {format(
+                                      new Date(r.created_at),
+                                      "dd MMM yyyy"
+                                    )}
                                   </td>
                                   <td className="px-6 py-4 text-text-main font-semibold">
                                     {displayPrice(r.total_amount)}
@@ -1036,6 +1066,9 @@ export default function DashboardPage() {
 
                   {/* Saved Addresses */}
                   <AddressManager />
+
+                  {/* Active Sessions */}
+                  <SessionManager />
 
                   {/* Danger Zone */}
                   <DangerZone />

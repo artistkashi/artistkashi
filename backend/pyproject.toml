@@ -30,6 +30,7 @@ dependencies = [
     "pydantic-settings>=2.14.1",
     "pydantic[email]>=2.6.1",
     # Utilities
+    "user-agents>=2.2.0",
     "fastapi-mail>=1.6.4",
     "fastapi-pagination>=0.15.13",
     "python-dotenv>=1.2.2",

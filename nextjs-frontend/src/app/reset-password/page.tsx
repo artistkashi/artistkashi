@@ -171,8 +171,8 @@ export default function ResetPasswordPage() {
                     {...register("password")}
                     type={showPassword ? "text" : "password"}
                     className={cn(
-                      "w-full bg-muted-light border text-text-main px-4 py-3 pr-12 focus:outline-none focus:border-gold transition-colors",
-                      errors.password ? "border-red-500" : "border-border"
+                      "w-full glass-input rounded text-text-main px-4 py-3 pr-12 focus:outline-none focus:border-gold transition-colors",
+                      errors.password ? "border-danger" : "border-border"
                     )}
                     placeholder="••••••••"
                   />
@@ -186,7 +186,7 @@ export default function ResetPasswordPage() {
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="mt-1 text-xs text-red-500 font-mono">
+                  <p className="mt-1 text-xs text-danger font-mono">
                     {errors.password.message}
                   </p>
                 )}
@@ -201,8 +201,8 @@ export default function ResetPasswordPage() {
                     {...register("confirmPassword")}
                     type={showConfirm ? "text" : "password"}
                     className={cn(
-                      "w-full bg-muted-light border text-text-main px-4 py-3 pr-12 focus:outline-none focus:border-gold transition-colors",
-                      errors.confirmPassword ? "border-red-500" : "border-border"
+                      "w-full glass-input rounded text-text-main px-4 py-3 pr-12 focus:outline-none focus:border-gold transition-colors",
+                      errors.confirmPassword ? "border-danger" : "border-border"
                     )}
                     placeholder="••••••••"
                   />
@@ -216,7 +216,7 @@ export default function ResetPasswordPage() {
                   </button>
                 </div>
                 {errors.confirmPassword && (
-                  <p className="mt-1 text-xs text-red-500 font-mono">
+                  <p className="mt-1 text-xs text-danger font-mono">
                     {errors.confirmPassword.message}
                   </p>
                 )}

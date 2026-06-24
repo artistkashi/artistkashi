@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.dependencies import CurrentUserDep, DatabaseDep
@@ -22,11 +22,18 @@ from app.schemas.auth_provider import (
 )
 from app.schemas.responses import SuccessResponse
 from app.schemas.user import UserCreate, UserRead
+from app.schemas.user_session import UserSessionRead
 from app.services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 auth_service = AuthService()
+
+
+def _extract_client_info(request: Request) -> tuple[str | None, str | None]:
+    ua = request.headers.get("User-Agent")
+    ip = request.client.host if request.client else None
+    return ua, ip
 
 
 @router.post("/register", response_model=SuccessResponse[None])
@@ -42,18 +49,34 @@ async def register(payload: UserCreate, session: DatabaseDep):
 
 @router.post("/login", response_model=SuccessResponse[TokenResponse])
 async def login(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()], session: DatabaseDep
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    request: Request,
+    session: DatabaseDep,
+    force: bool = Query(False),
 ):
     payload = LoginRequest(email=form_data.username, password=form_data.password)
-    result = await auth_service.login(session=session, payload=payload)
+    user_agent, ip_address = _extract_client_info(request)
+    result = await auth_service.login(
+        session=session,
+        payload=payload,
+        user_agent=user_agent,
+        ip_address=ip_address,
+        force=force,
+    )
 
     return SuccessResponse(message="Login successful", data=result)
 
 
 @router.post("/google", response_model=SuccessResponse[TokenResponse])
-async def google_auth(payload: GoogleAuthRequest, session: DatabaseDep):
+async def google_auth(
+    payload: GoogleAuthRequest, request: Request, session: DatabaseDep
+):
+    user_agent, ip_address = _extract_client_info(request)
     result = await auth_service.google_auth(
-        session=session, credential=payload.credential
+        session=session,
+        credential=payload.credential,
+        user_agent=user_agent,
+        ip_address=ip_address,
     )
 
     return SuccessResponse(message="Google authentication successful", data=result)
@@ -70,19 +93,21 @@ async def set_password(
 
 @router.get("/providers", response_model=SuccessResponse[AuthProvidersResponse])
 async def get_auth_providers(user: CurrentUserDep, session: DatabaseDep):
-    result = await auth_service.get_auth_providers(
-        session=session, user_id=user.id
-    )
+    result = await auth_service.get_auth_providers(session=session, user_id=user.id)
 
-    return SuccessResponse(
-        message="Auth providers retrieved successfully", data=result
-    )
+    return SuccessResponse(message="Auth providers retrieved successfully", data=result)
 
 
 @router.post("/refresh", response_model=SuccessResponse[TokenResponse])
-async def refresh_token(payload: RefreshTokenRequest, session: DatabaseDep):
+async def refresh_token(
+    payload: RefreshTokenRequest, request: Request, session: DatabaseDep
+):
+    user_agent, ip_address = _extract_client_info(request)
     result = await auth_service.refresh(
-        refresh_token=payload.refresh_token, session=session
+        refresh_token=payload.refresh_token,
+        session=session,
+        user_agent=user_agent,
+        ip_address=ip_address,
     )
 
     return SuccessResponse(message="Token refreshed successfully", data=result)
@@ -148,3 +173,21 @@ async def logout_all(user: CurrentUserDep, session: DatabaseDep):
     await auth_service.logout_all(session=session, user_id=user.id)
 
     return SuccessResponse(message="Logged out from all devices")
+
+
+@router.get("/sessions", response_model=SuccessResponse[list[UserSessionRead]])
+async def list_sessions(user: CurrentUserDep, session: DatabaseDep):
+    sessions = await auth_service.list_sessions(session=session, user_id=user.id)
+
+    return SuccessResponse(message="Sessions retrieved successfully", data=sessions)
+
+
+@router.delete("/sessions/{session_id}", response_model=SuccessResponse[None])
+async def revoke_session(session_id: int, user: CurrentUserDep, session: DatabaseDep):
+    await auth_service.revoke_session(
+        session=session,
+        session_id=session_id,
+        user_id=user.id,
+    )
+
+    return SuccessResponse(message="Session revoked successfully")

@@ -34,7 +34,11 @@ import {
 
 interface AuthContextType {
   user: UserRead | null;
-  login: (email: string, password: string) => Promise<UserRead>;
+  login: (
+    email: string,
+    password: string,
+    force?: boolean
+  ) => Promise<UserRead>;
   signup: (input: UserCreate) => Promise<UserRead>;
   googleLogin: (credential: string) => Promise<UserRead>;
   setPassword: (password: string) => Promise<void>;
@@ -156,9 +160,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return current;
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, force?: boolean) => {
     const tokenData = await unwrap(
-      loginSdk({ body: { username: email, password } })
+      loginSdk({
+        body: { username: email, password },
+        query: force ? { force: true } : undefined,
+      })
     );
     return afterLogin(tokenData);
   };

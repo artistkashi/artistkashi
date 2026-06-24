@@ -42,6 +42,11 @@ class UserSession(Base):
         nullable=True,
     )
 
+    device_info: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True,
+    )
+
     revoked: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
