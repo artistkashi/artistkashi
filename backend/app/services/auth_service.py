@@ -68,7 +68,7 @@ class AuthService:
             session=session, email=payload.email, user_schema=UserReadDB
         )
 
-        if existing:
+        if existing and existing.deleted_at is None:
             if not existing.is_verified:
                 verification_token = create_email_verification_token(
                     user_id=existing.id
@@ -149,10 +149,7 @@ class AuthService:
         if not user.is_verified:
             raise UnauthorizedException("Please verify your email address first")
 
-        if not user.is_active:
-            raise UnauthorizedException("User account is blocked")
-
-        if getattr(user, "is_deleted", False):
+        if user.deleted_at is not None or not user.is_active:
             raise UnauthorizedException("This account has been deleted")
 
         return await self._issue_tokens(session=session, user=user)
@@ -216,8 +213,8 @@ class AuthService:
                 user_id=existing_provider.user_id,
                 user_schema=UserReadDB,
             )
-            if not user:
-                raise UnauthorizedException("User not found")
+            if not user or user.deleted_at is not None:
+                raise UnauthorizedException("Account has been deleted")
             return await self._issue_tokens(session=session, user=user)
 
         # CASE 3: User exists by email but no Google provider linked
@@ -228,6 +225,8 @@ class AuthService:
         )
 
         if existing_user:
+            if existing_user.deleted_at is not None:
+                raise UnauthorizedException("Account has been deleted")
             # Link Google provider to existing account
             await crud_auth_provider.create(
                 db=session,
@@ -402,6 +401,14 @@ class AuthService:
         user_id: UUID = get_user_id_from_token(
             payload,
         )
+        user = await user_service.get_by_id(
+            session=session,
+            user_id=user_id,
+            user_schema=UserReadDB,
+        )
+        if not user or user.deleted_at is not None or not user.is_active:
+            raise UnauthorizedException("Account has been deleted")
+
         new_refresh_token = create_refresh_token(
             user_id=user_id,
         )
@@ -482,7 +489,7 @@ class AuthService:
             user_id=user_id,
         )
 
-        if not user:
+        if not user or user.deleted_at is not None:
             raise UnauthorizedException("Invalid verification token")
 
         if user.is_verified:
@@ -512,7 +519,7 @@ class AuthService:
             email=email,
         )
 
-        if not user:
+        if not user or user.deleted_at is not None:
             return
 
         token = create_password_reset_token(
@@ -548,7 +555,7 @@ class AuthService:
             user_id=user_id,
         )
 
-        if not user:
+        if not user or user.deleted_at is not None:
             raise UnauthorizedException("Invalid reset token")
 
         errors = validate_password_rules(

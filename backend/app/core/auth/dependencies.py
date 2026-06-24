@@ -57,8 +57,8 @@ async def get_current_user(
     if not user:
         raise UnauthorizedException("User not found")
 
-    if not user.is_active:
-        raise UnauthorizedException("User account is inactive")
+    if user.deleted_at is not None or not user.is_active:
+        raise UnauthorizedException("Account has been deleted")
 
     if not user.is_verified:
         raise UnauthorizedException("Email address not verified")
@@ -102,7 +102,7 @@ async def get_current_user_optional(
         user_schema=UserReadDB,
     )
 
-    if not user or not user.is_active or not user.is_verified:
+    if not user or user.deleted_at is not None or not user.is_active or not user.is_verified:
         return None
 
     return user

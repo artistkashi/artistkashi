@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated
 
 from pydantic import (
@@ -9,9 +10,10 @@ from pydantic import (
     field_validator,
 )
 
-from app.core.schema import TimestampSchemaRead, UUIDSchema
+from app.core.schema import PersistentDeletion, TimestampSchemaRead, UUIDSchema
 from app.models.user import Role
 from app.schemas.address import AddressRead
+from app.schemas.auth_provider import ProviderTypeMixin, UserAuthProviderRead
 
 
 class UserBase(BaseModel):
@@ -21,7 +23,7 @@ class UserBase(BaseModel):
     profile_picture: str | None = None
 
 
-class UserReadDB(UserBase, UUIDSchema, TimestampSchemaRead):
+class UserReadDB(UserBase, UUIDSchema, TimestampSchemaRead, PersistentDeletion):
     is_active: bool = True
     is_verified: bool = False
     is_superuser: bool = False
@@ -32,7 +34,7 @@ class UserReadDB(UserBase, UUIDSchema, TimestampSchemaRead):
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserRead(UserBase, UUIDSchema, TimestampSchemaRead):
+class UserRead(UserBase, UUIDSchema, TimestampSchemaRead, PersistentDeletion):
     is_active: bool
     is_verified: bool
     is_superuser: bool
@@ -123,7 +125,7 @@ class UserForgotPasswordRequest(BaseModel):
 
 
 class DeleteAccountRequest(BaseModel):
-    password: str
+    password: str | None = None
 
 
 class AdminUserUpdate(BaseModel):
@@ -138,3 +140,38 @@ class AdminUserUpdate(BaseModel):
     is_superuser: bool | None = None
 
     model_config = ConfigDict(extra="forbid")
+
+
+class AdminUserReadBase(
+    UUIDSchema,
+    TimestampSchemaRead,
+    PersistentDeletion,
+):
+    email: str
+    full_name: str
+    phone: str | None = None
+    profile_picture: str | None = None
+    role: Role
+    is_active: bool
+    is_verified: bool
+    is_superuser: bool
+    last_login_at: datetime | None = None
+
+
+class AdminUserListRead(ProviderTypeMixin, AdminUserReadBase):
+    auth_providers: list[UserAuthProviderRead] = Field(
+        default_factory=list, exclude=True
+    )
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AdminUserDetailRead(AdminUserReadBase, ProviderTypeMixin):
+    auth_providers: list[UserAuthProviderRead] = Field(default_factory=list)
+    addresses: list[AddressRead] = Field(default_factory=list)
+    orders_count: int = 0
+    enrollments_count: int = 0
+    products_spent: str = "0.00"
+    courses_spent: str = "0.00"
+    total_spent: str = "0.00"
+
+    model_config = ConfigDict(from_attributes=True)

@@ -1,8 +1,13 @@
-from uuid import UUID
+from datetime import UTC, datetime
+from uuid import UUID, uuid4
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.crud.user import crud_user
+from app.crud.address import crud_address
+from app.crud.auth_provider import crud_auth_provider
+from app.crud.cart import crud_cart
+from app.crud.user import crud_user, crud_user_session
+from app.crud.wishlist import crud_wishlist
 from app.schemas.user import UserRead, UserReadDB
 
 
@@ -44,19 +49,6 @@ class UserService:
             db=session, id=user_id, object={"is_active": False}
         )
 
-    async def soft_delete_user(self, session: AsyncSession, user_id: UUID):
-        from datetime import UTC, datetime
-
-        return await crud_user.update(
-            db=session,
-            id=user_id,
-            object={
-                "is_deleted": True,
-                "deleted_at": datetime.now(UTC),
-                "is_active": False,
-            },
-        )
-
     async def update_profile(
         self,
         session: AsyncSession,
@@ -68,6 +60,62 @@ class UserService:
             id=user_id,
             object=update_data,
         )
+
+    async def delete_account(
+        self,
+        session: AsyncSession,
+        user_id: UUID,
+    ):
+
+        suffix = uuid4().hex[:8]
+
+        # Anonymize user
+        await crud_user.update(
+            db=session,
+            id=user_id,
+            commit=False,
+            object={
+                "email": f"deleted-{user_id}-{suffix}@deleted.local",
+                "full_name": "Deleted User",
+                "phone": None,
+                "profile_picture": None,
+                "is_active": False,
+                "is_verified": False,
+                "is_deleted": True,
+                "deleted_at": datetime.now(UTC),
+            },
+        )
+
+        # Delete cart items
+        await crud_cart.delete(
+            db=session, allow_multiple=True, commit=False, user_id=user_id
+        )
+
+        # Delete wishlist items
+        await crud_wishlist.delete(
+            db=session, allow_multiple=True, commit=False, user_id=user_id
+        )
+
+        # Delete addresses
+        await crud_address.delete(
+            db=session, allow_multiple=True, commit=False, user_id=user_id
+        )
+
+        # Delete OAuth providers (prevents re-link)
+        await crud_auth_provider.delete(
+            db=session, allow_multiple=True, commit=False, user_id=user_id
+        )
+
+        # Revoke all sessions
+        await crud_user_session.update(
+            db=session,
+            allow_multiple=True,
+            commit=False,
+            object={"revoked": True},
+            user_id=user_id,
+        )
+
+        await session.commit()
 
 
 user_service = UserService()

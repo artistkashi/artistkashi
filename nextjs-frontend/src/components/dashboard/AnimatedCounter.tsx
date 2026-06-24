@@ -72,7 +72,7 @@ function Digit({ place, value, height, digitStyle }: DigitProps) {
   return (
     <span
       className="relative inline-flex overflow-hidden tabular-nums"
-      style={{ height, width: "1ch", ...digitStyle }}
+      style={{ height, width: "1.2ch", ...digitStyle }}
     >
       {Array.from({ length: 10 }, (_, i) => (
         <Number key={i} mv={animatedValue} number={i} height={height} />
@@ -140,7 +140,9 @@ function Counter({
   return (
     <span className="relative inline-block" style={{ ...containerStyle }}>
       <span
-        className={["flex overflow-hidden", counterClassName].filter(Boolean).join(" ")}
+        className={["flex overflow-hidden", counterClassName]
+          .filter(Boolean)
+          .join(" ")}
         style={{
           fontSize,
           gap,
@@ -220,7 +222,7 @@ export function AnimatedCounter({
       />
       {suffix && (
         <span
-          className="inline-flex items-center"
+          className="flex items-center"
           style={{ fontSize: finalFontSize }}
         >
           {suffix}

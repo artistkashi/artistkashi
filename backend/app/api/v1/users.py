@@ -106,18 +106,17 @@ async def delete_own_account(
     session: DatabaseDep,
     payload: DeleteAccountRequest,
 ):
-    if not payload.password:
-        raise UnauthorizedException("Password is required to delete your account")
 
-    if not user.hashed_password:
-        raise UnauthorizedException(
-            "This account uses Google Sign-In. "
-            "Please set a password first or contact support."
-        )
+    # Check if user has a password — if so, require password confirmation
+    has_password = user.hashed_password is not None
 
-    if not verify_password(payload.password, user.hashed_password):
-        raise UnauthorizedException("Incorrect password")
+    if has_password:
+        if not payload.password:
+            raise UnauthorizedException("Password is required to delete your account")
 
-    await user_service.soft_delete_user(session=session, user_id=user.id)
+        if not verify_password(payload.password, user.hashed_password):
+            raise UnauthorizedException("Incorrect password")
+
+    await user_service.delete_account(session=session, user_id=user.id)
 
     return SuccessResponse(message="Account deleted successfully")

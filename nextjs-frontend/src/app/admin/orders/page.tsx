@@ -943,8 +943,8 @@ export default function AdminOrdersPage() {
           <p className="text-text-muted text-xs mt-3 uppercase font-mono tracking-[0.3em] flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-gold rounded-full animate-pulse" />
             {activeTab === "orders"
-              ? <>Total Orders: <AnimatedCounter target={data?.pagination.total_items || 0} fontSize={18} /> Records</>
-              : <>Total Payments: <AnimatedCounter target={coursePaymentsData?.pagination.total_items || 0} fontSize={18} /> Records</>}
+              ? <>Total Orders: <AnimatedCounter target={data?.pagination.total_items || 0} fontSize={16} /> Records</>
+              : <>Total Payments: <AnimatedCounter target={coursePaymentsData?.pagination.total_items || 0} fontSize={16} /> Records</>}
           </p>
         </div>
         {activeTab === "orders" ? (

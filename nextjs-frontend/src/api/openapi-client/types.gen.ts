@@ -294,6 +294,160 @@ export type AdminOrderDetailRead = {
 };
 
 /**
+ * AdminUserDetailRead
+ */
+export type AdminUserDetailRead = {
+    /**
+     * Deleted At
+     */
+    deleted_at?: string | null;
+    /**
+     * Is Deleted
+     */
+    is_deleted?: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id?: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Full Name
+     */
+    full_name: string;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
+     * Profile Picture
+     */
+    profile_picture?: string | null;
+    role: Role;
+    /**
+     * Is Active
+     */
+    is_active: boolean;
+    /**
+     * Is Verified
+     */
+    is_verified: boolean;
+    /**
+     * Is Superuser
+     */
+    is_superuser: boolean;
+    /**
+     * Last Login At
+     */
+    last_login_at?: string | null;
+    /**
+     * Auth Providers
+     */
+    auth_providers?: Array<UserAuthProviderRead>;
+    /**
+     * Addresses
+     */
+    addresses?: Array<AddressRead>;
+    /**
+     * Orders Count
+     */
+    orders_count?: number;
+    /**
+     * Enrollments Count
+     */
+    enrollments_count?: number;
+    /**
+     * Products Spent
+     */
+    products_spent?: string;
+    /**
+     * Courses Spent
+     */
+    courses_spent?: string;
+    /**
+     * Total Spent
+     */
+    total_spent?: string;
+    /**
+     * Provider Type
+     */
+    readonly provider_type: string | null;
+};
+
+/**
+ * AdminUserListRead
+ */
+export type AdminUserListRead = {
+    /**
+     * Deleted At
+     */
+    deleted_at?: string | null;
+    /**
+     * Is Deleted
+     */
+    is_deleted?: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id?: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Full Name
+     */
+    full_name: string;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
+     * Profile Picture
+     */
+    profile_picture?: string | null;
+    role: Role;
+    /**
+     * Is Active
+     */
+    is_active: boolean;
+    /**
+     * Is Verified
+     */
+    is_verified: boolean;
+    /**
+     * Is Superuser
+     */
+    is_superuser: boolean;
+    /**
+     * Last Login At
+     */
+    last_login_at?: string | null;
+    /**
+     * Provider Type
+     */
+    readonly provider_type: string | null;
+};
+
+/**
  * AuthProvidersResponse
  */
 export type AuthProvidersResponse = {
@@ -1579,7 +1733,7 @@ export type DeleteAccountRequest = {
     /**
      * Password
      */
-    password: string;
+    password?: string | null;
 };
 
 /**
@@ -2205,6 +2359,30 @@ export type PaginatedResponseAdminCoursePaymentRead = {
      * Data
      */
     data?: Array<AdminCoursePaymentRead>;
+    pagination: Pagination;
+    meta?: Meta;
+};
+
+/**
+ * PaginatedResponse[AdminUserListRead]
+ */
+export type PaginatedResponseAdminUserListRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<AdminUserListRead>;
     pagination: Pagination;
     meta?: Meta;
 };
@@ -3487,6 +3665,26 @@ export type SuccessResponseAdminOrderDetailRead = {
 };
 
 /**
+ * SuccessResponse[AdminUserDetailRead]
+ */
+export type SuccessResponseAdminUserDetailRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: AdminUserDetailRead | null;
+    meta?: Meta;
+};
+
+/**
  * SuccessResponse[AuthProvidersResponse]
  */
 export type SuccessResponseAuthProvidersResponse = {
@@ -4130,31 +4328,6 @@ export type SuccessResponseWishlistRead = {
 };
 
 /**
- * SuccessResponse[dict]
- */
-export type SuccessResponseDict = {
-    /**
-     * Success
-     */
-    success?: boolean;
-    /**
-     * Status
-     */
-    status?: number;
-    /**
-     * Message
-     */
-    message: string;
-    /**
-     * Data
-     */
-    data?: {
-        [key: string]: unknown;
-    } | null;
-    meta?: Meta;
-};
-
-/**
  * SuccessResponse[dict[str, int]]
  */
 export type SuccessResponseDictStrInt = {
@@ -4435,31 +4608,6 @@ export type SuccessResponseListWishlistRead = {
 };
 
 /**
- * SuccessResponse[list[dict]]
- */
-export type SuccessResponseListDict = {
-    /**
-     * Success
-     */
-    success?: boolean;
-    /**
-     * Status
-     */
-    status?: number;
-    /**
-     * Message
-     */
-    message: string;
-    /**
-     * Data
-     */
-    data?: Array<{
-        [key: string]: unknown;
-    }> | null;
-    meta?: Meta;
-};
-
-/**
  * TestimonialItem
  */
 export type TestimonialItem = {
@@ -4501,6 +4649,16 @@ export type TokenResponse = {
      * Token Type
      */
     token_type?: string;
+};
+
+/**
+ * UpdateUserStatusRequest
+ */
+export type UpdateUserStatusRequest = {
+    /**
+     * Is Active
+     */
+    is_active: boolean;
 };
 
 /**
@@ -4557,6 +4715,14 @@ export type UserCreate = {
  */
 export type UserProfileRead = {
     /**
+     * Deleted At
+     */
+    deleted_at?: string | null;
+    /**
+     * Is Deleted
+     */
+    is_deleted?: boolean;
+    /**
      * Created At
      */
     created_at: string;
@@ -4607,6 +4773,14 @@ export type UserProfileRead = {
  * UserRead
  */
 export type UserRead = {
+    /**
+     * Deleted At
+     */
+    deleted_at?: string | null;
+    /**
+     * Is Deleted
+     */
+    is_deleted?: boolean;
     /**
      * Created At
      */
@@ -4849,6 +5023,152 @@ export type ErrorResponse = {
         [key: string]: unknown;
     } | Array<unknown> | null;
     meta?: Meta;
+};
+
+/**
+ * AdminUserDetailRead
+ */
+export type AdminUserDetailReadWritable = {
+    /**
+     * Deleted At
+     */
+    deleted_at?: string | null;
+    /**
+     * Is Deleted
+     */
+    is_deleted?: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id?: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Full Name
+     */
+    full_name: string;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
+     * Profile Picture
+     */
+    profile_picture?: string | null;
+    role: Role;
+    /**
+     * Is Active
+     */
+    is_active: boolean;
+    /**
+     * Is Verified
+     */
+    is_verified: boolean;
+    /**
+     * Is Superuser
+     */
+    is_superuser: boolean;
+    /**
+     * Last Login At
+     */
+    last_login_at?: string | null;
+    /**
+     * Auth Providers
+     */
+    auth_providers?: Array<UserAuthProviderRead>;
+    /**
+     * Addresses
+     */
+    addresses?: Array<AddressRead>;
+    /**
+     * Orders Count
+     */
+    orders_count?: number;
+    /**
+     * Enrollments Count
+     */
+    enrollments_count?: number;
+    /**
+     * Products Spent
+     */
+    products_spent?: string;
+    /**
+     * Courses Spent
+     */
+    courses_spent?: string;
+    /**
+     * Total Spent
+     */
+    total_spent?: string;
+};
+
+/**
+ * AdminUserListRead
+ */
+export type AdminUserListReadWritable = {
+    /**
+     * Deleted At
+     */
+    deleted_at?: string | null;
+    /**
+     * Is Deleted
+     */
+    is_deleted?: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id?: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Full Name
+     */
+    full_name: string;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
+     * Profile Picture
+     */
+    profile_picture?: string | null;
+    role: Role;
+    /**
+     * Is Active
+     */
+    is_active: boolean;
+    /**
+     * Is Verified
+     */
+    is_verified: boolean;
+    /**
+     * Is Superuser
+     */
+    is_superuser: boolean;
+    /**
+     * Last Login At
+     */
+    last_login_at?: string | null;
 };
 
 /**
@@ -5360,6 +5680,30 @@ export type CourseSectionWithLessonsReadWritable = {
 };
 
 /**
+ * PaginatedResponse[AdminUserListRead]
+ */
+export type PaginatedResponseAdminUserListReadWritable = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<AdminUserListReadWritable>;
+    pagination: Pagination;
+    meta?: Meta;
+};
+
+/**
  * PaginatedResponse[CourseListRead]
  */
 export type PaginatedResponseCourseListReadWritable = {
@@ -5619,6 +5963,26 @@ export type ProductVariantReadWritable = {
      * Is Available
      */
     is_available: boolean;
+};
+
+/**
+ * SuccessResponse[AdminUserDetailRead]
+ */
+export type SuccessResponseAdminUserDetailReadWritable = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: AdminUserDetailReadWritable | null;
+    meta?: Meta;
 };
 
 /**
@@ -6042,32 +6406,69 @@ export type UpdateHomePageSettingsResponses = {
 
 export type UpdateHomePageSettingsResponse = UpdateHomePageSettingsResponses[keyof UpdateHomePageSettingsResponses];
 
-export type ListUsersData = {
+export type ListAdminUsersData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+        /**
+         * Search
+         */
+        search?: string | null;
+        /**
+         * Is Active
+         */
+        is_active?: boolean | null;
+        /**
+         * Is Deleted
+         */
+        is_deleted?: boolean | null;
+        /**
+         * Is Verified
+         */
+        is_verified?: boolean | null;
+        /**
+         * Provider Type
+         */
+        provider_type?: string | null;
+        /**
+         * Sort Columns
+         */
+        sort_columns?: string | null;
+        /**
+         * Sort Orders
+         */
+        sort_orders?: string | null;
+    };
     url: '/api/admin/users';
 };
 
-export type ListUsersErrors = {
+export type ListAdminUsersErrors = {
     /**
-     * Error 422
+     * Validation Error
      */
     422: ErrorResponse;
 };
 
-export type ListUsersError = ListUsersErrors[keyof ListUsersErrors];
+export type ListAdminUsersError = ListAdminUsersErrors[keyof ListAdminUsersErrors];
 
-export type ListUsersResponses = {
+export type ListAdminUsersResponses = {
     /**
      * Successful Response
      */
-    200: SuccessResponseListDict;
+    200: PaginatedResponseAdminUserListRead;
 };
 
-export type ListUsersResponse = ListUsersResponses[keyof ListUsersResponses];
+export type ListAdminUsersResponse = ListAdminUsersResponses[keyof ListAdminUsersResponses];
 
-export type GetUserData = {
+export type GetAdminUserDetailData = {
     body?: never;
     path: {
         /**
@@ -6079,23 +6480,53 @@ export type GetUserData = {
     url: '/api/admin/users/{user_id}';
 };
 
-export type GetUserErrors = {
+export type GetAdminUserDetailErrors = {
     /**
      * Validation Error
      */
     422: ErrorResponse;
 };
 
-export type GetUserError = GetUserErrors[keyof GetUserErrors];
+export type GetAdminUserDetailError = GetAdminUserDetailErrors[keyof GetAdminUserDetailErrors];
 
-export type GetUserResponses = {
+export type GetAdminUserDetailResponses = {
     /**
      * Successful Response
      */
-    200: SuccessResponseDict;
+    200: SuccessResponseAdminUserDetailRead;
 };
 
-export type GetUserResponse = GetUserResponses[keyof GetUserResponses];
+export type GetAdminUserDetailResponse = GetAdminUserDetailResponses[keyof GetAdminUserDetailResponses];
+
+export type UpdateUserStatusData = {
+    body: UpdateUserStatusRequest;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/admin/users/{user_id}/status';
+};
+
+export type UpdateUserStatusErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type UpdateUserStatusError = UpdateUserStatusErrors[keyof UpdateUserStatusErrors];
+
+export type UpdateUserStatusResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseNoneType;
+};
+
+export type UpdateUserStatusResponse = UpdateUserStatusResponses[keyof UpdateUserStatusResponses];
 
 export type ListCategoriesData = {
     body?: never;

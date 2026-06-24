@@ -72,6 +72,7 @@ HTTP_ERROR_MESSAGES = {
     ErrorCode.PASSWORD_PROVIDER_EXISTS.value: (
         "Password login is already set up for this account"
     ),
+    ErrorCode.ACCOUNT_DELETED.value: "Account has been deleted",
     ErrorCode.COURSE_PAYMENT_NOT_FOUND.value: "Course payment not found",
     ErrorCode.COURSE_PAYMENT_ALREADY_PAID.value: "Course payment already processed",
     ErrorCode.COURSE_PAYMENT_FAILED.value: "Course payment failed",

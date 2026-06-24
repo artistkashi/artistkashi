@@ -333,7 +333,12 @@ function AdminProductsContent() {
           </h1>
           <p className="text-text-muted text-xs mt-3 uppercase font-mono tracking-[0.3em] flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-gold rounded-full animate-pulse" />
-            Curating <AnimatedCounter target={data?.pagination.total_items || 0} fontSize={18} /> Artistic Boundaries
+            Curating{" "}
+            <AnimatedCounter
+              target={data?.pagination.total_items || 0}
+              fontSize={16}
+            />{" "}
+            Artistic Boundaries
           </p>
         </div>
         <div className="flex items-center justify-end gap-3 w-full md:w-auto">

@@ -50,6 +50,7 @@ import { updateOwnProfile } from "@/api/openapi-client";
 
 import { ContinueWatching } from "@/components/dashboard/ContinueWatching";
 import { CourseCard } from "@/components/dashboard/CourseCard";
+import { AddressManager } from "@/components/dashboard/AddressManager";
 import { DangerZone } from "@/components/dashboard/DangerZone";
 import { ProviderCard } from "@/components/dashboard/ProviderCard";
 import { StatsCard } from "@/components/dashboard/StatsCard";
@@ -1032,6 +1033,9 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   )}
+
+                  {/* Saved Addresses */}
+                  <AddressManager />
 
                   {/* Danger Zone */}
                   <DangerZone />

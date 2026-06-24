@@ -215,7 +215,7 @@ export default function AdminCoursesPage() {
             Total Volume:{" "}
             <AnimatedCounter
               target={pagination?.total_items ?? 0}
-              fontSize={18}
+              fontSize={16}
             />{" "}
             Masterclasses
           </p>
