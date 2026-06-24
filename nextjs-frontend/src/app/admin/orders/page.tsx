@@ -12,6 +12,8 @@ import {
   PaymentStatus,
   updateOrderStatus,
 } from "@/api/openapi-client";
+import { AnimatedCounter } from "@/components/dashboard/AnimatedCounter";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { GhostBtn, PrimaryBtn } from "@/components/ui/buttons";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { DataTable } from "@/components/ui/data-table";
@@ -77,6 +79,22 @@ const EMPTY_FILTERS: OrderFilters = {
   maxAmount: "",
 };
 
+interface CpFilters {
+  status: string;
+  dateStart: string;
+  dateEnd: string;
+  minAmount: string;
+  maxAmount: string;
+}
+
+const EMPTY_CP_FILTERS: CpFilters = {
+  status: "",
+  dateStart: "",
+  dateEnd: "",
+  minAmount: "",
+  maxAmount: "",
+};
+
 const PAGE_SIZE_OPTIONS = [
   { value: 10, label: "10 per page" },
   { value: 25, label: "25 per page" },
@@ -94,12 +112,19 @@ export default function AdminOrdersPage() {
 
   const [filters, setFilters] = useState<OrderFilters>(EMPTY_FILTERS);
 
-  const [selectedOrder, setSelectedOrder] = useState<AdminOrderDetailRead | null>(
-    null
-  );
+  const [selectedOrder, setSelectedOrder] =
+    useState<AdminOrderDetailRead | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"orders" | "course-payments">("orders");
+  const [activeTab, setActiveTab] = useState<"orders" | "course-payments">(
+    "orders"
+  );
   const queryClient = useQueryClient();
+
+  const [cpPage, setCpPage] = useState(1);
+  const [cpSearchInput, setCpSearchInput] = useState("");
+  const [cpSearch, setCpSearch] = useState("");
+  const [cpFilters, setCpFilters] = useState<CpFilters>(EMPTY_CP_FILTERS);
+  const [isCpFilterModalOpen, setIsCpFilterModalOpen] = useState(false);
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["admin", "orders", page, pageSize, search, filters],
@@ -131,11 +156,35 @@ export default function AdminOrdersPage() {
   });
 
   const { data: coursePaymentsData, isLoading: cpLoading } = useQuery({
-    queryKey: ["admin", "course-payments", page],
+    queryKey: [
+      "admin",
+      "course-payments",
+      cpPage,
+      pageSize,
+      cpSearch,
+      cpFilters,
+    ],
     queryFn: () =>
       unwrapPaginated(
         listCoursePayments({
-          query: { page, page_size: pageSize },
+          query: {
+            page: cpPage,
+            page_size: pageSize,
+            search: cpSearch || undefined,
+            status: cpFilters.status || undefined,
+            date_start: cpFilters.dateStart
+              ? new Date(cpFilters.dateStart).toISOString()
+              : undefined,
+            date_end: cpFilters.dateEnd
+              ? new Date(cpFilters.dateEnd).toISOString()
+              : undefined,
+            min_amount: cpFilters.minAmount
+              ? Number(cpFilters.minAmount)
+              : undefined,
+            max_amount: cpFilters.maxAmount
+              ? Number(cpFilters.maxAmount)
+              : undefined,
+          },
         })
       ),
     placeholderData: keepPreviousData,
@@ -436,10 +485,111 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const handleCpRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["admin", "course-payments"] });
+  };
+
+  const handleCpExport = async () => {
+    try {
+      toast.loading("Preparing payments export...", { id: "export-cp" });
+      const allData = await unwrapPaginated(
+        listCoursePayments({
+          query: {
+            page: 1,
+            page_size: 1000,
+            search: cpSearch || undefined,
+            status: cpFilters.status || undefined,
+            date_start: cpFilters.dateStart
+              ? new Date(cpFilters.dateStart).toISOString()
+              : undefined,
+            date_end: cpFilters.dateEnd
+              ? new Date(cpFilters.dateEnd).toISOString()
+              : undefined,
+            min_amount: cpFilters.minAmount
+              ? Number(cpFilters.minAmount)
+              : undefined,
+            max_amount: cpFilters.maxAmount
+              ? Number(cpFilters.maxAmount)
+              : undefined,
+          },
+        })
+      );
+      const exportData = allData.data || [];
+      if (exportData.length === 0) {
+        toast.error("No payments to export.", { id: "export-cp" });
+        return;
+      }
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Course Payments");
+      worksheet.columns = [
+        { header: "Payment ID", key: "id", width: 40 },
+        { header: "Course", key: "course", width: 35 },
+        { header: "Customer", key: "customer", width: 25 },
+        { header: "Email", key: "email", width: 35 },
+        { header: "Amount", key: "amount", width: 18 },
+        { header: "Status", key: "status", width: 18 },
+        { header: "Date", key: "date", width: 22 },
+      ];
+      worksheet.mergeCells("A1:G1");
+      worksheet.getCell("A1").value = "ARTISTKASHI - COURSE PAYMENTS";
+      worksheet.getCell("A1").font = { bold: true, size: 18 };
+      worksheet.getCell("A1").alignment = { horizontal: "center" };
+      const headerRowIndex = 3;
+      const headerRow = worksheet.getRow(headerRowIndex);
+      [
+        "Payment ID",
+        "Course",
+        "Customer",
+        "Email",
+        "Amount",
+        "Status",
+        "Date",
+      ].forEach((h, i) => {
+        const cell = headerRow.getCell(i + 1);
+        cell.value = h;
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFB89D5C" },
+        };
+        cell.font = { color: { argb: "FFFFFFFF" }, bold: true };
+        cell.alignment = { vertical: "middle", horizontal: "center" };
+      });
+      exportData.forEach((p, idx) => {
+        const row = worksheet.getRow(headerRowIndex + 1 + idx);
+        row.values = [
+          p.id,
+          p.course_title || "N/A",
+          p.user_full_name || "Unknown",
+          p.user_email || "",
+          Number(p.amount),
+          p.status.toUpperCase(),
+          format(new Date(p.created_at), "dd MMM yyyy"),
+        ];
+        row.getCell(5).numFmt = '"₹ "#,##0.00';
+      });
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer]);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `CoursePayments_${format(new Date(), "yyyyMMdd_HHmm")}.xlsx`;
+      link.click();
+      toast.success("Payments exported.", { id: "export-cp" });
+    } catch (err) {
+      console.error("CP export failed", err);
+      toast.error("Export failed.", { id: "export-cp" });
+    }
+  };
+
   const orders = data?.data || [];
   const isDataLoading = isLoading || isFetching;
 
   const activeFilterCount = Object.values(filters).filter(
+    (v) => v !== ""
+  ).length;
+
+  const cpActiveFilterCount = Object.values(cpFilters).filter(
     (v) => v !== ""
   ).length;
 
@@ -607,6 +757,158 @@ export default function AdminOrdersPage() {
     []
   );
 
+  const cpDesktopColumns: ColumnDef<AdminCoursePaymentRead>[] = useMemo(
+    () => [
+      {
+        accessorKey: "id",
+        header: () => (
+          <div className="text-left">
+            <span>Payment ID</span>
+          </div>
+        ),
+        cell: ({ row }) => (
+          <span className="text-text-muted font-mono text-label uppercase tracking-tighter truncate block">
+            #{row.original.id.slice(0, 8)}
+          </span>
+        ),
+      },
+      {
+        id: "course",
+        header: () => (
+          <div className="text-left">
+            <span>Course</span>
+          </div>
+        ),
+        cell: ({ row }) => (
+          <div className="text-left">
+            <p className="text-text-main font-bold uppercase tracking-tight text-xs truncate">
+              {row.original.course_title || "N/A"}
+            </p>
+          </div>
+        ),
+      },
+      {
+        id: "customer",
+        header: () => (
+          <div className="text-center">
+            <span>Customer</span>
+          </div>
+        ),
+        cell: ({ row }) => (
+          <div className="text-center">
+            <p className="text-text-main font-bold uppercase tracking-tight text-xs truncate">
+              {row.original.user_full_name || "Unknown"}
+            </p>
+            <p className="text-2xs text-text-muted font-mono lowercase truncate">
+              {row.original.user_email || ""}
+            </p>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "amount",
+        header: () => (
+          <div className="text-right">
+            <span>Amount</span>
+          </div>
+        ),
+        cell: ({ row }) => (
+          <div className="text-right text-gold font-bold font-mono tracking-tighter text-base whitespace-nowrap">
+            {displayPrice(row.original.amount)}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: () => (
+          <div className="text-center">
+            <span>Status</span>
+          </div>
+        ),
+        cell: ({ row }) => (
+          <div className="flex justify-center">
+            <CpStatusBadge status={row.original.status} />
+          </div>
+        ),
+      },
+      {
+        accessorKey: "created_at",
+        header: () => (
+          <div className="text-center">
+            <span>Date</span>
+          </div>
+        ),
+        cell: ({ row }) => (
+          <div className="text-text-muted font-mono text-label whitespace-nowrap text-center">
+            {format(new Date(row.original.created_at), "dd-MM-yyyy")}
+          </div>
+        ),
+      },
+    ],
+    []
+  );
+
+  const cpTabletColumns: ColumnDef<AdminCoursePaymentRead>[] = useMemo(
+    () => [
+      {
+        id: "course_customer",
+        header: () => (
+          <div className="text-left">
+            <span>Course / Customer</span>
+          </div>
+        ),
+        cell: ({ row }) => (
+          <div className="space-y-3">
+            <div>
+              <p className="text-text-main font-bold uppercase tracking-tight text-xs">
+                {row.original.course_title || "N/A"}
+              </p>
+              <p className="text-2xs text-text-muted font-mono lowercase">
+                {row.original.user_full_name || "Unknown"} ·{" "}
+                {row.original.user_email || ""}
+              </p>
+            </div>
+            <div className="flex items-center gap-3 pt-2 border-t border-border/10">
+              <span className="text-text-muted font-mono text-2xs">
+                #{row.original.id.slice(0, 8)}
+              </span>
+              <CpStatusBadge status={row.original.status} />
+            </div>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "amount",
+        header: () => (
+          <div className="text-right">
+            <span>Amount</span>
+          </div>
+        ),
+        cell: ({ row }) => (
+          <div className="text-right text-gold font-bold font-mono tracking-tighter text-base">
+            {displayPrice(row.original.amount)}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "created_at",
+        header: () => (
+          <div className="text-center">
+            <span>Date</span>
+          </div>
+        ),
+        cell: ({ row }) => (
+          <div className="text-text-muted font-mono text-label whitespace-nowrap text-center">
+            {format(new Date(row.original.created_at), "dd MMM yyyy")}
+          </div>
+        ),
+      },
+    ],
+    []
+  );
+
+  const cpPayments = coursePaymentsData?.data || [];
+
   return (
     <div className="lg:h-[calc(100vh-164px)] flex flex-col space-y-6 lg:overflow-hidden pb-10 lg:pb-0">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 shrink-0 px-1 pt-4 lg:pt-0">
@@ -641,11 +943,11 @@ export default function AdminOrdersPage() {
           <p className="text-text-muted text-xs mt-3 uppercase font-mono tracking-[0.3em] flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-gold rounded-full animate-pulse" />
             {activeTab === "orders"
-              ? `Total Orders: ${data?.pagination.total_items || 0} Records`
-              : `Total Payments: ${coursePaymentsData?.pagination.total_items || 0} Records`}
+              ? <>Total Orders: <AnimatedCounter target={data?.pagination.total_items || 0} fontSize={18} /> Records</>
+              : <>Total Payments: <AnimatedCounter target={coursePaymentsData?.pagination.total_items || 0} fontSize={18} /> Records</>}
           </p>
         </div>
-        {activeTab === "orders" && (
+        {activeTab === "orders" ? (
           <div className="flex items-center justify-end gap-4 w-full md:w-auto">
             <button
               onClick={handleRefresh}
@@ -663,6 +965,26 @@ export default function AdminOrdersPage() {
               className="px-6 py-3 text-2xs flex items-center gap-2 border-border/40 hover:border-gold/50 tracking-widest transition-all"
             >
               <Download size={14} /> EXPORT MANIFEST
+            </GhostBtn>
+          </div>
+        ) : (
+          <div className="flex items-center justify-end gap-4 w-full md:w-auto">
+            <button
+              onClick={handleCpRefresh}
+              disabled={cpLoading}
+              className="p-3 bg-dark border border-border/40 text-text-muted hover:text-gold hover:border-gold/40 transition-all rounded-sm disabled:opacity-50 group"
+              title="Refresh Payments"
+            >
+              <RefreshCw
+                size={16}
+                className={cn(cpLoading && "animate-spin")}
+              />
+            </button>
+            <GhostBtn
+              onClick={handleCpExport}
+              className="px-6 py-3 text-2xs flex items-center gap-2 border-border/40 hover:border-gold/50 tracking-widest transition-all"
+            >
+              <Download size={14} /> EXPORT PAYMENTS
             </GhostBtn>
           </div>
         )}
@@ -784,42 +1106,205 @@ export default function AdminOrdersPage() {
         </>
       ) : (
         /* Course Payments View */
-        <div className="flex-1 lg:overflow-y-auto lg:custom-scrollbar px-1 relative group">
-          <AnimatePresence>
-            {cpLoading && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 z-20 bg-dark/60 backdrop-blur-xs flex flex-col items-center justify-center gap-4 rounded-sm"
-              >
-                <div className="luxury-loader luxury-loader-gold loader-lg" />
-                <p className="text-2xs font-mono text-gold uppercase tracking-[0.4em] animate-pulse">
-                  Loading Payments
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <div className="space-y-4">
-            {coursePaymentsData?.data?.map((payment) => (
-              <CoursePaymentCard key={payment.id} payment={payment} />
-            ))}
-            {!coursePaymentsData?.data?.length && !cpLoading && (
-              <div className="p-20 text-center bg-surface/30 border border-border/60 rounded-sm">
-                <div className="flex flex-col items-center gap-4 opacity-40">
-                  <ShoppingBag size={40} className="text-text-muted" />
-                  <p className="text-xs font-mono text-text-muted uppercase tracking-[0.2em]">
-                    No course payments found.
-                  </p>
-                </div>
+        <>
+          {/* Search & Filter Bar */}
+          <div className="flex items-stretch gap-2 lg:gap-4 mb-1 shrink-0 px-1">
+            <div className="flex-1 relative group">
+              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none z-10">
+                <Search
+                  size={18}
+                  className="text-text-muted group-focus-within:text-gold transition-colors"
+                />
               </div>
-            )}
+              <input
+                type="text"
+                value={cpSearchInput}
+                onChange={(e) => {
+                  setCpSearchInput(e.target.value);
+                  if (e.target.value === "") {
+                    setCpSearch("");
+                    setCpPage(1);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setCpSearch(cpSearchInput);
+                    setCpPage(1);
+                  }
+                }}
+                placeholder="Search payments by course, customer, or order ID..."
+                className="w-full focus:border-gold/50! px-14 py-4 text-sm text-text-main outline-none placeholder:text-text-muted/50 transition-all rounded-sm backdrop-blur-sm glass-input"
+              />
+            </div>
+            <button
+              onClick={() => setIsCpFilterModalOpen(true)}
+              className={cn(
+                "flex items-center justify-center gap-3 px-5 lg:px-8 py-4 border rounded-sm transition-all font-mono text-xs uppercase tracking-widest min-w-14 glass-input",
+                cpActiveFilterCount > 0
+                  ? "bg-gold/10! border-gold! text-gold"
+                  : "bg-surface/50 border-border/60 text-text-muted hover:border-gold/30! hover:text-text-main"
+              )}
+              title="Toggle Filters"
+            >
+              <Filter size={16} />
+              <span className="hidden lg:inline">Filters</span>
+              {cpActiveFilterCount > 0 && (
+                <span className="lg:ml-1 bg-gold text-dark px-1.5 py-0.5 rounded-full text-2xs font-bold">
+                  {cpActiveFilterCount}
+                </span>
+              )}
+            </button>
           </div>
-        </div>
+
+          {/* Main Content */}
+          <div className="flex-1 lg:overflow-y-auto lg:custom-scrollbar px-1 relative group">
+            {/* Desktop skeleton */}
+            <div className="hidden lg:block">
+              {cpPayments.length === 0 && cpLoading ? (
+                <div className="rounded-sm border border-border/60 bg-surface/30 backdrop-blur-md overflow-hidden">
+                  <table className="w-full caption-bottom text-sm">
+                    <thead className="border-b border-border/40 bg-dark/40">
+                      <tr>
+                        {["Payment ID", "Course", "Customer", "Amount", "Status", "Date"].map((h) => (
+                          <th key={h} className="py-3 px-8 text-left align-middle font-mono text-[6px] text-text-muted/60 tracking-[0.3em] uppercase">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/10">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <tr key={i} className="transition-all duration-300 border-l-2 border-l-transparent">
+                          <td className="px-8 py-2 align-middle"><Skeleton className="h-4 w-20" /></td>
+                          <td className="px-8 py-2 align-middle"><Skeleton className="h-4 w-36" /></td>
+                          <td className="px-8 py-2 align-middle"><div className="flex flex-col items-center gap-1.5"><Skeleton className="h-3.5 w-28" /><Skeleton className="h-3 w-20" /></div></td>
+                          <td className="px-8 py-2 align-middle"><div className="flex justify-end"><Skeleton className="h-4 w-16" /></div></td>
+                          <td className="px-8 py-2 align-middle"><div className="flex justify-center"><Skeleton className="h-5 w-14 rounded-full" /></div></td>
+                          <td className="px-8 py-2 align-middle"><div className="flex justify-center"><Skeleton className="h-4 w-16" /></div></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : cpPayments.length === 0 && !cpLoading ? (
+                <div className="p-20 text-center bg-surface/30 border border-border/60 rounded-sm">
+                  <div className="flex flex-col items-center gap-4 opacity-40">
+                    <ShoppingBag size={40} className="text-text-muted" />
+                    <p className="text-xs font-mono text-text-muted uppercase tracking-[0.2em]">
+                      No course payments found.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <DataTable
+                  columns={cpDesktopColumns}
+                  data={cpPayments}
+                  isLoading={cpLoading}
+                />
+              )}
+            </div>
+
+            {/* Tablet skeleton */}
+            <div className="hidden md:block lg:hidden">
+              {cpPayments.length === 0 && cpLoading ? (
+                <div className="rounded-sm border border-border/60 bg-surface/30 backdrop-blur-md overflow-hidden">
+                  <table className="w-full caption-bottom text-sm">
+                    <thead className="border-b border-border/40 bg-dark/40">
+                      <tr>
+                        {["Course / Customer", "Amount", "Date"].map((h) => (
+                          <th key={h} className="py-3 px-8 text-left align-middle font-mono text-[6px] text-text-muted/60 tracking-[0.3em] uppercase">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/10">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <tr key={i} className="transition-all duration-300 border-l-2 border-l-transparent">
+                          <td className="px-8 py-2 align-middle">
+                            <div className="space-y-3">
+                              <div className="space-y-1.5">
+                                <Skeleton className="h-3.5 w-40" />
+                                <Skeleton className="h-3 w-32" />
+                              </div>
+                              <div className="flex items-center gap-3 pt-2 border-t border-border/10">
+                                <Skeleton className="h-3 w-16" />
+                                <Skeleton className="h-5 w-14 rounded-full" />
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-8 py-2 align-middle"><div className="flex justify-end"><Skeleton className="h-4 w-16" /></div></td>
+                          <td className="px-8 py-2 align-middle"><div className="flex justify-center"><Skeleton className="h-4 w-20" /></div></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : cpPayments.length === 0 && !cpLoading ? (
+                <div className="p-20 text-center bg-surface/30 border border-border/60 rounded-sm">
+                  <div className="flex flex-col items-center gap-4 opacity-40">
+                    <ShoppingBag size={40} className="text-text-muted" />
+                    <p className="text-xs font-mono text-text-muted uppercase tracking-[0.2em]">
+                      No course payments found.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <DataTable
+                  columns={cpTabletColumns}
+                  data={cpPayments}
+                  isLoading={cpLoading}
+                />
+              )}
+            </div>
+
+            {/* Mobile skeleton */}
+            <div className="md:hidden space-y-6">
+              {cpPayments.length === 0 && cpLoading ? (
+                <div className="grid gap-6">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="group relative bg-surface border border-border shadow-md overflow-hidden rounded-sm">
+                      <div className="px-6 py-4 border-b border-border/90 bg-dark/20 flex justify-between items-center">
+                        <Skeleton className="h-3.5 w-28" />
+                        <Skeleton className="h-2 w-2 rounded-full" />
+                      </div>
+                      <div className="p-6 space-y-6">
+                        <div className="space-y-1">
+                          <Skeleton className="h-4 w-48" />
+                          <Skeleton className="h-3 w-36" />
+                        </div>
+                        <div className="flex items-center justify-between py-4 border-y border-border/5">
+                          <div className="space-y-1">
+                            <Skeleton className="h-3 w-12" />
+                            <Skeleton className="h-6 w-20" />
+                          </div>
+                          <Skeleton className="h-5 w-16 rounded-full" />
+                        </div>
+                        <div className="flex justify-between items-end pt-2">
+                          <Skeleton className="h-3 w-24" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : cpPayments.length === 0 && !cpLoading ? (
+                <div className="p-20 text-center bg-surface/30 border border-border/60 rounded-sm">
+                  <div className="flex flex-col items-center gap-4 opacity-40">
+                    <ShoppingBag size={40} className="text-text-muted" />
+                    <p className="text-xs font-mono text-text-muted uppercase tracking-[0.2em]">
+                      No course payments found.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid gap-6">
+                  {cpPayments.map((payment) => (
+                    <MobileCpCard key={payment.id} payment={payment} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </>
       )}
 
-      {/* Advanced Pagination - Anchored to bottom on desktop, flow on mobile */}
+      {/* Advanced Pagination */}
       <div className="px-6 py-4 md:py-2 border border-border/40 bg-dark/40 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4 rounded-sm shadow-2xl shrink-0">
         <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 w-full md:w-auto">
           <div className="flex items-center gap-3 w-auto justify-center">
@@ -831,24 +1316,33 @@ export default function AdminOrdersPage() {
               value={pageSize}
               onChange={(val) => {
                 setPageSize(Number(val));
-                setPage(1);
+                if (activeTab === "orders") setPage(1);
+                else setCpPage(1);
               }}
               placeholder="10"
               className="w-28 h-8"
               dropdownPosition="top"
+              buttonClassName="py-2"
             />
           </div>
           <div className="hidden sm:block h-4 w-px bg-border/40" />
           <div className="flex items-center gap-4 lg:gap-6 justify-center">
             <div className="flex items-center gap-2">
               <p className="text-2xs font-mono text-text-muted uppercase tracking-widest whitespace-nowrap">
-                Showing {orders.length} of {data?.pagination.total_items || 0}
+                Showing{" "}
+                {activeTab === "orders" ? orders.length : cpPayments.length} of{" "}
+                {activeTab === "orders"
+                  ? data?.pagination.total_items || 0
+                  : coursePaymentsData?.pagination.total_items || 0}
               </p>
             </div>
             <div className="hidden md:block h-4 w-px bg-border/40" />
             <div className="flex items-center gap-2">
               <p className="text-2xs font-mono text-text-muted uppercase tracking-widest whitespace-nowrap">
-                Page {page} of {data?.pagination.total_pages || 1}
+                Page {activeTab === "orders" ? page : cpPage} of{" "}
+                {activeTab === "orders"
+                  ? data?.pagination.total_pages || 1
+                  : coursePaymentsData?.pagination.total_pages || 1}
               </p>
             </div>
             <div className="hidden sm:block h-4 w-px bg-border/40" />
@@ -859,15 +1353,21 @@ export default function AdminOrdersPage() {
               <input
                 type="number"
                 min={1}
-                max={data?.pagination.total_pages || 1}
+                max={
+                  activeTab === "orders"
+                    ? data?.pagination.total_pages || 1
+                    : coursePaymentsData?.pagination.total_pages || 1
+                }
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     const val = Number(e.currentTarget.value);
-                    if (
-                      val >= 1 &&
-                      val <= (data?.pagination.total_pages || 1)
-                    ) {
-                      setPage(val);
+                    const max =
+                      activeTab === "orders"
+                        ? data?.pagination.total_pages || 1
+                        : coursePaymentsData?.pagination.total_pages || 1;
+                    if (val >= 1 && val <= max) {
+                      if (activeTab === "orders") setPage(val);
+                      else setCpPage(val);
                     }
                   }
                 }}
@@ -880,16 +1380,26 @@ export default function AdminOrdersPage() {
 
         <div className="flex gap-2 w-auto">
           <button
-            disabled={page === 1}
-            onClick={() => setPage((p) => p - 1)}
+            disabled={activeTab === "orders" ? page === 1 : cpPage === 1}
+            onClick={() => {
+              if (activeTab === "orders") setPage((p) => p - 1);
+              else setCpPage((p) => p - 1);
+            }}
             className="flex-none px-4 py-2 bg-dark border border-border/60 text-2xs font-mono uppercase tracking-widest hover:border-gold disabled:opacity-20 disabled:hover:border-border transition-all rounded-sm active:scale-95 flex items-center justify-center gap-2"
           >
             <ChevronLeft size={14} />{" "}
             <span className="hidden sm:inline">Prev</span>
           </button>
           <button
-            disabled={!data?.pagination.has_next}
-            onClick={() => setPage((p) => p + 1)}
+            disabled={
+              activeTab === "orders"
+                ? !data?.pagination.has_next
+                : !coursePaymentsData?.pagination.has_next
+            }
+            onClick={() => {
+              if (activeTab === "orders") setPage((p) => p + 1);
+              else setCpPage((p) => p + 1);
+            }}
             className="flex-none px-4 py-2 bg-dark border border-border/60 text-2xs font-mono uppercase tracking-widest hover:border-gold disabled:opacity-20 disabled:hover:border-border transition-all rounded-sm active:scale-95 flex items-center justify-center gap-2"
           >
             <span className="hidden sm:inline">Next</span>{" "}
@@ -898,7 +1408,7 @@ export default function AdminOrdersPage() {
         </div>
       </div>
 
-      {/* Filter Sidebar */}
+      {/* Filter Sidebar (Orders) */}
       <AnimatePresence>
         {isFilterModalOpen && (
           <FilterSidebar
@@ -909,6 +1419,22 @@ export default function AdminOrdersPage() {
               setFilters(newFilters);
               setPage(1);
               setIsFilterModalOpen(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Filter Sidebar (Course Payments) */}
+      <AnimatePresence>
+        {isCpFilterModalOpen && (
+          <CpFilterSidebar
+            isOpen={isCpFilterModalOpen}
+            onClose={() => setIsCpFilterModalOpen(false)}
+            filters={cpFilters}
+            onApply={(newFilters) => {
+              setCpFilters(newFilters);
+              setCpPage(1);
+              setIsCpFilterModalOpen(false);
             }}
           />
         )}
@@ -1399,7 +1925,8 @@ function OrderDetailsModal({
                         ) : (
                           <>
                             <p className="text-xs font-bold text-text-main uppercase">
-                              {item.product_title || `Product ID: ${item.product_id}`}
+                              {item.product_title ||
+                                `Product ID: ${item.product_id}`}
                             </p>
                             {item.variant_name && (
                               <p className="text-2xs text-text-muted font-mono tracking-widest uppercase">
@@ -1474,56 +2001,234 @@ function OrderDetailsModal({
   );
 }
 
-// ─── Course Payment Card ─────────────────────────────────────────────────────
+// ─── Cp Status Badge ─────────────────────────────────────────────────────────
 
-function CoursePaymentCard({
-  payment,
-}: {
-  payment: AdminCoursePaymentRead;
-}) {
-  const statusColorMap: Record<string, string> = {
-    paid: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-    pending: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-    failed: "text-red-400 bg-red-500/10 border-red-500/20",
-    refunded: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
+function CpStatusBadge({ status }: { status: string }) {
+  const styles: Record<string, string> = {
+    paid: "text-emerald-500 bg-emerald-500/10",
+    pending: "text-amber-500 bg-amber-500/10",
+    failed: "text-red-500 bg-red-500/10",
+    refunded: "text-indigo-500 bg-indigo-500/10",
   };
-
   return (
-    <div className="bg-surface border border-border p-4 rounded-sm hover:border-gold/30 transition-all">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4 min-w-0 flex-1">
-          <div className="w-10 h-10 bg-gold/10 border border-gold/20 flex items-center justify-center text-gold font-bold text-sm shrink-0">
-            {payment.course_title?.charAt(0) || "C"}
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-text-main uppercase truncate">
-              {payment.course_title || `Course ${payment.course_id}`}
-            </p>
-            <p className="text-2xs text-text-muted font-mono truncate">
-              {payment.user_full_name || "Unknown"} · {payment.user_email || ""}
-            </p>
-          </div>
-        </div>
+    <span
+      className={cn(
+        "px-2 py-0.5 rounded text-2xs font-mono font-black uppercase tracking-tighter",
+        styles[status] || styles.pending
+      )}
+    >
+      {status}
+    </span>
+  );
+}
 
-        <div className="flex items-center gap-4 shrink-0">
-          <div className="text-right">
-            <p className="text-sm font-bold text-gold font-mono">
+// ─── Mobile Cp Card ─────────────────────────────────────────────────────────
+
+function MobileCpCard({ payment }: { payment: AdminCoursePaymentRead }) {
+  const statusColorMap: Record<string, string> = {
+    paid: "text-emerald-400 border-emerald-500/20 bg-emerald-500/5 shadow-[0_0_10px_rgba(16,185,129,0.05)]",
+    pending:
+      "text-amber-400 border-amber-500/20 bg-amber-500/5 shadow-[0_0_10px_rgba(245,158,11,0.05)]",
+    failed:
+      "text-red-400 border-red-500/20 bg-red-500/5 shadow-[0_0_10px_rgba(239,68,68,0.05)]",
+    refunded:
+      "text-indigo-400 border-indigo-500/20 bg-indigo-500/5 shadow-[0_0_10px_rgba(99,102,241,0.05)]",
+  };
+  return (
+    <div className="group relative bg-surface border border-border shadow-md overflow-hidden rounded-sm transition-all duration-500 hover:border-gold/40">
+      <div className="px-6 py-4 border-b border-border/90 bg-dark/20 flex justify-between items-center">
+        <span className="text-2xs font-mono text-gold uppercase tracking-[0.3em] font-bold">
+          #{payment.id.slice(0, 8)}
+        </span>
+        <div className="w-1.5 h-1.5 rounded-full bg-gold/30 group-hover:bg-gold group-hover:animate-pulse transition-all" />
+      </div>
+      <div className="p-6 space-y-6">
+        <div className="space-y-1">
+          <h4 className="text-sm font-black text-text-main uppercase tracking-tight leading-tight">
+            {payment.course_title || "N/A"}
+          </h4>
+          <p className="text-2xs text-text-muted font-mono lowercase truncate opacity-70">
+            {payment.user_full_name || "Unknown"} · {payment.user_email || ""}
+          </p>
+        </div>
+        <div className="flex items-center justify-between py-4 border-y border-border/5">
+          <div className="space-y-1">
+            <span className="text-[9px] font-mono text-text-muted/60 uppercase tracking-widest block">
+              Amount
+            </span>
+            <p className="text-2xl font-black text-gold font-mono tracking-tighter leading-none">
               {displayPrice(payment.amount)}
-            </p>
-            <p className="text-2xs text-text-muted font-mono whitespace-nowrap">
-              {format(new Date(payment.created_at), "dd MMM yyyy")}
             </p>
           </div>
           <span
             className={cn(
-              "px-3 py-1 rounded-full text-2xs font-mono font-bold uppercase tracking-wider border",
+              "inline-flex items-center px-3 py-1 border rounded-full text-[9px] font-mono font-bold tracking-[0.2em] uppercase transition-all duration-500",
               statusColorMap[payment.status] || statusColorMap.pending
             )}
           >
+            <span className="w-1 h-1 rounded-full bg-current mr-2 animate-pulse" />
             {payment.status}
           </span>
         </div>
+        <div className="flex justify-between items-end pt-2">
+          <div className="text-2xs font-mono text-text-muted uppercase">
+            {format(new Date(payment.created_at), "dd MMM yyyy")}
+          </div>
+        </div>
       </div>
+    </div>
+  );
+}
+
+// ─── Cp Filter Sidebar ──────────────────────────────────────────────────────
+
+const CP_PAYMENT_STATUSES = ["paid", "pending", "failed", "refunded"];
+
+function CpFilterSidebar({
+  isOpen,
+  onClose,
+  filters: currentFilters,
+  onApply,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  filters: CpFilters;
+  onApply: (f: CpFilters) => void;
+}) {
+  const [tempFilters, setTempFilters] = useState<CpFilters>(currentFilters);
+
+  useEffect(() => {
+    if (isOpen) setTempFilters(currentFilters);
+  }, [isOpen, currentFilters]);
+
+  const clear = () => setTempFilters(EMPTY_CP_FILTERS);
+
+  return (
+    <div className="fixed inset-0 z-150 flex items-center justify-end">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-black/90 backdrop-blur-xl"
+      />
+      <motion.div
+        initial={{ x: "100%" }}
+        animate={{ x: 0 }}
+        exit={{ x: "100%" }}
+        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+        className="relative w-full max-w-md h-full bg-surface border-l border-border shadow-2xl flex flex-col"
+      >
+        <div className="px-8 py-6 border-b border-border/40 flex items-center justify-between bg-dark/40">
+          <div>
+            <h2 className="text-xl font-black uppercase tracking-tight text-text-main">
+              Filter <span className="text-gold">Payments</span>
+            </h2>
+            <p className="text-2xs font-mono text-text-muted uppercase tracking-widest mt-1">
+              Refine course payments
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-text-muted hover:text-gold transition-colors"
+          >
+            <X size={24} />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
+          <section className="space-y-4">
+            <label className="text-2xs font-mono text-text-muted uppercase tracking-[0.2em] block font-bold">
+              Payment Status
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {CP_PAYMENT_STATUSES.map((s) => (
+                <button
+                  key={s}
+                  onClick={() =>
+                    setTempFilters({
+                      ...tempFilters,
+                      status: s === tempFilters.status ? "" : s,
+                    })
+                  }
+                  className={cn(
+                    "px-3 py-2.5 text-2xs font-mono uppercase border transition-all rounded-sm text-left",
+                    tempFilters.status === s
+                      ? "bg-gold text-dark border-gold font-bold"
+                      : "bg-dark/40 border-border/60 text-text-muted hover:border-gold/40"
+                  )}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </section>
+          <section className="space-y-4">
+            <label className="text-2xs font-mono text-text-muted uppercase tracking-[0.2em] block font-bold">
+              Temporal Boundary
+            </label>
+            <DatePickerWithRange
+              date={
+                tempFilters.dateStart
+                  ? {
+                      from: new Date(tempFilters.dateStart),
+                      to: tempFilters.dateEnd
+                        ? new Date(tempFilters.dateEnd)
+                        : undefined,
+                    }
+                  : undefined
+              }
+              setDate={(range) => {
+                setTempFilters({
+                  ...tempFilters,
+                  dateStart: range?.from
+                    ? format(range.from, "yyyy-MM-dd")
+                    : "",
+                  dateEnd: range?.to ? format(range.to, "yyyy-MM-dd") : "",
+                });
+              }}
+            />
+          </section>
+          <section className="space-y-4 pt-2">
+            <label className="text-2xs font-mono text-text-muted uppercase tracking-[0.2em] block font-bold">
+              Amount Range (₹)
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="number"
+                placeholder="MIN"
+                value={tempFilters.minAmount}
+                onChange={(e) =>
+                  setTempFilters({ ...tempFilters, minAmount: e.target.value })
+                }
+                className="w-full bg-dark/40 border border-border/60 p-3 text-xs font-mono text-text-main outline-none focus:border-gold/40 placeholder:text-text-muted/30 rounded-sm"
+              />
+              <input
+                type="number"
+                placeholder="MAX"
+                value={tempFilters.maxAmount}
+                onChange={(e) =>
+                  setTempFilters({ ...tempFilters, maxAmount: e.target.value })
+                }
+                className="w-full bg-dark/40 border border-border/60 p-3 text-xs font-mono text-text-main outline-none focus:border-gold/40 placeholder:text-text-muted/30 rounded-sm"
+              />
+            </div>
+          </section>
+        </div>
+        <div className="p-8 bg-dark/40 border-t border-border/40 flex gap-3">
+          <button
+            onClick={clear}
+            className="flex-1 px-4 py-4 text-2xs font-mono uppercase tracking-[0.3em] text-text-muted hover:text-text-main transition-colors border border-border/40 rounded-sm"
+          >
+            Reset
+          </button>
+          <PrimaryBtn
+            onClick={() => onApply(tempFilters)}
+            className="flex-2 justify-center py-4 text-2xs tracking-[0.4em] font-bold"
+          >
+            APPLY FILTERS
+          </PrimaryBtn>
+        </div>
+      </motion.div>
     </div>
   );
 }

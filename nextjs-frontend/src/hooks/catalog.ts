@@ -16,10 +16,18 @@ import {
   createCourseCategory as apiCreateCourseCategory,
   createMedium as apiCreateMedium,
   createVariantType as apiCreateVariantType,
+  deleteCategory as apiDeleteCategory,
+  deleteCourseCategory as apiDeleteCourseCategory,
+  deleteMedium as apiDeleteMedium,
+  deleteVariantType as apiDeleteVariantType,
   listCategories,
   listCourseCategories,
   listMediums,
   listVariantTypes,
+  updateCategory as apiUpdateCategory,
+  updateCourseCategory as apiUpdateCourseCategory,
+  updateMedium as apiUpdateMedium,
+  updateVariantType as apiUpdateVariantType,
 } from "@/api/openapi-client";
 import { getErrorMessage } from "@/lib/error-handler";
 import { useCallback, useEffect, useState } from "react";
@@ -212,4 +220,86 @@ export function useCreateCourseCategory() {
   );
 
   return { createCourseCategory, creating };
+}
+
+// ─── Update / Delete Hooks ────────────────────────────────────────────────────
+
+export function useUpdateCategory() {
+  const [updating, setUpdating] = useState(false);
+  const update = useCallback(async (id: number, data: { name?: string | null; description?: string | null }) => {
+    setUpdating(true);
+    try { return await unwrap(apiUpdateCategory({ path: { category_id: id }, body: data })); }
+    finally { setUpdating(false); }
+  }, []);
+  return { update, updating };
+}
+
+export function useDeleteCategory() {
+  const [deleting, setDeleting] = useState(false);
+  const remove = useCallback(async (id: number) => {
+    setDeleting(true);
+    try { return await unwrap(apiDeleteCategory({ path: { category_id: id } })); }
+    finally { setDeleting(false); }
+  }, []);
+  return { remove, deleting };
+}
+
+export function useUpdateMedium() {
+  const [updating, setUpdating] = useState(false);
+  const update = useCallback(async (id: number, data: { name?: string | null }) => {
+    setUpdating(true);
+    try { return await unwrap(apiUpdateMedium({ path: { medium_id: id }, body: data })); }
+    finally { setUpdating(false); }
+  }, []);
+  return { update, updating };
+}
+
+export function useDeleteMedium() {
+  const [deleting, setDeleting] = useState(false);
+  const remove = useCallback(async (id: number) => {
+    setDeleting(true);
+    try { return await unwrap(apiDeleteMedium({ path: { medium_id: id } })); }
+    finally { setDeleting(false); }
+  }, []);
+  return { remove, deleting };
+}
+
+export function useUpdateVariantType() {
+  const [updating, setUpdating] = useState(false);
+  const update = useCallback(async (id: number, data: { name?: string | null; description?: string | null }) => {
+    setUpdating(true);
+    try { return await unwrap(apiUpdateVariantType({ path: { variant_type_id: id }, body: data })); }
+    finally { setUpdating(false); }
+  }, []);
+  return { update, updating };
+}
+
+export function useDeleteVariantType() {
+  const [deleting, setDeleting] = useState(false);
+  const remove = useCallback(async (id: number) => {
+    setDeleting(true);
+    try { return await unwrap(apiDeleteVariantType({ path: { variant_type_id: id } })); }
+    finally { setDeleting(false); }
+  }, []);
+  return { remove, deleting };
+}
+
+export function useUpdateCourseCategory() {
+  const [updating, setUpdating] = useState(false);
+  const update = useCallback(async (id: string, data: { name?: string | null; description?: string | null }) => {
+    setUpdating(true);
+    try { return await unwrap(apiUpdateCourseCategory({ path: { category_id: id }, body: data })); }
+    finally { setUpdating(false); }
+  }, []);
+  return { update, updating };
+}
+
+export function useDeleteCourseCategory() {
+  const [deleting, setDeleting] = useState(false);
+  const remove = useCallback(async (id: string) => {
+    setDeleting(true);
+    try { return await unwrap(apiDeleteCourseCategory({ path: { category_id: id } })); }
+    finally { setDeleting(false); }
+  }, []);
+  return { remove, deleting };
 }

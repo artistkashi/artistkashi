@@ -16,6 +16,7 @@ interface CustomSelectProps {
   onChange: (value: string | number) => void;
   placeholder: string;
   className?: string;
+  buttonClassName?: string;
   label?: string;
   error?: string;
   dropdownPosition?: "top" | "bottom";
@@ -27,6 +28,7 @@ export function CustomSelect({
   onChange,
   placeholder,
   className,
+  buttonClassName,
   label,
   error,
   dropdownPosition = "bottom",
@@ -50,7 +52,10 @@ export function CustomSelect({
   }, []);
 
   return (
-    <div className={cn("space-y-1 w-full flex flex-col justify-center", className)} ref={containerRef}>
+    <div
+      className={cn("space-y-1 w-full flex flex-col justify-center", className)}
+      ref={containerRef}
+    >
       {label && (
         <label className="text-label! font-mono tracking-widest uppercase text-text-muted block mb-2">
           {label}
@@ -62,6 +67,7 @@ export function CustomSelect({
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
             "w-full bg-surface border border-border px-4 py-3 text-sm text-foreground flex items-center justify-between rounded-sm transition-all duration-300 focus:outline-none focus:border-primary",
+            buttonClassName,
             isOpen && "border-primary bg-surface",
             error && "border-danger danger-glow"
           )}
@@ -70,7 +76,7 @@ export function CustomSelect({
             className={cn(
               "truncate",
               !selectedOption &&
-              "text-text-muted/50 uppercase font-mono text-2xs"
+                "text-text-muted/50 uppercase font-mono text-2xs"
             )}
           >
             {selectedOption ? selectedOption.label : placeholder}
@@ -92,7 +98,9 @@ export function CustomSelect({
               exit={{ opacity: 0, y: dropdownPosition === "top" ? 10 : -10 }}
               className={cn(
                 "absolute z-50 w-full bg-surface border border-border backdrop-blur-xl max-h-60 overflow-y-auto scrollbar-hide shadow-lg rounded card-luxury",
-                dropdownPosition === "top" ? "bottom-full mb-1" : "top-full mt-1"
+                dropdownPosition === "top"
+                  ? "bottom-full mb-1"
+                  : "top-full mt-1"
               )}
             >
               <div className="py-1">

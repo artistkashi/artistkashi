@@ -3,6 +3,7 @@
 import { unwrap, unwrapPaginated } from "@/api/client-service";
 import { listOrders, overview } from "@/api/openapi-client";
 import { PrimaryBtn } from "@/components/ui/buttons";
+import { AnimatedCounter } from "@/components/dashboard/AnimatedCounter";
 import { cn, displayPrice } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -73,7 +74,7 @@ export default function AdminPage() {
               />
             </div>
             <div className="text-text-main font-extrabold text-3xl mb-2">
-              {isStatsLoading ? "..." : s.value}
+              <AnimatedCounter target={isStatsLoading ? 0 : s.value} fontSize={34} />
             </div>
             <div className="text-2xs font-mono text-text-muted flex items-center gap-1 uppercase">
               <TrendingUp size={11} className="text-gold" /> System Archive Data

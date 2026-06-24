@@ -8137,6 +8137,30 @@ export type ListCoursePaymentsData = {
          * Page Size
          */
         page_size?: number;
+        /**
+         * Search
+         */
+        search?: string | null;
+        /**
+         * Status
+         */
+        status?: string | null;
+        /**
+         * Date Start
+         */
+        date_start?: string | null;
+        /**
+         * Date End
+         */
+        date_end?: string | null;
+        /**
+         * Min Amount
+         */
+        min_amount?: number | string | null;
+        /**
+         * Max Amount
+         */
+        max_amount?: number | string | null;
     };
     url: '/api/admin/course-payments';
 };

@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatedCounter } from "@/components/dashboard/AnimatedCounter";
 import { PrimaryBtn } from "@/components/ui/buttons";
 import {
   useCategories,
@@ -8,7 +9,15 @@ import {
   useCreateCourseCategory,
   useCreateMedium,
   useCreateVariantType,
+  useDeleteCategory,
+  useDeleteCourseCategory,
+  useDeleteMedium,
+  useDeleteVariantType,
   useMediums,
+  useUpdateCategory,
+  useUpdateCourseCategory,
+  useUpdateMedium,
+  useUpdateVariantType,
   useVariantTypes,
 } from "@/hooks/catalog";
 import { getErrorMessage, getValidationErrors } from "@/lib/error-handler";
@@ -22,9 +31,11 @@ import {
   FolderOpen,
   Layers,
   Palette,
+  Pencil,
   Plus,
   RefreshCw,
   Tag,
+  Trash2,
   XCircle,
 } from "lucide-react";
 import React, { useState } from "react";
@@ -58,7 +69,11 @@ const TABS: { key: ActiveTab; label: string; icon: React.ReactNode }[] = [
   { key: "categories", label: "Collections", icon: <Tag size={13} /> },
   { key: "mediums", label: "Mediums", icon: <Palette size={13} /> },
   { key: "variantTypes", label: "Variant Types", icon: <Layers size={13} /> },
-  { key: "courseCategories", label: "Course Categories", icon: <BookOpen size={13} /> },
+  {
+    key: "courseCategories",
+    label: "Course Categories",
+    icon: <BookOpen size={13} />,
+  },
 ];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -103,6 +118,19 @@ export default function CatalogPage() {
   } = useCourseCategories();
   const { createCourseCategory, creating: creatingCourseCategory } =
     useCreateCourseCategory();
+
+  // ── Update / Delete hooks
+  const { update: updateCategory, updating: updatingCategory } =
+    useUpdateCategory();
+  const { remove: deleteCategory } = useDeleteCategory();
+  const { update: updateMedium, updating: updatingMedium } = useUpdateMedium();
+  const { remove: deleteMedium } = useDeleteMedium();
+  const { update: updateVariantType, updating: updatingVariantType } =
+    useUpdateVariantType();
+  const { remove: deleteVariantType } = useDeleteVariantType();
+  const { update: updateCourseCategory, updating: updatingCourseCategory } =
+    useUpdateCourseCategory();
+  const { remove: deleteCourseCategory } = useDeleteCourseCategory();
 
   // ── Handlers
 
@@ -164,12 +192,119 @@ export default function CatalogPage() {
     }
   };
 
+  // ── Update / Delete handlers
+
+  const handleUpdateCategory = async (
+    id: number | string,
+    name: string,
+    description?: string
+  ) => {
+    try {
+      await updateCategory(id as number, {
+        name,
+        description: description?.trim() || null,
+      });
+      toast.success("Collection updated");
+      await refetchCategories();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
+  };
+
+  const handleDeleteCategory = async (id: number | string) => {
+    if (!confirm("Delete this collection? This cannot be undone.")) return;
+    try {
+      await deleteCategory(id as number);
+      toast.success("Collection deleted");
+      await refetchCategories();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
+  };
+
+  const handleUpdateMedium = async (id: number | string, name: string) => {
+    try {
+      await updateMedium(id as number, { name });
+      toast.success("Medium updated");
+      await refetchMediums();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
+  };
+
+  const handleDeleteMedium = async (id: number | string) => {
+    if (!confirm("Delete this medium? This cannot be undone.")) return;
+    try {
+      await deleteMedium(id as number);
+      toast.success("Medium deleted");
+      await refetchMediums();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
+  };
+
+  const handleUpdateVariantType = async (
+    id: number | string,
+    name: string,
+    description?: string
+  ) => {
+    try {
+      await updateVariantType(id as number, {
+        name,
+        description: description?.trim() || null,
+      });
+      toast.success("Variant type updated");
+      await refetchVariantTypes();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
+  };
+
+  const handleDeleteVariantType = async (id: number | string) => {
+    if (!confirm("Delete this variant type? This cannot be undone.")) return;
+    try {
+      await deleteVariantType(id as number);
+      toast.success("Variant type deleted");
+      await refetchVariantTypes();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
+  };
+
+  const handleUpdateCourseCategory = async (
+    id: number | string,
+    name: string,
+    description?: string
+  ) => {
+    try {
+      await updateCourseCategory(id as string, {
+        name,
+        description: description?.trim() || null,
+      });
+      toast.success("Course category updated");
+      await refetchCourseCategories();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
+  };
+
+  const handleDeleteCourseCategory = async (id: number | string) => {
+    if (!confirm("Delete this course category? This cannot be undone.")) return;
+    try {
+      await deleteCourseCategory(id as string);
+      toast.success("Course category deleted");
+      await refetchCourseCategories();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
+  };
+
   return (
     <div className="space-y-8 pb-16">
       {/* ── Page Header ── */}
       <div className="flex items-start justify-between gap-4 border-b border-gold/10 pb-6">
         <div className="flex items-center gap-4">
-          <div className="w-11 h-11 bg-gold/10 border border-gold/20 flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 bg-gold/10 border border-gold/20 flex items-center justify-center shrink-0 rounded">
             <BookOpen className="text-gold" size={20} />
           </div>
           <div>
@@ -184,18 +319,26 @@ export default function CatalogPage() {
 
         {/* Summary badges */}
         <div className="hidden md:flex items-center gap-3 shrink-0 pt-1">
-          {!catLoading && (
-            <StatBadge icon={<Tag size={10} />} count={categories.length} label="Collections" />
-          )}
-          {!medLoading && (
-            <StatBadge icon={<Palette size={10} />} count={mediums.length} label="Mediums" />
-          )}
-          {!vtLoading && (
-            <StatBadge icon={<Layers size={10} />} count={variantTypes.length} label="Formats" />
-          )}
-          {!ccLoading && (
-            <StatBadge icon={<BookOpen size={10} />} count={courseCategories.length} label="Courses" />
-          )}
+          <StatBadge
+            icon={<Tag size={10} />}
+            count={categories.length}
+            label="Collections"
+          />
+          <StatBadge
+            icon={<Palette size={10} />}
+            count={mediums.length}
+            label="Mediums"
+          />
+          <StatBadge
+            icon={<Layers size={10} />}
+            count={variantTypes.length}
+            label="Formats"
+          />
+          <StatBadge
+            icon={<BookOpen size={10} />}
+            count={courseCategories.length}
+            label="Courses"
+          />
         </div>
       </div>
 
@@ -257,11 +400,20 @@ export default function CatalogPage() {
               loading={catLoading}
               error={catError}
               creating={creatingCategory}
+              updating={updatingCategory}
               hasDescription
               onRefetch={refetchCategories}
               onSubmit={handleCreateCategory}
+              onUpdate={handleUpdateCategory}
+              onDelete={handleDeleteCategory}
               namePlaceholder="e.g. Landscapes, Portraits..."
-              examples={["Landscapes", "Portraits", "Abstract", "Still Life", "Wildlife"]}
+              examples={[
+                "Landscapes",
+                "Portraits",
+                "Abstract",
+                "Still Life",
+                "Wildlife",
+              ]}
             />
           </motion.div>
         )}
@@ -289,9 +441,12 @@ export default function CatalogPage() {
               loading={medLoading}
               error={medError}
               creating={creatingMedium}
+              updating={updatingMedium}
               hasDescription={false}
               onRefetch={refetchMediums}
               onSubmit={async (name) => handleCreateMedium(name)}
+              onUpdate={handleUpdateMedium}
+              onDelete={handleDeleteMedium}
               namePlaceholder="e.g. Oil Painting, Acrylic..."
               examples={[
                 "Oil Painting",
@@ -327,9 +482,12 @@ export default function CatalogPage() {
               loading={vtLoading}
               error={vtError}
               creating={creatingVariantType}
+              updating={updatingVariantType}
               hasDescription
               onRefetch={refetchVariantTypes}
               onSubmit={handleCreateVariantType}
+              onUpdate={handleUpdateVariantType}
+              onDelete={handleDeleteVariantType}
               namePlaceholder="e.g. Original, Canvas Print..."
               examples={[
                 "Original",
@@ -364,9 +522,12 @@ export default function CatalogPage() {
               loading={ccLoading}
               error={ccError}
               creating={creatingCourseCategory}
+              updating={updatingCourseCategory}
               hasDescription
               onRefetch={refetchCourseCategories}
               onSubmit={handleCreateCourseCategory}
+              onUpdate={handleUpdateCourseCategory}
+              onDelete={handleDeleteCourseCategory}
               namePlaceholder="e.g. Beginner, Advanced, Acrylic..."
               examples={[
                 "Beginner",
@@ -394,10 +555,10 @@ function StatBadge({
   label: string;
 }) {
   return (
-    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-dark/40 border border-border/60">
+    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-dark/40 border border-border/60 rounded">
       <span className="text-gold">{icon}</span>
-      <span className="text-text-main text-2xs font-mono font-bold">
-        {count}
+      <span className="font-bold">
+        <AnimatedCounter target={count} fontSize={13} />
       </span>
       <span className="text-text-muted text-2xs font-mono tracking-wider uppercase">
         {label}
@@ -416,9 +577,16 @@ interface CatalogTabPanelProps {
   loading: boolean;
   error: string | null;
   creating: boolean;
+  updating: boolean;
   hasDescription: boolean;
   onRefetch: () => Promise<void>;
   onSubmit: (name: string, description?: string) => Promise<void>;
+  onUpdate: (
+    id: number | string,
+    name: string,
+    description?: string
+  ) => Promise<void>;
+  onDelete: (id: number | string) => Promise<void>;
   namePlaceholder: string;
   examples: string[];
 }
@@ -431,12 +599,18 @@ function CatalogTabPanel({
   loading,
   error,
   creating,
+  updating,
   hasDescription,
   onRefetch,
   onSubmit,
+  onUpdate,
+  onDelete,
   namePlaceholder,
   examples,
 }: CatalogTabPanelProps) {
+  const [editingId, setEditingId] = useState<number | string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editDesc, setEditDesc] = useState("");
   const form = useForm<CatalogFormData>({
     resolver: zodResolver(catalogSchema),
     defaultValues: {
@@ -456,14 +630,20 @@ function CatalogTabPanel({
 
   const handleFormSubmit = async (data: CatalogFormData) => {
     try {
-      await onSubmit(data.name.trim(), hasDescription ? data.description : undefined);
+      await onSubmit(
+        data.name.trim(),
+        hasDescription ? data.description : undefined
+      );
       reset({ name: "", description: "" });
     } catch (err) {
       const validationErrors = getValidationErrors(err);
       if (validationErrors) {
         Object.entries(validationErrors).forEach(([field, messages]) => {
           if (field.startsWith("payload.")) {
-            const rhfField = field.replace(/^payload\./, "") as Path<CatalogFormData>;
+            const rhfField = field.replace(
+              /^payload\./,
+              ""
+            ) as Path<CatalogFormData>;
             setError(rhfField, { type: "server", message: messages[0] });
           }
         });
@@ -477,10 +657,10 @@ function CatalogTabPanel({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-8 items-start">
       {/* ── Create Form ── */}
-      <div className="bg-muted-light/60 border border-border overflow-hidden">
+      <div className="bg-muted-light/60 border border-border overflow-hidden rounded">
         {/* Form header */}
         <div className="px-6 py-4 border-b border-border bg-dark/20 flex items-center gap-3">
-          <div className="w-8 h-8 bg-gold/10 border border-gold/20 flex items-center justify-center text-gold shrink-0">
+          <div className="w-8 h-8 bg-gold/10 border border-gold/20 flex items-center justify-center text-gold shrink-0 rounded">
             {icon}
           </div>
           <div>
@@ -494,7 +674,10 @@ function CatalogTabPanel({
         </div>
 
         {/* Form body */}
-        <form onSubmit={handleRHFSubmit(handleFormSubmit)} className="p-6 space-y-5">
+        <form
+          onSubmit={handleRHFSubmit(handleFormSubmit)}
+          className="p-6 space-y-5"
+        >
           {/* Name */}
           <div className="space-y-2">
             <label
@@ -513,10 +696,14 @@ function CatalogTabPanel({
               placeholder={namePlaceholder}
               className={cn(
                 "w-full bg-dark/40 border px-4 py-3 text-sm text-text-main focus:outline-none focus:bg-dark/60 transition-all duration-300 placeholder:text-text-muted/30 rounded-sm",
-                errors.name ? "border-red-500/50 focus:border-red-500" : "border-border/60 focus:border-gold/50"
+                errors.name
+                  ? "border-red-500/50 focus:border-red-500"
+                  : "border-border/60 focus:border-gold/50"
               )}
             />
-            {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+            {errors.name && (
+              <p className="text-xs text-red-500">{errors.name.message}</p>
+            )}
           </div>
 
           {/* Description */}
@@ -538,10 +725,16 @@ function CatalogTabPanel({
                 rows={3}
                 className={cn(
                   "w-full bg-dark/40 border px-4 py-3 text-sm text-text-main focus:outline-none focus:bg-dark/60 transition-all duration-300 resize-none placeholder:text-text-muted/30 rounded-sm",
-                  errors.description ? "border-red-500/50 focus:border-red-500" : "border-border/60 focus:border-gold/50"
+                  errors.description
+                    ? "border-red-500/50 focus:border-red-500"
+                    : "border-border/60 focus:border-gold/50"
                 )}
               />
-              {errors.description && <p className="text-xs text-red-500">{errors.description.message}</p>}
+              {errors.description && (
+                <p className="text-xs text-red-500">
+                  {errors.description.message}
+                </p>
+              )}
             </div>
           )}
 
@@ -555,7 +748,9 @@ function CatalogTabPanel({
                 <button
                   key={example}
                   type="button"
-                  onClick={() => setValue("name", example, { shouldValidate: true })}
+                  onClick={() =>
+                    setValue("name", example, { shouldValidate: true })
+                  }
                   className="px-3 py-1 text-2xs font-mono tracking-wider border border-border/40 text-text-muted hover:border-gold/40 hover:text-gold transition-all rounded-sm"
                 >
                   {example}
@@ -568,9 +763,7 @@ function CatalogTabPanel({
           <PrimaryBtn
             type="submit"
             disabled={creating}
-            className={cn(
-              "w-full justify-center gap-2.5 px-6 py-3"
-            )}
+            className={cn("w-full justify-center gap-2.5 px-6 py-3")}
           >
             {creating ? (
               <div className="luxury-loader scale-50" />
@@ -593,7 +786,7 @@ function CatalogTabPanel({
               {entityLabelPlural}
             </h3>
             {!loading && !error && (
-              <span className="px-2 py-0.5 bg-gold/10 border border-gold/20 text-gold text-2xs font-mono font-bold tracking-widest">
+              <span className="px-2 py-0.5 bg-gold/10 border border-gold/20 text-gold text-2xs font-mono font-bold tracking-widest rounded">
                 {items.length}
               </span>
             )}
@@ -614,7 +807,7 @@ function CatalogTabPanel({
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="h-17 bg-muted-light/30 border border-border animate-pulse"
+                className="h-17 bg-muted-light/30 border border-border animate-pulse rounded"
                 style={{ opacity: 1 - i * 0.18 }}
               />
             ))}
@@ -628,10 +821,7 @@ function CatalogTabPanel({
             animate={{ opacity: 1 }}
             className="border border-red-500/20 bg-red-500/5 p-6 flex items-start gap-4"
           >
-            <AlertCircle
-              size={18}
-              className="text-red-400 shrink-0 mt-0.5"
-            />
+            <AlertCircle size={18} className="text-red-400 shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-red-400">{error}</p>
               <button
@@ -669,70 +859,150 @@ function CatalogTabPanel({
         {!loading && !error && items.length > 0 && (
           <div className="space-y-2">
             <AnimatePresence>
-              {items.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: Math.min(index * 0.04, 0.3) }}
-                  className={cn(
-                    "flex items-center gap-4 px-5 py-4",
-                    "bg-muted-light/40 border border-border",
-                    "hover:border-gold/20 hover:bg-dark/20 transition-all duration-300 group"
-                  )}
-                >
-                  {/* Active dot */}
-                  <div
+              {items.map((item, index) => {
+                const isEditing = editingId === item.id;
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: Math.min(index * 0.04, 0.3) }}
                     className={cn(
-                      "w-1.5 h-1.5 rounded-full shrink-0 transition-colors duration-300",
-                      item.is_active
-                        ? "bg-gold group-hover:shadow-[0_0_6px_rgba(184,157,92,0.6)]"
-                        : "bg-text-muted/20"
+                      "flex items-center gap-4 px-5 py-4",
+                      "bg-muted-light/40 border border-border",
+                      "hover:border-gold/20 hover:bg-dark/20 transition-all duration-300 group rounded",
+                      isEditing && "border-gold/40 bg-gold/5"
                     )}
-                  />
+                  >
+                    {/* Active dot */}
+                    <div
+                      className={cn(
+                        "w-1.5 h-1.5 rounded-full shrink-0 transition-colors duration-300",
+                        item.is_active
+                          ? "bg-gold group-hover:shadow-[0_0_6px_rgba(184,157,92,0.6)]"
+                          : "bg-text-muted/20"
+                      )}
+                    />
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className="text-sm font-medium text-text-main group-hover:text-gold transition-colors duration-300 truncate">
-                        {item.name}
-                      </span>
-                      {item.is_active ? (
-                        <span className="hidden sm:flex items-center gap-1 px-2 py-0.5 bg-green/10 border border-green/20 text-green text-2xs font-mono tracking-widest uppercase shrink-0">
-                          <CheckCircle2 size={8} />
-                          Active
-                        </span>
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      {isEditing ? (
+                        <div
+                          className="space-y-2"
+                          onSubmit={(e) => e.preventDefault()}
+                        >
+                          <input
+                            type="text"
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            className="w-full bg-dark/60 border border-gold/40 px-3 py-1.5 text-sm text-text-main outline-none rounded-sm"
+                            autoFocus
+                          />
+                          {hasDescription && (
+                            <input
+                              type="text"
+                              value={editDesc}
+                              onChange={(e) => setEditDesc(e.target.value)}
+                              placeholder="Description (optional)"
+                              className="w-full bg-dark/60 border border-border/60 px-3 py-1.5 text-xs text-text-muted outline-none focus:border-gold/40 rounded-sm"
+                            />
+                          )}
+                          <div className="flex items-center gap-2 pt-1">
+                            <button
+                              type="button"
+                              disabled={!editName.trim() || updating}
+                              onClick={async () => {
+                                await onUpdate(
+                                  item.id,
+                                  editName.trim(),
+                                  hasDescription ? editDesc.trim() : undefined
+                                );
+                                setEditingId(null);
+                              }}
+                              className="px-3 py-1 text-2xs font-mono tracking-widest uppercase bg-gold text-dark font-bold rounded-sm hover:brightness-110 transition-all disabled:opacity-40"
+                            >
+                              {updating ? "Saving..." : "Save"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingId(null)}
+                              className="px-3 py-1 text-2xs font-mono tracking-widest uppercase text-text-muted hover:text-text-main transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
                       ) : (
-                        <span className="hidden sm:flex items-center gap-1 px-2 py-0.5 bg-red/10 border border-red/20 text-red text-2xs font-mono tracking-widest uppercase shrink-0">
-                          <XCircle size={8} />
-                          Inactive
-                        </span>
+                        <>
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <span className="text-sm font-medium text-text-main group-hover:text-gold transition-colors duration-300 truncate">
+                              {item.name}
+                            </span>
+                            {item.is_active ? (
+                              <span className="hidden sm:flex items-center gap-1 px-2 py-0.5 bg-green/10 border border-green/20 text-green text-2xs font-mono tracking-widest uppercase shrink-0">
+                                <CheckCircle2 size={8} />
+                                Active
+                              </span>
+                            ) : (
+                              <span className="hidden sm:flex items-center gap-1 px-2 py-0.5 bg-red/10 border border-red/20 text-red text-2xs font-mono tracking-widest uppercase shrink-0">
+                                <XCircle size={8} />
+                                Inactive
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 mt-1 flex-wrap">
+                            <span className="text-2xs font-mono text-text-muted/40 tracking-wider shrink-0">
+                              /{item.slug}
+                            </span>
+                            {item.description && (
+                              <span className="text-2xs text-text-muted/50 truncate">
+                                {item.description}
+                              </span>
+                            )}
+                          </div>
+                        </>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 mt-1 flex-wrap">
-                      <span className="text-2xs font-mono text-text-muted/40 tracking-wider shrink-0">
-                        /{item.slug}
-                      </span>
-                      {item.description && (
-                        <span className="text-2xs text-text-muted/50 truncate">
-                          {item.description}
-                        </span>
-                      )}
-                    </div>
-                  </div>
 
-                  {/* Date */}
-                  {item.created_at && (
-                    <div className="text-2xs font-mono text-text-muted/30 tracking-wider shrink-0 hidden md:block">
-                      {new Date(item.created_at).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </div>
-                  )}
-                </motion.div>
-              ))}
+                    {/* Date */}
+                    {item.created_at && !isEditing && (
+                      <div className="text-2xs font-mono text-text-muted/30 tracking-wider shrink-0 hidden md:block">
+                        {new Date(item.created_at).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    {!isEditing && (
+                      <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingId(item.id);
+                            setEditName(item.name);
+                            setEditDesc(item.description ?? "");
+                          }}
+                          className="p-1.5 text-text-muted/40 hover:text-gold transition-colors"
+                          title={`Edit ${entityLabel}`}
+                        >
+                          <Pencil size={13} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onDelete(item.id)}
+                          className="p-1.5 text-text-muted/40 hover:text-red-400 transition-colors"
+                          title={`Delete ${entityLabel}`}
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
         )}

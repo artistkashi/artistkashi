@@ -9,7 +9,6 @@ import {
   ChevronUp,
   ExternalLink,
   GripVertical,
-  Loader2,
   MoveRight,
   Pencil,
   Play,
@@ -59,6 +58,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { StatusModal } from "@/components/ui/StatusModal";
+import { AnimatedCounter } from "@/components/dashboard/AnimatedCounter";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip } from "@/components/ui/tooltip";
 import { getErrorMessage } from "@/lib/error-handler";
@@ -1141,8 +1142,40 @@ export default function AdminCourseDetailPage({
 
   if (curriculumQuery.isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-gold" />
+      <div className="space-y-8">
+        <Skeleton className="h-4 w-28" />
+        <div className="flex items-start justify-between gap-6">
+          <div className="space-y-3 min-w-0 flex-1">
+            <Skeleton className="h-9 w-96" />
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-5 w-20 rounded-sm" />
+            </div>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <Skeleton className="h-9 w-9 rounded" />
+            <Skeleton className="h-9 w-32 rounded" />
+          </div>
+        </div>
+        <div className="flex gap-2 border-b border-border/40 pb-px">
+          {["Overview", "Curriculum", "Details", "Sections", "Lessons", "Settings"].map((t) => (
+            <Skeleton key={t} className="h-10 w-24 rounded-t" />
+          ))}
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="border border-border p-4 space-y-2">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-6 w-16" />
+            </div>
+          ))}
+        </div>
+        <div className="border border-border p-6 space-y-3">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+        </div>
       </div>
     );
   }
@@ -1224,12 +1257,13 @@ export default function AdminCourseDetailPage({
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-            <StatBox label="Sections" value={String(sections.length)} />
+            <StatBox label="Sections" value={String(sections.length)} count={sections.length} />
             <StatBox
               label="Lessons"
               value={String(
                 sections.reduce((a, s) => a + (s.lessons?.length ?? 0), 0)
               )}
+              count={sections.reduce((a, s) => a + (s.lessons?.length ?? 0), 0)}
             />
             <StatBox
               label="Duration"
@@ -1244,6 +1278,7 @@ export default function AdminCourseDetailPage({
             <StatBox
               label="Students Enrolled"
               value={String(stats?.enrollment_count ?? "—")}
+              count={stats?.enrollment_count ?? 0}
             />
             <StatBox
               label="Total Revenue"
@@ -1472,10 +1507,12 @@ export default function AdminCourseDetailPage({
   );
 }
 
-function StatBox({ label, value }: { label: string; value: string }) {
+function StatBox({ label, value, count }: { label: string; value: string; count?: number }) {
   return (
     <div className="rounded border border-border bg-dark/30 p-5 text-center">
-      <div className="text-2xl font-bold text-text-main">{value}</div>
+      <div className="text-2xl font-bold text-text-main">
+        {count !== undefined ? <AnimatedCounter target={count} /> : value}
+      </div>
       <div className="text-2xs font-mono text-text-muted uppercase tracking-widest mt-1">
         {label}
       </div>

@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 
 import razorpay
+from fastcrud import JoinConfig, compute_offset
+from fastcrud.types import GetMultiResponseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -15,10 +18,13 @@ from app.core.exceptions import (
     ValidationException,
 )
 from app.crud.course import crud_course, crud_course_enrollment, crud_course_payment
-from app.models.course_payment import CoursePaymentStatus
+from app.models.course import Course
+from app.models.course_payment import CoursePayment, CoursePaymentStatus
+from app.models.user import User
 from app.schemas.course import CourseRead
 from app.schemas.course_enrollment import CourseEnrollmentRead
 from app.schemas.course_payment import (
+    AdminCoursePaymentRead,
     CoursePaymentCreate,
     CoursePaymentRead,
     CoursePaymentVerificationRequest,
@@ -214,6 +220,70 @@ class CoursePaymentService:
                 "Course Payment",
                 f"Failed to verify payment: {exc}",
             ) from exc
+
+    async def list_course_payments(
+        self,
+        *,
+        session: AsyncSession,
+        page: int = 1,
+        page_size: int = 10,
+        search: str | None = None,
+        status: str | None = None,
+        date_start: datetime | None = None,
+        date_end: datetime | None = None,
+        min_amount: Decimal | None = None,
+        max_amount: Decimal | None = None,
+    ) -> GetMultiResponseModel[AdminCoursePaymentRead]:
+        filters: dict = {}
+
+        if status:
+            filters["status"] = status
+
+        if date_start and date_end:
+            filters["created_at__gte"] = date_start
+            filters["created_at__lt"] = date_end + timedelta(days=1)
+
+        if min_amount is not None:
+            filters["amount__gte"] = min_amount
+
+        if max_amount is not None:
+            filters["amount__lte"] = max_amount
+
+        if search:
+            like = f"%{search}%"
+            filters["_or"] = {
+                "razorpay_order_id__ilike": like,
+                "user.full_name__ilike": like,
+                "user.email__ilike": like,
+                "course.title__ilike": like,
+            }
+
+        result = await crud_course_payment.get_multi_joined(
+            db=session,
+            schema_to_select=AdminCoursePaymentRead,
+            joins_config=[
+                JoinConfig(
+                    model=User,
+                    join_on=CoursePayment.user_id == User.id,
+                    join_type="left",
+                    join_prefix="user_",
+                ),
+                JoinConfig(
+                    model=Course,
+                    join_on=CoursePayment.course_id == Course.id,
+                    join_type="left",
+                    join_prefix="course_",
+                ),
+            ],
+            offset=compute_offset(page, page_size),
+            limit=page_size,
+            sort_columns=["created_at"],
+            sort_orders=["desc"],
+            return_total_count=True,
+            **filters,
+        )
+
+        return result
 
 
 course_payment_service = CoursePaymentService()

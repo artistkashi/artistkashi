@@ -2,33 +2,23 @@
 
 import { unwrapPaginated, unwrapVoid } from "@/api/client-service";
 import type { CourseListRead, Pagination } from "@/api/openapi-client";
-import {
-  deleteCourse,
-  listCourses,
-} from "@/api/openapi-client";
+import { deleteCourse, listCourses } from "@/api/openapi-client";
+import { AnimatedCounter } from "@/components/dashboard/AnimatedCounter";
 import { PrimaryBtn } from "@/components/ui/buttons";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { DataTable } from "@/components/ui/data-table";
-import { StatusModal } from "@/components/ui/StatusModal";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { StatusModal } from "@/components/ui/StatusModal";
 import { getErrorMessage } from "@/lib/error-handler";
 import { cn, displayPrice } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  Eye,
-  Filter,
-  Plus,
-  RefreshCw,
-  Search,
-  Trash2,
-  X,
-} from "lucide-react";
+import { Eye, Filter, Plus, RefreshCw, Search, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -88,7 +78,6 @@ export default function AdminCoursesPage() {
 
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
-
   const deleteMutation = useMutation({
     mutationFn: (slug: string) => unwrapVoid(deleteCourse({ path: { slug } })),
     onSuccess: () => {
@@ -120,7 +109,7 @@ export default function AdminCoursesPage() {
             >
               {row.original.title}
             </Link>
-            <span className="text-2xs font-mono text-text-muted">
+            <span className="text-xs font-mono text-text-muted">
               {row.original.slug}
             </span>
           </div>
@@ -169,8 +158,10 @@ export default function AdminCoursesPage() {
       {
         id: "lessons",
         header: "Lessons",
-        cell: () => (
-          <span className="text-xs text-text-muted font-mono">—</span>
+        cell: ({ row }) => (
+          <span className="text-xs text-text-muted font-mono">
+            {row.original.lessons_count ?? 0}
+          </span>
         ),
       },
       {
@@ -221,7 +212,12 @@ export default function AdminCoursesPage() {
           </h1>
           <p className="text-text-muted text-xs mt-3 uppercase font-mono tracking-[0.3em] flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-gold rounded-full animate-pulse" />
-            Total Volume: {pagination?.total_items ?? 0} Masterclasses
+            Total Volume:{" "}
+            <AnimatedCounter
+              target={pagination?.total_items ?? 0}
+              fontSize={18}
+            />{" "}
+            Masterclasses
           </p>
         </div>
         <div className="flex items-center justify-end gap-3 w-full md:w-auto">
@@ -406,8 +402,9 @@ export default function AdminCoursesPage() {
                 setPage(1);
               }}
               placeholder="10"
-              className="w-28 h-8"
+              className="w-28 h-6"
               dropdownPosition="top"
+              buttonClassName="py-2"
             />
           </div>
           <div className="hidden sm:block h-4 w-px bg-border/40" />

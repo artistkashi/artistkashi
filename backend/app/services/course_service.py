@@ -4,7 +4,7 @@ import uuid
 from decimal import Decimal
 
 from fastapi import UploadFile
-from fastcrud import JoinConfig, compute_offset
+from fastcrud import CountConfig, JoinConfig, compute_offset
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -24,6 +24,7 @@ from app.crud.course import (
 )
 from app.models.course import Course
 from app.models.course_category import CourseCategory
+from app.models.course_lesson import CourseLesson
 from app.models.course_payment import CoursePayment, CoursePaymentStatus
 from app.models.course_section import CourseSection
 from app.models.review import ReviewType
@@ -348,11 +349,17 @@ class CourseService:
                     relationship_type="one-to-one",
                 )
             ],
+            counts_config=[
+                CountConfig(
+                    model=CourseLesson,
+                    join_on=Course.id == CourseLesson.course_id,
+                    alias="lessons_count",
+                )
+            ],
             nest_joins=True,
             **filters,
         )
         courses = result["data"]
-        total_count = result.get("total_count", 0)
 
         ratings = await review_service.get_bulk_ratings(
             session=session,
@@ -369,7 +376,7 @@ class CourseService:
             course.review_count = review_count
 
         return build_paginated_response(
-            result={"data": courses, "total_count": total_count},
+            result={"data": courses, "total_count": result.get("total_count", 0)},
             page=page,
             page_size=page_size,
             message="Courses retrieved successfully",

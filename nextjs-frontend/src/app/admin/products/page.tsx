@@ -9,6 +9,7 @@ import {
   ProductDetailRead,
   ProductStatus,
 } from "@/api/openapi-client";
+import { AnimatedCounter } from "@/components/dashboard/AnimatedCounter";
 import { PrimaryBtn } from "@/components/ui/buttons";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { DataTable } from "@/components/ui/data-table";
@@ -332,7 +333,7 @@ function AdminProductsContent() {
           </h1>
           <p className="text-text-muted text-xs mt-3 uppercase font-mono tracking-[0.3em] flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-gold rounded-full animate-pulse" />
-            Curating {data?.pagination.total_items || 0} Artistic Boundaries
+            Curating <AnimatedCounter target={data?.pagination.total_items || 0} fontSize={18} /> Artistic Boundaries
           </p>
         </div>
         <div className="flex items-center justify-end gap-3 w-full md:w-auto">
@@ -630,6 +631,7 @@ function AdminProductsContent() {
               placeholder="10"
               className="w-28 h-8"
               dropdownPosition="top"
+              buttonClassName="py-2"
             />
           </div>
           <div className="hidden sm:block h-4 w-px bg-border/40" />
@@ -754,8 +756,8 @@ function ProductGridCard({
           className={cn(
             "relative overflow-hidden bg-dark max-w-full",
             isCompact
-              ? "aspect-[4/5] sm:aspect-[3/4]"
-              : "aspect-[16/9] sm:aspect-[3/4]"
+              ? "aspect-4/5 sm:aspect-3/4"
+              : "aspect-video sm:aspect-3/4"
           )}
         >
           <ImageWithFallback
