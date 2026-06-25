@@ -4,7 +4,7 @@ import { ProductCardRead } from "@/api/openapi-client";
 import { RevealBlock } from "@/components/ui/misc";
 import { useAuth } from "@/lib/auth-store";
 import { useCartStore } from "@/lib/cart-store";
-import { cn, displayPrice } from "@/lib/utils";
+import { displayPrice } from "@/lib/utils";
 import { useWishlistStore } from "@/lib/wishlist-store";
 import { ArrowUpRight, Check, Heart, Loader2, ShoppingBag } from "lucide-react";
 import Link from "next/link";
@@ -13,7 +13,8 @@ import { toast } from "sonner";
 
 function compactNum(n: number): string {
   if (n < 1000) return String(n);
-  if (n < 100000) return (n / 1000).toFixed(n % 1000 === 0 ? 0 : 1).replace(/\.0$/, "") + "k";
+  if (n < 100000)
+    return (n / 1000).toFixed(n % 1000 === 0 ? 0 : 1).replace(/\.0$/, "") + "k";
   return (n / 100000).toFixed(1) + "L";
 }
 
@@ -22,7 +23,6 @@ interface ProductCardProps {
   delay?: number;
   view?: "grid" | "list";
 }
-
 
 export function ProductCard({
   product,
@@ -111,7 +111,10 @@ export function ProductCard({
                   <span className="text-xs text-foreground">
                     ⭐ {rating > 0 ? rating.toFixed(1) : "—"}{" "}
                     {reviewCount > 0 && (
-                      <span className="text-text-muted">({compactNum(reviewCount)} review{reviewCount !== 1 ? "s" : ""})</span>
+                      <span className="text-text-muted">
+                        ({compactNum(reviewCount)} review
+                        {reviewCount !== 1 ? "s" : ""})
+                      </span>
                     )}
                   </span>
                 )}
@@ -191,7 +194,9 @@ export function ProductCard({
           >
             <Heart
               size={14}
-              className={wishlisted ? "fill-danger text-danger" : "text-white/80"}
+              className={
+                wishlisted ? "fill-danger text-danger" : "text-white/80"
+              }
             />
           </button>
         )}
@@ -208,7 +213,9 @@ export function ProductCard({
                 <span className="text-xs text-foreground">
                   ⭐ {rating > 0 ? rating.toFixed(1) : "—"}{" "}
                   {reviewCount > 0 && (
-                    <span className="text-text-muted">({compactNum(reviewCount)})</span>
+                    <span className="text-text-muted">
+                      ({compactNum(reviewCount)})
+                    </span>
                   )}
                 </span>
               </div>
@@ -291,7 +298,9 @@ export function BestSellerCard({
                 <span className="text-xs text-foreground">
                   ⭐ {rating > 0 ? rating.toFixed(1) : "—"}{" "}
                   {reviewCount > 0 && (
-                    <span className="text-text-muted">({compactNum(reviewCount)})</span>
+                    <span className="text-text-muted">
+                      ({compactNum(reviewCount)})
+                    </span>
                   )}
                 </span>
               </div>
@@ -310,4 +319,3 @@ export function BestSellerCard({
     </RevealBlock>
   );
 }
-

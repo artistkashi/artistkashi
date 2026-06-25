@@ -64,7 +64,7 @@ export function CourseReviewCard({
       </div>
 
       <div className="flex items-center gap-3">
-        <StarRating rating={review.rating} />
+        <StarRating rating={typeof review.rating === 'number' ? review.rating : parseFloat(review.rating)} />
         <span className="text-xs font-mono text-text-muted">
           {review.rating}/5
         </span>

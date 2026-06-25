@@ -5,7 +5,8 @@ client.setConfig({
   throwOnError: true,
 });
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 if (typeof window === "undefined") {
   client.setConfig({ baseURL: new URL(API_BASE).origin });
 }
@@ -42,8 +43,7 @@ function clearAuthStorage() {
 // the session on the backend before clearing local state. This prevents orphaned
 // sessions when localStorage gets cleared or the server invalidates the token.
 client.instance.interceptors.response.use(undefined, async (error) => {
-  const isAuth =
-    error?.config?.url?.includes("/auth/") ?? false;
+  const isAuth = error?.config?.url?.includes("/auth/") ?? false;
 
   if (
     error?.response?.status === 401 &&

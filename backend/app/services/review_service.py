@@ -141,17 +141,35 @@ class ReviewService:
         entity_id: UUID,
         page: int = 1,
         page_size: int = 20,
+        rating: int | None = None,
+        sort_by: str | None = None,
+        sort_order: str | None = None,
     ) -> GetMultiResponseModel[ReviewReadPublic]:
+
+        # Determine sort column and order
+        sort_column = "created_at"
+        sort_order_value = "desc"
+
+        if sort_by in ("created_at", "rating"):
+            sort_column = sort_by
+        if sort_order in ("asc", "desc"):
+            sort_order_value = sort_order
+
+        # Build filters
+        filters = {
+            "type": review_type,
+            "entity_id": entity_id,
+            "status": ReviewStatus.ACTIVE,
+        }
+        if rating is not None:
+            filters["rating"] = rating
 
         return await crud_review.get_multi_joined(
             db=session,
-            type=review_type,
-            entity_id=entity_id,
-            status=ReviewStatus.ACTIVE,
             offset=compute_offset(page, page_size),
             limit=page_size,
-            sort_columns=["created_at"],
-            sort_orders=["desc"],
+            sort_columns=[sort_column],
+            sort_orders=[sort_order_value],
             return_total_count=True,
             schema_to_select=ReviewReadPublic,
             nest_joins=True,
@@ -163,6 +181,7 @@ class ReviewService:
                     schema_to_select=ReviewUserInfo,
                 )
             ],
+            **filters,
         )
 
     async def delete_review(

@@ -521,7 +521,7 @@ function ProductReviewsSection({
                         key={i}
                         size={10}
                         className={cn(
-                          i < review.rating
+                          i < (typeof review.rating === 'number' ? review.rating : parseFloat(review.rating))
                             ? "text-gold fill-gold"
                             : "text-border"
                         )}

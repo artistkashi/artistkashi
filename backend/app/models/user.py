@@ -104,6 +104,12 @@ class User(Base, TimestampMixin, SoftDeleteMixin):
         cascade="all, delete-orphan",
     )
 
+    review_reports: Mapped[list["ReviewReport"]] = relationship(
+        "ReviewReport",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
     wishlist_items: Mapped[list["Wishlist"]] = relationship(
         "Wishlist",
         back_populates="user",

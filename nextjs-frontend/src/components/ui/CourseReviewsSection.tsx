@@ -153,7 +153,7 @@ export function CourseReviewsSection({
 
   const handleEdit = (review: ReviewReadPublic) => {
     setEditingReview(review);
-    setFormRating(review.rating);
+    setFormRating(typeof review.rating === 'number' ? review.rating : parseFloat(review.rating));
     setFormText(review.text);
     setShowForm(true);
   };

@@ -16,6 +16,10 @@ export function StarRating({
   interactive = false,
   onChange,
 }: StarRatingProps) {
+  const numericRating = typeof rating === 'number' ? rating : parseFloat(rating);
+  const fullStars = Math.floor(numericRating);
+  const hasHalfStar = numericRating - fullStars >= 0.5;
+
   if (interactive) {
     return (
       <div className="flex gap-2">
@@ -43,15 +47,29 @@ export function StarRating({
 
   return (
     <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
+      {/* Full stars */}
+      {Array.from({ length: fullStars }).map((_, i) => (
         <Star
-          key={star}
+          key={`full-${i}`}
           size={size}
-          className={cn(
-            star <= rating
-              ? "fill-primary text-primary"
-              : "fill-none text-border"
-          )}
+          className="fill-primary text-primary"
+        />
+      ))}
+      {/* Half star */}
+      {hasHalfStar && (
+        <Star
+          key="half"
+          size={size}
+          className="fill-primary text-primary"
+          style={{ clipPath: "polygon(0 0, 50% 0, 50% 100%, 0 100%)" } as React.CSSProperties}
+        />
+      )}
+      {/* Empty stars */}
+      {Array.from({ length: 5 - fullStars - (hasHalfStar ? 1 : 0) }).map((_, i) => (
+        <Star
+          key={`empty-${i}`}
+          size={size}
+          className="fill-none text-border"
         />
       ))}
     </div>

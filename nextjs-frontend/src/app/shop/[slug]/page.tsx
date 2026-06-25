@@ -2,11 +2,12 @@
 
 import { unwrap, unwrapPaginated } from "@/api/client-service";
 import {
-  listAllReviews,
+  listProductReviews,
   ProductDetailRead,
   productsGetProduct,
   ProductVariantRead,
-  ReviewRead,
+  ReviewReadPublic,
+  UserRead,
 } from "@/api/openapi-client";
 import { GhostBtn, PrimaryBtn } from "@/components/ui/buttons";
 import { CircularGallery } from "@/components/ui/circular-gallery";
@@ -16,7 +17,6 @@ import { useAuth } from "@/lib/auth-store";
 import { getSafeReturnTo } from "@/lib/auth-utils";
 import { useCartStore } from "@/lib/cart-store";
 import { useCheckoutStore } from "@/lib/checkout-store";
-import { toast } from "sonner";
 import { cn, displayPrice } from "@/lib/utils";
 import { useWishlistStore } from "@/lib/wishlist-store";
 import { useQuery } from "@tanstack/react-query";
@@ -31,27 +31,34 @@ import {
   Loader2,
   MessageSquare,
   RefreshCcw,
-  ShoppingBag,
   Ruler,
   ShieldCheck,
+  ShoppingBag,
   Star,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 // ─── Wishlist Button ───────────────────────────────────────────────────────
 
-function WishlistButton({ productId, isWishlisted: apiWishlisted }: { productId: string; isWishlisted?: boolean }) {
-  const storeWishlisted = useWishlistStore((s) => s.productIds[productId]);
-  const wishlisted = apiWishlisted ?? !!storeWishlisted;
-  const toggleProduct = useWishlistStore((s) => s.toggleProduct);
-  const fetchWishlist = useWishlistStore((s) => s.fetchWishlist);
-  const [loading, setLoading] = useState(false);
+function WishlistButton({
+  product,
+  isWishlisted,
+  user,
+}: {
+  product: ProductDetailRead;
+  isWishlisted?: boolean;
+  user: UserRead | null;
+}) {
+  if (!user) return null;
 
-  useEffect(() => {
-    if (!useWishlistStore.getState().loaded) fetchWishlist();
-  }, [fetchWishlist]);
+  const wishlisted = isWishlisted ?? product.is_wishlisted ?? false;
+  const productId = product.id;
+  const toggleProduct = useWishlistStore((s) => s.toggleProduct);
+  const [loading, setLoading] = useState(false);
 
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -70,7 +77,7 @@ function WishlistButton({ productId, isWishlisted: apiWishlisted }: { productId:
     <button
       onClick={handleClick}
       disabled={loading}
-      className="absolute top-6 right-6 text-white/70 hover:text-primary transition-all duration-500 z-10 hover:scale-110 active:scale-90 group/heart drop-shadow-sm disabled:opacity-50"
+      className="absolute top-6 right-6 text-white/70 hover:text-primary transition-all duration-500 z-10 hover:scale-110 active:scale-90 group/heart drop-shadow-sm"
     >
       {loading ? (
         <Loader2 size={20} className="animate-spin" />
@@ -105,10 +112,9 @@ function useReviews(productId: string | null) {
     queryKey: ["reviews", productId],
     queryFn: async () => {
       const result = await unwrapPaginated(
-        listAllReviews({
-          query: {
-            entity_id: productId!,
-            review_type: "product",
+        listProductReviews({
+          path: {
+            product_id: productId!,
           },
         })
       );
@@ -203,6 +209,7 @@ function ProductVisualsSection({
   const { data: product, isLoading, error, refetch } = query;
   const [activeImage, setActiveImage] = useState<string | null>(null);
   const [zoomed, setZoomed] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (product) {
@@ -317,8 +324,13 @@ function ProductVisualsSection({
             )}
           </motion.div>
 
-          {/* Floating Wishlist Button */}
-          <WishlistButton productId={product?.id ?? ""} isWishlisted={product?.is_wishlisted} />
+          {product && (
+            <WishlistButton
+              product={product}
+              isWishlisted={product.is_wishlisted}
+              user={user}
+            />
+          )}
         </div>
 
         {/* Variant Selection Hidden on Mobile here, shown only on Desktop */}
@@ -391,8 +403,12 @@ function ProductPurchaseSection({
   const setCheckoutItems = useCheckoutStore((state) => state.setItems);
   const addItemToCart = useCartStore((s) => s.addItem);
   const storeInCart = useCartStore((s) => s.productIds);
-  const inCartKey = selectedVariant?.id ? `${product?.id}:${selectedVariant.id}` : product?.id ?? "";
-  const inCart = product?.id ? (product.is_in_cart ?? !!storeInCart[inCartKey]) : false;
+  const inCartKey = selectedVariant?.id
+    ? `${product?.id}:${selectedVariant.id}`
+    : (product?.id ?? "");
+  const inCart = product?.id
+    ? (product.is_in_cart ?? !!storeInCart[inCartKey])
+    : false;
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   const handleAddToCart = async () => {
@@ -533,28 +549,45 @@ function ProductPurchaseSection({
           />
         </div>
 
-        <div className="flex flex-col gap-3">
-          <PrimaryBtn
-            onClick={handleAcquireNow}
-            className="w-full justify-center py-5"
-          >
-            Acquire Now <ArrowRight size={16} className="ml-2" />
-          </PrimaryBtn>
-          <GhostBtn
-            onClick={handleAddToCart}
-            disabled={isAddingToCart}
-            className="w-full justify-center py-5 border-border/20 disabled:opacity-50"
-          >
-            {isAddingToCart ? (
-              <Loader2 size={16} className="mr-2 animate-spin" />
-            ) : inCart ? (
-              <Check size={16} className="mr-2 text-green-500" />
-            ) : (
-              <ShoppingBag size={16} className="mr-2" />
-            )}
-            {isAddingToCart ? "Adding..." : inCart ? "Added to Cart" : "Add to Cart"}
-          </GhostBtn>
-        </div>
+        {user ? (
+          <div className="flex flex-col gap-3">
+            <PrimaryBtn
+              onClick={handleAcquireNow}
+              className="w-full justify-center py-5"
+            >
+              Acquire Now <ArrowRight size={16} className="ml-2" />
+            </PrimaryBtn>
+            <GhostBtn
+              onClick={handleAddToCart}
+              disabled={isAddingToCart}
+              className="w-full justify-center py-5 border-border/20 disabled:opacity-50"
+            >
+              {isAddingToCart ? (
+                <Loader2 size={16} className="mr-2 animate-spin" />
+              ) : inCart ? (
+                <Check size={16} className="mr-2 text-green-500" />
+              ) : (
+                <ShoppingBag size={16} className="mr-2" />
+              )}
+              {isAddingToCart
+                ? "Adding..."
+                : inCart
+                  ? "Added to Cart"
+                  : "Add to Cart"}
+            </GhostBtn>
+          </div>
+        ) : (
+          <p className="text-2xs font-mono uppercase tracking-widest text-text-muted opacity-60 italic border-l border-primary/20 pl-4 py-4 text-center">
+            <Link href="/login" className="text-gold hover:underline mr-2">
+              Login
+            </Link>
+            or
+            <Link href="/signup" className="text-gold hover:underline ml-2">
+              Register
+            </Link>
+            to acquire
+          </p>
+        )}
       </div>
 
       <div className="pt-10 border-t border-border/20 space-y-6">
@@ -683,7 +716,7 @@ function ProductReviewsSection({
             </p>
           </div>
         ) : (
-          reviews.map((review: ReviewRead) => (
+          reviews.map((review: ReviewReadPublic) => (
             <div
               key={review.id}
               className="p-8 border border-border bg-dark/10 space-y-6 hover:border-gold/20 transition-all duration-500"
@@ -699,7 +732,10 @@ function ProductReviewsSection({
                         key={i}
                         size={12}
                         className={cn(
-                          i < review.rating
+                          i <
+                            (typeof review.rating === "number"
+                              ? review.rating
+                              : parseFloat(review.rating))
                             ? "text-gold fill-gold"
                             : "text-border"
                         )}

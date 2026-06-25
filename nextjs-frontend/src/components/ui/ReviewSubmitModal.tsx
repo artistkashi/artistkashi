@@ -2,7 +2,7 @@
 
 import { unwrap } from "@/api/client-service";
 import type { ReviewType } from "@/api/openapi-client";
-import { createCourseReview } from "@/api/openapi-client";
+import { createCourseReview, createProductReview } from "@/api/openapi-client";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
@@ -11,6 +11,7 @@ import { useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { PrimaryBtn } from "./buttons";
+import { StarRating } from "./StarRating";
 
 interface ReviewSubmitModalProps {
   isOpen: boolean;
@@ -22,7 +23,9 @@ interface ReviewSubmitModalProps {
 }
 
 const reviewSchema = z.object({
-  rating: z.number().min(1).max(5),
+  rating: z.number().min(0.5).max(5).refine((val) => val * 2 % 1 === 0, {
+    message: "Rating must be in 0.5 increments",
+  }),
   text: z
     .string()
     .min(1, "The narrative must not be empty")
@@ -69,8 +72,18 @@ export function ReviewSubmitModal({
               },
             })
           );
+        } else if (reviewType === "product") {
+          await unwrap(
+            createProductReview({
+              path: { slug: entityId! },
+              body: {
+                rating: data.rating,
+                text: data.text,
+              },
+            })
+          );
         } else {
-          throw new Error("Product reviews not yet supported");
+          throw new Error("Review type not supported");
         }
 
         reset();
@@ -153,26 +166,12 @@ export function ReviewSubmitModal({
                     name="rating"
                     control={control}
                     render={({ field }) => (
-                      <div className="flex gap-4">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={`submit-star-${star}`}
-                            type="button"
-                            onClick={() => field.onChange(star)}
-                            className="group transition-all duration-300 transform active:scale-90"
-                          >
-                            <Star
-                              size={28}
-                              className={cn(
-                                "transition-all duration-500",
-                                star <= field.value
-                                  ? "fill-primary text-primary gold-glow"
-                                  : "text-border group-hover:text-primary/40"
-                              )}
-                            />
-                          </button>
-                        ))}
-                      </div>
+                      <StarRating
+                        rating={field.value}
+                        size={28}
+                        interactive
+                        onChange={(value) => field.onChange(value)}
+                      />
                     )}
                   />
                   {errors.rating && (

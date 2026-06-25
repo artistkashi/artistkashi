@@ -21,10 +21,15 @@ async def list_all_reviews(
     review_type: Annotated[ReviewType | None, Query()] = None,
     entity_id: Annotated[UUID | None, Query()] = None,
     status: Annotated[ReviewStatus | None, Query()] = None,
+    rating: Annotated[int | None, Query(ge=1, le=5)] = None,
+    sort_by: Annotated[str | None, Query(pattern="^(created_at|rating)$")] = None,
+    sort_order: Annotated[str | None, Query(pattern="^(asc|desc)$")] = None,
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 50,
 ):
     """List all reviews (admin only)."""
+    from sqlalchemy import desc, asc
+
     filters = {}
     if review_type:
         filters["type"] = review_type
@@ -32,12 +37,23 @@ async def list_all_reviews(
         filters["entity_id"] = entity_id
     if status:
         filters["status"] = status
+    if rating is not None:
+        filters["rating"] = rating
+
+    sort_column = "created_at"
+    sort_order_value = "desc"
+    if sort_by in ("created_at", "rating"):
+        sort_column = sort_by
+    if sort_order in ("asc", "desc"):
+        sort_order_value = sort_order
 
     reviews_data = await crud_review.get_multi(
         db=db,
         offset=compute_offset(page, page_size),
         limit=page_size,
         return_total_count=True,
+        sort_columns=[sort_column],
+        sort_orders=[sort_order_value],
         **filters,
     )
 

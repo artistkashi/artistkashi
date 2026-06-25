@@ -3556,7 +3556,7 @@ export type ReviewCreate = {
     /**
      * Rating
      */
-    rating: number;
+    rating: number | string;
     /**
      * Text
      */
@@ -3583,7 +3583,7 @@ export type ReviewRead = {
     /**
      * Rating
      */
-    rating: number;
+    rating: string;
     /**
      * Text
      */
@@ -3618,7 +3618,7 @@ export type ReviewReadPublic = {
     /**
      * Rating
      */
-    rating: number;
+    rating: string;
     /**
      * Text
      */
@@ -3629,7 +3629,7 @@ export type ReviewReadPublic = {
 /**
  * ReviewStatus
  */
-export type ReviewStatus = 'active' | 'blocked';
+export type ReviewStatus = 'active' | 'blocked' | 'flagged';
 
 /**
  * ReviewType
@@ -3643,7 +3643,7 @@ export type ReviewUpdate = {
     /**
      * Rating
      */
-    rating?: number | null;
+    rating?: number | string | null;
     /**
      * Text
      */
@@ -8867,6 +8867,18 @@ export type ListAllReviewsData = {
          */
         status?: ReviewStatus | null;
         /**
+         * Rating
+         */
+        rating?: number | null;
+        /**
+         * Sort By
+         */
+        sort_by?: string | null;
+        /**
+         * Sort Order
+         */
+        sort_order?: string | null;
+        /**
          * Page
          */
         page?: number;
@@ -10137,6 +10149,18 @@ export type ListCourseReviewsData = {
          * Page Size
          */
         page_size?: number;
+        /**
+         * Rating
+         */
+        rating?: number | null;
+        /**
+         * Sort By
+         */
+        sort_by?: string | null;
+        /**
+         * Sort Order
+         */
+        sort_order?: string | null;
     };
     url: '/api/courses/{slug}/reviews';
 };
@@ -10388,6 +10412,177 @@ export type GetEnrollmentStatusResponses = {
 };
 
 export type GetEnrollmentStatusResponse = GetEnrollmentStatusResponses[keyof GetEnrollmentStatusResponses];
+
+export type ListProductReviewsData = {
+    body?: never;
+    path: {
+        /**
+         * Product Id
+         */
+        product_id: string;
+    };
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+        /**
+         * Rating
+         */
+        rating?: number | null;
+        /**
+         * Sort By
+         */
+        sort_by?: string | null;
+        /**
+         * Sort Order
+         */
+        sort_order?: string | null;
+    };
+    url: '/api/products/{product_id}/reviews';
+};
+
+export type ListProductReviewsErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type ListProductReviewsError = ListProductReviewsErrors[keyof ListProductReviewsErrors];
+
+export type ListProductReviewsResponses = {
+    /**
+     * Successful Response
+     */
+    200: PaginatedResponseReviewReadPublic;
+};
+
+export type ListProductReviewsResponse = ListProductReviewsResponses[keyof ListProductReviewsResponses];
+
+export type CreateProductReviewData = {
+    body: ReviewCreate;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/products/{slug}/reviews';
+};
+
+export type CreateProductReviewErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type CreateProductReviewError = CreateProductReviewErrors[keyof CreateProductReviewErrors];
+
+export type CreateProductReviewResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseReviewRead;
+};
+
+export type CreateProductReviewResponse = CreateProductReviewResponses[keyof CreateProductReviewResponses];
+
+export type DeleteProductReviewData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/products/{slug}/reviews/my-review';
+};
+
+export type DeleteProductReviewErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type DeleteProductReviewError = DeleteProductReviewErrors[keyof DeleteProductReviewErrors];
+
+export type DeleteProductReviewResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseNoneType;
+};
+
+export type DeleteProductReviewResponse = DeleteProductReviewResponses[keyof DeleteProductReviewResponses];
+
+export type GetMyProductReviewData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/products/{slug}/reviews/my-review';
+};
+
+export type GetMyProductReviewErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetMyProductReviewError = GetMyProductReviewErrors[keyof GetMyProductReviewErrors];
+
+export type GetMyProductReviewResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseUnionReviewReadNoneType;
+};
+
+export type GetMyProductReviewResponse = GetMyProductReviewResponses[keyof GetMyProductReviewResponses];
+
+export type UpdateProductReviewData = {
+    body: ReviewUpdate;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/api/products/{slug}/reviews/my-review';
+};
+
+export type UpdateProductReviewErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type UpdateProductReviewError = UpdateProductReviewErrors[keyof UpdateProductReviewErrors];
+
+export type UpdateProductReviewResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseReviewRead;
+};
+
+export type UpdateProductReviewResponse = UpdateProductReviewResponses[keyof UpdateProductReviewResponses];
 
 export type ProductsListProductsData = {
     body?: never;

@@ -1,7 +1,6 @@
 "use client";
 
 import { unwrapPaginated } from "@/api/client-service";
-import type { ProductCardRead } from "@/api/openapi-client";
 import { productsListProducts } from "@/api/openapi-client";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { PrimaryBtn } from "@/components/ui/buttons";
@@ -55,9 +54,7 @@ export default function ShopPage() {
   const { data: result, isLoading } = useQuery({
     queryKey: ["shop-products"],
     queryFn: async () =>
-      unwrapPaginated(
-        productsListProducts({ query: { page_size: 100 } })
-      ),
+      unwrapPaginated(productsListProducts({ query: { page_size: 100 } })),
   });
 
   const data = result?.data;

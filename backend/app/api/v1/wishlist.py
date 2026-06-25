@@ -7,7 +7,7 @@ from app.core.exceptions import ErrorCode, NotFoundException
 from app.crud.wishlist import crud_wishlist
 from app.models.product import Product
 from app.models.wishlist import Wishlist
-from app.schemas.product import ProductCardRead, ProductMediumRead, ProductCategoryRead
+from app.schemas.product import ProductCardRead, ProductCategoryRead, ProductMediumRead
 from app.schemas.responses import SuccessResponse
 from app.schemas.wishlist import WishlistCreate, WishlistCreateDB, WishlistRead
 
@@ -49,8 +49,12 @@ async def get_my_wishlist(user: CurrentUserDep, db: DatabaseDep) -> SuccessRespo
                 slug=item.product.slug,
                 short_description=item.product.short_description,
                 is_original_available=item.product.is_original_available,
-                medium=ProductMediumRead.model_validate(item.product.medium) if item.product.medium else None,
-                category=ProductCategoryRead.model_validate(item.product.category) if item.product.category else None,
+                medium=ProductMediumRead.model_validate(item.product.medium)
+                if item.product.medium
+                else None,
+                category=ProductCategoryRead.model_validate(item.product.category)
+                if item.product.category
+                else None,
                 status=item.product.status,
                 price=default_variant.price if default_variant else 0,
                 primary_image=primary_image.image_url if primary_image else None,
