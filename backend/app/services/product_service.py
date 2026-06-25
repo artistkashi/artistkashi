@@ -3,6 +3,7 @@ import uuid
 from fastapi import UploadFile
 from fastcrud import compute_offset
 from fastcrud.types import GetMultiResponseModel, SelectSchemaType
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,10 +25,14 @@ from app.crud.product import (
     crud_product_variant,
     crud_variant_type,
 )
+from app.crud.wishlist import crud_wishlist
+from app.crud.cart import crud_cart
+from app.models.order import Order, OrderItem, PaymentStatus
 from app.models.product import (
     ImageSourceType,
     ProductStatus,
 )
+from app.models.review import ReviewType
 from app.schemas.product import (
     ProductBase,
     ProductCardJoinRead,
@@ -56,6 +61,8 @@ from app.schemas.product import (
     VariantTypeRead,
     VariantTypeUpdate,
 )
+from app.schemas.wishlist import WishlistProductId
+from app.services.review_service import review_service
 from app.services.storage_service import storage_service
 
 
@@ -103,6 +110,7 @@ class ProductService:
         slug: str | None = None,
         status: ProductStatus | None = None,
         check: bool = False,
+        user_id: uuid.UUID | None = None,
     ) -> ProductDetailRead | None:
         filters = {}
 
@@ -131,7 +139,89 @@ class ProductService:
                 error_code=ErrorCode.PRODUCT_NOT_FOUND,
             )
 
+        if product:
+            avg_rating, review_count = await review_service.get_rating(
+                session=session,
+                review_type=ReviewType.PRODUCT,
+                entity_id=product.id,
+            )
+            product.average_rating = avg_rating
+            product.review_count = review_count
+
+            buyer_counts = await self._get_sold_counts(
+                session=session, product_ids=[product.id]
+            )
+            product.sold_count = buyer_counts.get(product.id, 0)
+
+            if user_id:
+                is_wishlisted = await crud_wishlist.exists(
+                    db=session,
+                    user_id=user_id,
+                    product_id=product.id,
+                )
+                product.is_wishlisted = is_wishlisted
+
+                is_in_cart = await crud_cart.exists(
+                    db=session,
+                    user_id=user_id,
+                    product_id=product.id,
+                )
+                product.is_in_cart = is_in_cart
+
         return product
+
+    async def _get_sold_counts(
+        self,
+        *,
+        session: AsyncSession,
+        product_ids: list[uuid.UUID],
+    ) -> dict[uuid.UUID, int]:
+        if not product_ids:
+            return {}
+
+        stmt = (
+            select(
+                OrderItem.product_id,
+                func.coalesce(func.sum(OrderItem.quantity), 0).label("sold_count"),
+            )
+            .join(
+                Order,
+                OrderItem.order_id == Order.id,
+            )
+            .where(
+                OrderItem.product_id.in_(product_ids),
+                Order.payment_status == PaymentStatus.PAID,
+            )
+            .group_by(OrderItem.product_id)
+        )
+
+        result = await session.execute(stmt)
+
+        return {product_id: sold_count for product_id, sold_count in result.all()}
+
+    async def _get_buyer_counts(
+        self,
+        *,
+        session: AsyncSession,
+        product_ids: list[uuid.UUID],
+    ) -> dict[uuid.UUID, int]:
+        if not product_ids:
+            return {}
+
+        stmt = (
+            select(
+                OrderItem.product_id,
+                func.count(func.distinct(Order.user_id)).label("buyer_count"),
+            )
+            .join(Order, OrderItem.order_id == Order.id)
+            .where(
+                OrderItem.product_id.in_(product_ids),
+                Order.payment_status == PaymentStatus.PAID,
+            )
+            .group_by(OrderItem.product_id)
+        )
+        result = await session.execute(stmt)
+        return {row.product_id: row.buyer_count for row in result}
 
     async def create_product(
         self, *, session: AsyncSession, payload: ProductCreate
@@ -212,6 +302,7 @@ class ProductService:
         search: str | None = None,
         min_price: float | None = None,
         max_price: float | None = None,
+        user_id: uuid.UUID | None = None,
     ) -> GetMultiResponseModel[ProductCardRead]:
 
         filters = {}
@@ -243,30 +334,98 @@ class ProductService:
             **filters,
         )
 
-        result["data"] = [
-            ProductCardRead.model_validate(item) for item in result["data"]
-        ]
+        products = [ProductCardRead.model_validate(item) for item in result["data"]]
+
+        if products:
+            product_ids = [p.id for p in products]
+
+            # Enrich with ratings
+            ratings = await review_service.get_bulk_ratings(
+                session=session,
+                review_type=ReviewType.PRODUCT,
+                entity_ids=product_ids,
+            )
+
+            # Enrich with sold counts
+            sold_counts = await self._get_sold_counts(
+                session=session, product_ids=product_ids
+            )
+
+            # Enrich with wishlist status
+            wishlisted_ids: set[uuid.UUID] = set()
+            print(user_id, "User ID")
+            if user_id:
+                wishlist_result = await crud_wishlist.get_multi(
+                    db=session,
+                    user_id=user_id,
+                    product_id__in=product_ids,
+                    schema_to_select=WishlistProductId,  # lightweight schema, just product_id
+                    limit=len(product_ids),
+                )
+                print(wishlist_result, "WISHTLIST Result")
+                wishlisted_ids = {
+                    item["product_id"]
+                    for item in wishlist_result["data"]
+                    if item["product_id"]
+                }
+
+            # Enrich with cart status
+            cart_product_ids: set[uuid.UUID] = set()
+            if user_id:
+                cart_result = await crud_cart.get_multi(
+                    db=session,
+                    user_id=user_id,
+                    product_id__in=product_ids,
+                    limit=len(product_ids),
+                )
+                cart_product_ids = {
+                    item["product_id"]
+                    for item in cart_result["data"]
+                    if item["product_id"]
+                }
+
+            for p in products:
+                pid = p.id
+                avg_rating, review_count = ratings.get(pid, (0.0, 0))
+                p.average_rating = avg_rating
+                p.review_count = review_count
+                p.sold_count = sold_counts.get(pid, 0)
+                p.is_wishlisted = pid in wishlisted_ids
+                p.is_in_cart = pid in cart_product_ids
+
+        result["data"] = products
 
         return result
 
     async def list_published_products(
-        self, *, session: AsyncSession, page: int = 1, page_size: int = 20
+        self,
+        *,
+        session: AsyncSession,
+        page: int = 1,
+        page_size: int = 20,
+        user_id: uuid.UUID | None = None,
     ):
         return await self.list_products(
             session=session,
             page=page,
             page_size=page_size,
             status=ProductStatus.PUBLISHED,
+            user_id=user_id,
         )
 
     async def list_featured_published_products(
-        self, *, session: AsyncSession, limit: 8
+        self,
+        *,
+        session: AsyncSession,
+        limit: 8,
+        user_id: uuid.UUID | None = None,
     ):
         return await self.list_products(
             session=session,
             page_size=limit,
             status=ProductStatus.PUBLISHED,
             is_featured=True,
+            user_id=user_id,
         )
 
     async def list_products_by_category(
@@ -452,9 +611,10 @@ class ProductService:
         payload_image_ids = {img.id for img in payload.images if img.id}
         existing_images_map = {img.id: img for img in existing.images}
 
-        # Deletions (and S3 cleanup)
+        # Collect images to remove (defer deletion after new images are created)
+        removed_image_ids = existing_images_map.keys() - payload_image_ids
         deleted_keys = []
-        for img_id in existing_images_map.keys() - payload_image_ids:
+        for img_id in removed_image_ids:
             img = existing_images_map[img_id]
             if img.source_type == ImageSourceType.UPLOAD:
                 try:
@@ -462,17 +622,13 @@ class ProductService:
                     deleted_keys.append(key)
                 except (IndexError, AttributeError):
                     pass
-            await product_image_service.delete_image(session=session, image_id=img_id)
-
-        if deleted_keys:
-            await storage_service.delete_files(deleted_keys)
 
         # Upload new files
         uploaded_urls = []
         if files:
             uploaded_urls = await storage_service.upload_images(files)
 
-        # Updates & Creations
+        # Updates & Creations (process new/updated images first)
         for img_state in payload.images:
             if img_state.id:
                 if img_state.id not in existing_images_map:
@@ -517,6 +673,13 @@ class ProductService:
                         ),
                         source_type=source_type,
                     )
+
+        # Delete removed images (after new images are created so product has ≥1 image)
+        for img_id in removed_image_ids:
+            await product_image_service.delete_image(session=session, image_id=img_id)
+
+        if deleted_keys:
+            await storage_service.delete_files(deleted_keys)
 
         return await self.get_product_detail(
             session=session, product_id=product_id, check=True
@@ -1186,13 +1349,10 @@ class ProductImageService:
                 error_code=ErrorCode.CONFLICT,
             )
 
-        deleted = await crud_product_image.delete(
+        await crud_product_image.delete(
             db=session,
             id=image_id,
         )
-
-        if not deleted:
-            raise RuntimeError("Failed to delete image")
 
         if image.is_primary:
             next_image = await crud_product_image.get(
@@ -1334,3 +1494,19 @@ variant_type_service = VariantTypeService()
 product_variant_service = ProductVariantService()
 product_image_service = ProductImageService()
 product_category_service = ProductCategoryService()
+"""
+ SELECT order_items.product_id, count(distinct(orders.user_id)) AS count_1  
+ FROM order_items JOIN orders ON order_items.order_id = orders.id
+  WHERE order_items.product_id IN 'a42d2cfa-1d95-4e3e-b794-482f9ff1e055' AND orders.payment_status ='paid' GROUP BY order_items.product_id
+"""
+"""
+SELECT count(*) AS count_1 
+FROM (SELECT order_items.id AS distinct_id FROM order_items
+ WHERE order_items.product_id IN ('a42d2cfa-1d95-4e3e-b794-482f9ff1e055')) AS anon_1;
+"""
+"""
+SELECT order_items.id, order_items.order_id, order_items.product_id, order_items.variant_id, order_items.course_id, order_items.quantity, order_items.price, (SELECT count(*) AS count_1
+FROM orders WHERE order_items.order_id = orders.id AND orders.payment_status = 'paid') AS buyer_count FROM order_items
+WHERE order_items.product_id IN ('a42d2cfa-1d95-4e3e-b794-482f9ff1e055')
+LIMIT 100;
+"""

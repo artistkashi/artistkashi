@@ -1,4 +1,5 @@
 import { client } from "@/api/openapi-client/client.gen";
+import { getItem, STORAGE_KEYS } from "@/lib/storage";
 
 client.setConfig({
   throwOnError: true,
@@ -9,12 +10,28 @@ if (typeof window === "undefined") {
   client.setConfig({ baseURL: new URL(apiUrl).origin });
 }
 
+// Dynamically attach the auth token on every request via interceptor.
+// This avoids stale headers from setConfig() and prevents "Authorization: undefined".
+client.instance.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const token = getItem(STORAGE_KEYS.AUTH_TOKEN);
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
 export const setAuthToken = (token?: string | null) => {
-  client.setConfig({
-    headers: {
-      Authorization: token ? `Bearer ${token}` : undefined,
-    },
-  });
+  // no-op: the interceptor reads from storage automatically
+  // kept for backwards-compat / manual override
+  if (token) {
+    client.setConfig({
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
 };
 
 // extract backend error message so error.message is always the backend message

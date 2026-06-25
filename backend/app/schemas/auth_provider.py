@@ -8,6 +8,7 @@ from app.models.user_auth_provider import ProviderType
 
 class GoogleAuthRequest(BaseModel):
     credential: str = Field(..., description="Google ID token from the client")
+    force: bool = False
 
 
 class SetPasswordRequest(BaseModel):

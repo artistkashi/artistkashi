@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.dependencies import DatabaseDep
+from app.api.dependencies import CurrentUserOptionalDep, DatabaseDep
 from app.core.exceptions import ErrorCode, NotFoundException
 from app.core.pagination import build_paginated_response
 from app.models.product import ProductStatus
@@ -14,9 +14,17 @@ router = APIRouter(prefix="/products", tags=["Products"])
 
 
 @router.get("", response_model=PaginatedResponse[ProductCardRead])
-async def list_products(session: DatabaseDep, page: int = 1, page_size: int = 20):
+async def list_products(
+    session: DatabaseDep,
+    user: CurrentUserOptionalDep = None,
+    page: int = 1,
+    page_size: int = 20,
+):
     products = await product_service.list_published_products(
-        session=session, page=page, page_size=page_size
+        session=session,
+        page=page,
+        page_size=page_size,
+        user_id=user.id if user else None,
     )
 
     return build_paginated_response(
@@ -25,9 +33,17 @@ async def list_products(session: DatabaseDep, page: int = 1, page_size: int = 20
 
 
 @router.get("/{slug}", response_model=SuccessResponse[ProductDetailRead])
-async def get_product(slug: str, session: DatabaseDep):
+async def get_product(
+    slug: str,
+    session: DatabaseDep,
+    user: CurrentUserOptionalDep = None,
+):
     product = await product_service.get_product_detail(
-        session=session, slug=slug, status=ProductStatus.PUBLISHED, check=False
+        session=session,
+        slug=slug,
+        status=ProductStatus.PUBLISHED,
+        check=False,
+        user_id=user.id if user else None,
     )
 
     if not product:

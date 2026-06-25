@@ -217,6 +217,7 @@ class AuthService:
         credential: str,
         user_agent: str | None = None,
         ip_address: str | None = None,
+        force: bool = False,
     ) -> TokenResponse:
         # SECURITY: Verify the Google ID token server-side.
         # The email is extracted from the verified token, NOT from the client.
@@ -244,6 +245,7 @@ class AuthService:
                 user=user,
                 user_agent=user_agent,
                 ip_address=ip_address,
+                force=force,
             )
 
         # CASE 3: User exists by email but no Google provider linked
@@ -285,7 +287,7 @@ class AuthService:
                     object=update_data,
                 )
 
-            return await self._issue_tokens(session=session, user=existing_user)
+            return await self._issue_tokens(session=session, user=existing_user, user_agent=user_agent, ip_address=ip_address, force=force)
 
         # CASE 1: New user - create account with Google provider
         user = await crud_user.create(

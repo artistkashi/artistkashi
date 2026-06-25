@@ -13,7 +13,7 @@ import { AnimatedCounter } from "@/components/dashboard/AnimatedCounter";
 import { PrimaryBtn } from "@/components/ui/buttons";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { DataTable } from "@/components/ui/data-table";
-import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
+
 import {
   Popover,
   PopoverContent,
@@ -33,6 +33,7 @@ import {
   Edit3,
   Filter,
   Grid,
+  ImageIcon,
   Info,
   List,
   Plus,
@@ -174,14 +175,17 @@ function AdminProductsContent() {
         cell: ({ row }) => (
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 border border-border overflow-hidden bg-background shrink-0 rounded-sm">
-              <ImageWithFallback
-                src={row.original.primary_image}
-                alt={row.original.title}
-                width={45}
-                height={45}
-                unoptimized
-                className="object-cover w-full h-full"
-              />
+              {row.original.primary_image ? (
+                <img
+                  src={row.original.primary_image}
+                  alt={row.original.title}
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <div className="flex items-center justify-center w-full h-full text-text-muted/20">
+                  <ImageIcon size={16} strokeWidth={1} />
+                </div>
+              )}
             </div>
             <div>
               <Link
@@ -261,14 +265,17 @@ function AdminProductsContent() {
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 border border-border overflow-hidden bg-background shrink-0 rounded-sm">
-              <ImageWithFallback
-                src={row.original.primary_image}
-                alt={row.original.title}
-                width={40}
-                height={40}
-                unoptimized
-                className="object-cover w-full h-full"
-              />
+              {row.original.primary_image ? (
+                <img
+                  src={row.original.primary_image}
+                  alt={row.original.title}
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <div className="flex items-center justify-center w-full h-full text-text-muted/20">
+                  <ImageIcon size={16} strokeWidth={1} />
+                </div>
+              )}
             </div>
             <span className="text-label font-bold text-foreground uppercase tracking-widest line-clamp-1">
               {row.original.title}
@@ -765,14 +772,17 @@ function ProductGridCard({
               : "aspect-video sm:aspect-3/4"
           )}
         >
-          <ImageWithFallback
-            src={product.primary_image}
-            alt={product.title}
-            width={isCompact ? 300 : 600}
-            height={isCompact ? 400 : 800}
-            unoptimized
-            className="object-cover w-full h-full transition-transform duration-1000 group-hover:scale-103"
-          />
+          {product.primary_image ? (
+            <img
+              src={product.primary_image}
+              alt={product.title}
+              className="object-cover w-full h-full transition-transform duration-1000 group-hover:scale-103"
+            />
+          ) : (
+            <div className="flex items-center justify-center w-full h-full text-text-muted/20">
+              <ImageIcon size={32} strokeWidth={1} />
+            </div>
+          )}
 
           {/* Hover Action Overlay with Framer Motion variants */}
           <motion.div

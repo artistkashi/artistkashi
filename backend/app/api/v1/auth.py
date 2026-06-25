@@ -77,6 +77,7 @@ async def google_auth(
         credential=payload.credential,
         user_agent=user_agent,
         ip_address=ip_address,
+        force=payload.force,
     )
 
     return SuccessResponse(message="Google authentication successful", data=result)

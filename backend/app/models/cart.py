@@ -38,6 +38,10 @@ class CartItem(Base, TimestampMixin):
         ForeignKey("products.id", ondelete="CASCADE"), nullable=True
     )
 
+    variant_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("product_variants.id", ondelete="SET NULL"), nullable=True
+    )
+
     course_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("courses.id", ondelete="CASCADE"), nullable=True
     )
@@ -47,5 +51,7 @@ class CartItem(Base, TimestampMixin):
     user = relationship("User", back_populates="cart_items")
 
     product = relationship("Product")
+
+    variant = relationship("ProductVariant")
 
     course = relationship("Course")

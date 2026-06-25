@@ -14,27 +14,80 @@ import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { Skeleton, SkeletonText } from "@/components/ui/Skeleton";
 import { useAuth } from "@/lib/auth-store";
 import { getSafeReturnTo } from "@/lib/auth-utils";
+import { useCartStore } from "@/lib/cart-store";
 import { useCheckoutStore } from "@/lib/checkout-store";
+import { toast } from "sonner";
 import { cn, displayPrice } from "@/lib/utils";
+import { useWishlistStore } from "@/lib/wishlist-store";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
   Award,
+  Check,
   Eye,
   Heart,
   Image as ImageIcon,
+  Loader2,
   MessageSquare,
   RefreshCcw,
+  ShoppingBag,
   Ruler,
   ShieldCheck,
-  ShoppingBag,
   Star,
   X,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
-import { toast } from "sonner";
+
+// ─── Wishlist Button ───────────────────────────────────────────────────────
+
+function WishlistButton({ productId, isWishlisted: apiWishlisted }: { productId: string; isWishlisted?: boolean }) {
+  const storeWishlisted = useWishlistStore((s) => s.productIds[productId]);
+  const wishlisted = apiWishlisted ?? !!storeWishlisted;
+  const toggleProduct = useWishlistStore((s) => s.toggleProduct);
+  const fetchWishlist = useWishlistStore((s) => s.fetchWishlist);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!useWishlistStore.getState().loaded) fetchWishlist();
+  }, [fetchWishlist]);
+
+  const handleClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLoading(true);
+    try {
+      await toggleProduct(productId);
+      toast.success(wishlisted ? "Removed from wishlist" : "Added to wishlist");
+    } catch {
+      toast.error("Failed to update wishlist");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={loading}
+      className="absolute top-6 right-6 text-white/70 hover:text-primary transition-all duration-500 z-10 hover:scale-110 active:scale-90 group/heart drop-shadow-sm disabled:opacity-50"
+    >
+      {loading ? (
+        <Loader2 size={20} className="animate-spin" />
+      ) : (
+        <Heart
+          size={22}
+          strokeWidth={1.5}
+          fill={wishlisted ? "var(--color-gold)" : "none"}
+          className={cn(
+            "transition-transform group-hover/heart:scale-110",
+            wishlisted && "text-primary"
+          )}
+        />
+      )}
+    </button>
+  );
+}
 
 // ─── Custom Hooks ──────────────────────────────────────────────────────────
 
@@ -265,19 +318,7 @@ function ProductVisualsSection({
           </motion.div>
 
           {/* Floating Wishlist Button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              toast.info("Aesthetic preserved in wishlist.");
-            }}
-            className="absolute top-6 right-6 text-white/70 hover:text-primary transition-all duration-500 z-10 hover:scale-110 active:scale-90 group/heart drop-shadow-sm"
-          >
-            <Heart
-              size={22}
-              strokeWidth={1.5}
-              className="transition-transform group-hover/heart:scale-110"
-            />
-          </button>
+          <WishlistButton productId={product?.id ?? ""} isWishlisted={product?.is_wishlisted} />
         </div>
 
         {/* Variant Selection Hidden on Mobile here, shown only on Desktop */}
@@ -348,6 +389,23 @@ function ProductPurchaseSection({
   const loginHref = `/login?returnTo=${encodeURIComponent(returnTo)}`;
 
   const setCheckoutItems = useCheckoutStore((state) => state.setItems);
+  const addItemToCart = useCartStore((s) => s.addItem);
+  const storeInCart = useCartStore((s) => s.productIds);
+  const inCartKey = selectedVariant?.id ? `${product?.id}:${selectedVariant.id}` : product?.id ?? "";
+  const inCart = product?.id ? (product.is_in_cart ?? !!storeInCart[inCartKey]) : false;
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+
+  const handleAddToCart = async () => {
+    if (!product?.id) return;
+    setIsAddingToCart(true);
+    try {
+      await addItemToCart(product.id, "product", selectedVariant?.id);
+    } catch {
+      toast.error("Failed to add to cart");
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
 
   const handleAcquireNow = () => {
     if (!user) {
@@ -483,10 +541,18 @@ function ProductPurchaseSection({
             Acquire Now <ArrowRight size={16} className="ml-2" />
           </PrimaryBtn>
           <GhostBtn
-            onClick={() => toast.success("Added to your curated collection.")}
-            className="w-full justify-center py-5 border-border/20"
+            onClick={handleAddToCart}
+            disabled={isAddingToCart}
+            className="w-full justify-center py-5 border-border/20 disabled:opacity-50"
           >
-            <ShoppingBag size={16} className="mr-2" /> Add to Collection
+            {isAddingToCart ? (
+              <Loader2 size={16} className="mr-2 animate-spin" />
+            ) : inCart ? (
+              <Check size={16} className="mr-2 text-green-500" />
+            ) : (
+              <ShoppingBag size={16} className="mr-2" />
+            )}
+            {isAddingToCart ? "Adding..." : inCart ? "Added to Cart" : "Add to Cart"}
           </GhostBtn>
         </div>
       </div>

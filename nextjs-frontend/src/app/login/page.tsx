@@ -41,6 +41,7 @@ function LoginForm() {
     email: string;
     password: string;
   } | null>(null);
+  const [pendingGoogleCredential, setPendingGoogleCredential] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = getSafeReturnTo(searchParams.get("returnTo"));
@@ -91,19 +92,27 @@ function LoginForm() {
   };
 
   const handleForceLogin = async () => {
-    if (!pendingCredentials) return;
     setIsSubmitting(true);
     try {
-      const user = await login(
-        pendingCredentials.email,
-        pendingCredentials.password,
-        true
-      );
-      toast.success(`Welcome back, ${user.full_name}!`, {
-        description: "Previous sessions have been revoked.",
-      });
-      setPendingCredentials(null);
-      redirectUser(user);
+      if (pendingCredentials) {
+        const user = await login(
+          pendingCredentials.email,
+          pendingCredentials.password,
+          true
+        );
+        toast.success(`Welcome back, ${user.full_name}!`, {
+          description: "Previous sessions have been revoked.",
+        });
+        setPendingCredentials(null);
+        redirectUser(user);
+      } else if (pendingGoogleCredential) {
+        const user = await googleLogin(pendingGoogleCredential, true);
+        toast.success(`Welcome back, ${user.full_name}!`, {
+          description: "Previous sessions have been revoked.",
+        });
+        setPendingGoogleCredential(null);
+        redirectUser(user);
+      }
     } catch (error) {
       toast.error(getErrorMessage(error));
     } finally {
@@ -122,8 +131,16 @@ function LoginForm() {
             : "Logged in successfully",
       });
       redirectUser(user);
-    } catch (error) {
-      toast.error(getErrorMessage(error));
+    } catch (error: unknown) {
+      const axiosErr = error as
+        | { response?: { data?: { error_code?: string } } }
+        | undefined;
+      const errorCode = axiosErr?.response?.data?.error_code;
+      if (errorCode === "MAX_SESSIONS_REACHED") {
+        setPendingGoogleCredential(credential);
+      } else {
+        toast.error(getErrorMessage(error));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -258,12 +275,13 @@ function LoginForm() {
       </main>
 
       {/* Force Login Confirmation Modal */}
-      {pendingCredentials && (
+      {(pendingCredentials || pendingGoogleCredential) && (
         <div
           className="fixed inset-0 z-modal flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setPendingCredentials(null);
+              setPendingGoogleCredential(null);
             }
           }}
         >
@@ -276,7 +294,7 @@ function LoginForm() {
                 </h3>
               </div>
               <button
-                onClick={() => setPendingCredentials(null)}
+                onClick={() => { setPendingCredentials(null); setPendingGoogleCredential(null); }}
                 className="text-text-muted hover:text-text-main transition-colors"
                 aria-label="Close"
               >
@@ -293,7 +311,7 @@ function LoginForm() {
             </div>
             <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
               <button
-                onClick={() => setPendingCredentials(null)}
+                onClick={() => { setPendingCredentials(null); setPendingGoogleCredential(null); }}
                 disabled={isSubmitting}
                 className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-border text-text-muted text-xs font-mono tracking-widest uppercase hover:text-text-main hover:border-gold/50 transition-colors rounded disabled:opacity-50"
               >

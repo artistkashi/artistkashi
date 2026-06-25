@@ -414,10 +414,8 @@ export default function CoursesPage() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px ">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-surface aspect-video animate-pulse" />
-            ))}
+          <div className="flex items-center justify-center py-24">
+            <div className="luxury-loader luxury-loader-gold loader-lg" />
           </div>
         ) : (
           <>

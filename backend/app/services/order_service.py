@@ -3,9 +3,9 @@ from uuid import UUID
 
 import razorpay
 from fastcrud import CountConfig, JoinConfig, compute_offset
-from sqlalchemy import select
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, load_only, selectinload
 
 from app.core.config import settings
 from app.core.exceptions import (
@@ -17,6 +17,7 @@ from app.core.exceptions import (
 from app.crud.order import crud_order, crud_order_item
 from app.crud.product import crud_product_variant
 from app.models.order import Order, OrderItem, OrderStatus, PaymentStatus
+from app.models.product import Product
 from app.models.user import User
 from app.schemas.order import (
     AdminOrderDetailRead,
@@ -30,7 +31,10 @@ from app.schemas.order import (
     OrderRead,
     PaymentVerificationRequest,
 )
-from app.schemas.product import ProductVariantCheckDB
+from app.schemas.product import (
+    ProductVariantCheckDB,
+    ProductVariantRead,
+)
 from app.schemas.user import PublicUserRead
 from app.services.product_service import product_variant_service
 
@@ -76,8 +80,25 @@ class OrderService:
 
                 calculated_total += variant.price * item.quantity
 
+            elif item.product_id:
+                variant = await crud_product_variant.get(
+                    db=db,
+                    product_id=item.product_id,
+                    is_default=True,
+                    schema_to_select=ProductVariantRead,
+                    return_as_model=True,
+                )
+                if not variant:
+                    raise NotFoundException(
+                        "Default Product Variant for product", item.product_id
+                    )
+                calculated_total += variant.price * item.quantity
+
             elif item.course_id:
                 calculated_total += item.price * item.quantity
+
+        PACKAGING_FEE = 99
+        calculated_total += PACKAGING_FEE
 
         try:
             print(user_id, calculated_total, payload, "------------")
@@ -315,21 +336,35 @@ class OrderService:
                     join_prefix="user",
                 )
             ],
-            counts_config=[
-                CountConfig(
-                    model=OrderItem,
-                    join_on=Order.id == OrderItem.order_id,
-                    alias="item_count",
-                )
-            ],
             nest_joins=True,
             offset=compute_offset(params.page, params.page_size),
             limit=params.page_size,
             sort_columns=["created_at"],
             sort_orders=["desc"],
-            return_total_count=True,
+            return_as_model=True,
             **query_filters,
         )
+
+        # Patch item_count to sum quantities instead of counting rows
+        if orders_data["data"]:
+            order_ids = [
+                o["id"] if isinstance(o, dict) else o.id for o in orders_data["data"]
+            ]
+            sum_qty = await db.execute(
+                select(
+                    OrderItem.order_id, func.sum(OrderItem.quantity).label("qty_sum")
+                )
+                .where(OrderItem.order_id.in_(order_ids))
+                .group_by(OrderItem.order_id)
+            )
+            qty_map = {row.order_id: row.qty_sum for row in sum_qty.all()}
+            for order in orders_data["data"]:
+                oid = order["id"] if isinstance(order, dict) else order.id
+                if isinstance(order, dict):
+                    order["item_count"] = qty_map.get(oid, 0)
+                else:
+                    order.item_count = qty_map.get(oid, 0)
+
         return orders_data
 
     async def get_order_detail_with_items(
@@ -340,8 +375,9 @@ class OrderService:
             .options(
                 joinedload(Order.user),
                 joinedload(Order.items).joinedload(OrderItem.course),
-                joinedload(Order.items).joinedload(OrderItem.product),
+                joinedload(Order.items).joinedload(OrderItem.product).selectinload(Product.images),
                 joinedload(Order.items).joinedload(OrderItem.variant),
+                joinedload(Order.shipping_address),
             )
             .where(Order.id == order_id)
         )
@@ -359,8 +395,28 @@ class OrderService:
                 base.course_slug = item.course.slug
             if item.product:
                 base.product_title = item.product.title
+                primary_img = next(
+                    (img for img in item.product.images if img.is_primary),
+                    item.product.images[0] if item.product.images else None,
+                )
+                if primary_img:
+                    base.product_image = primary_img.image_url
             if item.variant:
-                base.variant_name = item.variant.sku or str(item.variant.id)
+                dims = []
+                if item.variant.width:
+                    dims.append(f"{item.variant.width}{item.variant.dimension_unit}")
+                if item.variant.height:
+                    dims.append(f"{item.variant.height}{item.variant.dimension_unit}")
+                base.variant_dimensions = " × ".join(dims) if dims else None
+                base.variant_name = (
+                    item.variant.sku
+                    or (
+                        f"{item.variant.width}×{item.variant.height}{item.variant.dimension_unit}"
+                        if item.variant.width and item.variant.height
+                        else None
+                    )
+                    or str(item.variant.id)
+                )
             detail_items.append(base)
 
         order_data.items = detail_items

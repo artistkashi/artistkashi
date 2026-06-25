@@ -16,7 +16,7 @@ import { useCheckoutStore } from "@/lib/checkout-store";
 import { cn, displayPrice } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle2, Plus, ShieldCheck, X } from "lucide-react";
+import { CheckCircle2, Minus, Plus, ShieldCheck, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -43,7 +43,8 @@ function useAddresses() {
 export default function CheckoutPage() {
   const { user } = useAuth();
   const router = useRouter();
-  const { items: checkoutItems, clearCheckout } = useCheckoutStore();
+  const { items: checkoutItems, clearCheckout, updateItemQuantity } =
+    useCheckoutStore();
 
   const [step, setStep] = useState<CheckoutStep>("address");
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
@@ -51,6 +52,7 @@ export default function CheckoutPage() {
   );
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
+  const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
   const [hasHydrated, setHasHydrated] = useState(false);
 
   const [modalConfig, setModalConfig] = useState<{
@@ -95,6 +97,8 @@ export default function CheckoutPage() {
       typeof item.price === "string" ? parseFloat(item.price) : item.price;
     return acc + price * item.quantity;
   }, 0);
+
+  const PACKAGING_FEE = 99;
 
   const handleCreateOrder = async () => {
     if (!selectedAddressId) {
@@ -157,6 +161,7 @@ export default function CheckoutPage() {
         razorpay_payment_id: string;
         razorpay_signature: string;
       }) {
+        setIsVerifyingPayment(true);
         try {
           const verificationData = {
             razorpay_order_id: response.razorpay_order_id,
@@ -188,6 +193,7 @@ export default function CheckoutPage() {
           clearCheckout();
         } catch (err: unknown) {
           console.error("Payment verification failed:", err);
+          setIsVerifyingPayment(false);
           setModalConfig({
             isOpen: true,
             type: "error",
@@ -256,6 +262,19 @@ export default function CheckoutPage() {
   }
 
   const selectedAddress = addresses?.find((a) => a.id === selectedAddressId);
+
+  if (isVerifyingPayment) {
+    return (
+      <div className="pt-32 pb-24 px-6 bg-background min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-6">
+          <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-xs font-bold uppercase tracking-widest text-text-muted">
+            Verifying your payment…
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (!hasHydrated) return null;
 
@@ -424,9 +443,45 @@ export default function CheckoutPage() {
                             </p>
                           </div>
                           <div className="flex justify-between items-end">
-                            <span className="text-xs font-mono text-text-muted">
-                              Qty: {item.quantity}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-mono text-text-muted">
+                                Qty:
+                              </span>
+                              {step === "summary" ? (
+                                <div className="flex items-center border border-border/60 rounded-sm">
+                                  <button
+                                    onClick={() =>
+                                      updateItemQuantity(
+                                        idx,
+                                        item.quantity - 1
+                                      )
+                                    }
+                                    disabled={item.quantity <= 1}
+                                    className="w-7 h-7 flex items-center justify-center text-text-muted hover:text-text-main hover:bg-muted/50 transition-colors disabled:opacity-30"
+                                  >
+                                    <Minus size={10} />
+                                  </button>
+                                  <span className="w-8 text-center text-xs font-mono text-text-main">
+                                    {item.quantity}
+                                  </span>
+                                  <button
+                                    onClick={() =>
+                                      updateItemQuantity(
+                                        idx,
+                                        item.quantity + 1
+                                      )
+                                    }
+                                    className="w-7 h-7 flex items-center justify-center text-text-muted hover:text-text-main hover:bg-muted/50 transition-colors"
+                                  >
+                                    <Plus size={10} />
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className="text-xs font-mono text-text-main">
+                                  {item.quantity}
+                                </span>
+                              )}
+                            </div>
                             <span className="text-sm font-bold text-text-main">
                               {displayPrice(item.price)}
                             </span>

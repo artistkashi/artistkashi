@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Query
 
 from app.api.dependencies import DatabaseDep
-from app.core.exceptions import ErrorCode, NotFoundException
+from app.core.exceptions import ErrorCode, NotFoundException, ValidationException
 from app.core.pagination import build_paginated_response
 from app.crud.order import crud_order
 from app.schemas.order import (
@@ -49,6 +49,20 @@ async def update_order_status(
     order = await crud_order.get(db=db, id=order_id)
     if not order:
         raise NotFoundException("Order", order_id, error_code=ErrorCode.ORDER_NOT_FOUND)
+
+    if payload.status is not None:
+        VALID_TRANSITIONS: dict[str, set[str]] = {
+            "pending": {"confirmed", "cancelled"},
+            "confirmed": {"shipped", "cancelled"},
+            "shipped": {"delivered", "cancelled"},
+            "delivered": set(),
+            "cancelled": set(),
+        }
+        allowed = VALID_TRANSITIONS.get(order.status.value, set())
+        if payload.status.value not in allowed:
+            raise ValidationException(
+                f"Cannot transition from '{order.status.value}' to '{payload.status.value}'"
+            )
 
     updated_order = await crud_order.update(db=db, id=order_id, object=payload)
     return SuccessResponse(message="Order status updated", data=updated_order)

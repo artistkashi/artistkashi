@@ -12,7 +12,14 @@ import { CustomCursor } from "@/components/shared/CustomCursor";
 import { GalaxyBackground } from "@/components/shared/GalaxyBackground";
 import { useAuth } from "@/lib/auth-store";
 
-const authRoutes = new Set(["/login", "/signup"]);
+const authRoutes = new Set([
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/reset-password",
+  "/verify-email",
+  "/verify-email/verify",
+]);
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();

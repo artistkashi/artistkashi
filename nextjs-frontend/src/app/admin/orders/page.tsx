@@ -36,6 +36,7 @@ import {
   Download,
   Eye,
   Filter,
+  ImageIcon,
   RefreshCw,
   Search,
   ShoppingBag,
@@ -217,6 +218,11 @@ export default function AdminOrdersPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
       setIsDetailsOpen(false);
+    },
+    onError: (err) => {
+      const message =
+        err instanceof Error ? err.message : "Failed to update status";
+      toast.error(message);
     },
   });
 
@@ -942,9 +948,25 @@ export default function AdminOrdersPage() {
           </div>
           <p className="text-text-muted text-xs mt-3 uppercase font-mono tracking-[0.3em] flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-gold rounded-full animate-pulse" />
-            {activeTab === "orders"
-              ? <>Total Orders: <AnimatedCounter target={data?.pagination.total_items || 0} fontSize={16} /> Records</>
-              : <>Total Payments: <AnimatedCounter target={coursePaymentsData?.pagination.total_items || 0} fontSize={16} /> Records</>}
+            {activeTab === "orders" ? (
+              <>
+                Total Orders:{" "}
+                <AnimatedCounter
+                  target={data?.pagination.total_items || 0}
+                  fontSize={16}
+                />{" "}
+                Records
+              </>
+            ) : (
+              <>
+                Total Payments:{" "}
+                <AnimatedCounter
+                  target={coursePaymentsData?.pagination.total_items || 0}
+                  fontSize={16}
+                />{" "}
+                Records
+              </>
+            )}
           </p>
         </div>
         {activeTab === "orders" ? (
@@ -1165,20 +1187,56 @@ export default function AdminOrdersPage() {
                   <table className="w-full caption-bottom text-sm">
                     <thead className="border-b border-border/40 bg-dark/40">
                       <tr>
-                        {["Payment ID", "Course", "Customer", "Amount", "Status", "Date"].map((h) => (
-                          <th key={h} className="py-3 px-8 text-left align-middle font-mono text-[6px] text-text-muted/60 tracking-[0.3em] uppercase">{h}</th>
+                        {[
+                          "Payment ID",
+                          "Course",
+                          "Customer",
+                          "Amount",
+                          "Status",
+                          "Date",
+                        ].map((h) => (
+                          <th
+                            key={h}
+                            className="py-3 px-8 text-left align-middle font-mono text-[6px] text-text-muted/60 tracking-[0.3em] uppercase"
+                          >
+                            {h}
+                          </th>
                         ))}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/10">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <tr key={i} className="transition-all duration-300 border-l-2 border-l-transparent">
-                          <td className="px-8 py-2 align-middle"><Skeleton className="h-4 w-20" /></td>
-                          <td className="px-8 py-2 align-middle"><Skeleton className="h-4 w-36" /></td>
-                          <td className="px-8 py-2 align-middle"><div className="flex flex-col items-center gap-1.5"><Skeleton className="h-3.5 w-28" /><Skeleton className="h-3 w-20" /></div></td>
-                          <td className="px-8 py-2 align-middle"><div className="flex justify-end"><Skeleton className="h-4 w-16" /></div></td>
-                          <td className="px-8 py-2 align-middle"><div className="flex justify-center"><Skeleton className="h-5 w-14 rounded-full" /></div></td>
-                          <td className="px-8 py-2 align-middle"><div className="flex justify-center"><Skeleton className="h-4 w-16" /></div></td>
+                        <tr
+                          key={i}
+                          className="transition-all duration-300 border-l-2 border-l-transparent"
+                        >
+                          <td className="px-8 py-2 align-middle">
+                            <Skeleton className="h-4 w-20" />
+                          </td>
+                          <td className="px-8 py-2 align-middle">
+                            <Skeleton className="h-4 w-36" />
+                          </td>
+                          <td className="px-8 py-2 align-middle">
+                            <div className="flex flex-col items-center gap-1.5">
+                              <Skeleton className="h-3.5 w-28" />
+                              <Skeleton className="h-3 w-20" />
+                            </div>
+                          </td>
+                          <td className="px-8 py-2 align-middle">
+                            <div className="flex justify-end">
+                              <Skeleton className="h-4 w-16" />
+                            </div>
+                          </td>
+                          <td className="px-8 py-2 align-middle">
+                            <div className="flex justify-center">
+                              <Skeleton className="h-5 w-14 rounded-full" />
+                            </div>
+                          </td>
+                          <td className="px-8 py-2 align-middle">
+                            <div className="flex justify-center">
+                              <Skeleton className="h-4 w-16" />
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -1210,13 +1268,21 @@ export default function AdminOrdersPage() {
                     <thead className="border-b border-border/40 bg-dark/40">
                       <tr>
                         {["Course / Customer", "Amount", "Date"].map((h) => (
-                          <th key={h} className="py-3 px-8 text-left align-middle font-mono text-[6px] text-text-muted/60 tracking-[0.3em] uppercase">{h}</th>
+                          <th
+                            key={h}
+                            className="py-3 px-8 text-left align-middle font-mono text-[6px] text-text-muted/60 tracking-[0.3em] uppercase"
+                          >
+                            {h}
+                          </th>
                         ))}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/10">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <tr key={i} className="transition-all duration-300 border-l-2 border-l-transparent">
+                        <tr
+                          key={i}
+                          className="transition-all duration-300 border-l-2 border-l-transparent"
+                        >
                           <td className="px-8 py-2 align-middle">
                             <div className="space-y-3">
                               <div className="space-y-1.5">
@@ -1229,8 +1295,16 @@ export default function AdminOrdersPage() {
                               </div>
                             </div>
                           </td>
-                          <td className="px-8 py-2 align-middle"><div className="flex justify-end"><Skeleton className="h-4 w-16" /></div></td>
-                          <td className="px-8 py-2 align-middle"><div className="flex justify-center"><Skeleton className="h-4 w-20" /></div></td>
+                          <td className="px-8 py-2 align-middle">
+                            <div className="flex justify-end">
+                              <Skeleton className="h-4 w-16" />
+                            </div>
+                          </td>
+                          <td className="px-8 py-2 align-middle">
+                            <div className="flex justify-center">
+                              <Skeleton className="h-4 w-20" />
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -1259,7 +1333,10 @@ export default function AdminOrdersPage() {
               {cpPayments.length === 0 && cpLoading ? (
                 <div className="grid gap-6">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="group relative bg-surface border border-border shadow-md overflow-hidden rounded-sm">
+                    <div
+                      key={i}
+                      className="group relative bg-surface border border-border shadow-md overflow-hidden rounded-sm"
+                    >
                       <div className="px-6 py-4 border-b border-border/90 bg-dark/20 flex justify-between items-center">
                         <Skeleton className="h-3.5 w-28" />
                         <Skeleton className="h-2 w-2 rounded-full" />
@@ -1793,129 +1870,200 @@ function OrderDetailsModal({
   onUpdateStatus: (status: OrderStatus) => void;
   isUpdating: boolean;
 }) {
+  const [pendingStatus, setPendingStatus] = useState<OrderStatus | null>(null);
+  const hasChanges = pendingStatus !== null && pendingStatus !== order.status;
+
+  const VALID_TRANSITIONS: Record<string, string[]> = {
+    pending: ["confirmed", "cancelled"],
+    confirmed: ["shipped", "cancelled"],
+    shipped: ["delivered", "cancelled"],
+    delivered: [],
+    cancelled: [],
+  };
+
+  const allowedNext = VALID_TRANSITIONS[order.status] ?? [];
+
+  const handleSave = () => {
+    if (pendingStatus) {
+      onUpdateStatus(pendingStatus);
+      setPendingStatus(null);
+    }
+  };
+
+  const currentStatus = pendingStatus ?? order.status;
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-end">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-      />
-
-      <motion.div
-        initial={{ x: "100%" }}
-        animate={{ x: 0 }}
-        exit={{ x: "100%" }}
-        transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        className="relative w-full max-w-2xl h-full bg-surface border-l border-border shadow-2xl flex flex-col"
+    <>
+      <style>{`
+        @media print {
+          body * { visibility: hidden !important; }
+          #invoice-area { visibility: visible !important; position: fixed !important; inset: 0 !important; background: #fff !important; color: #000 !important; padding: 1.5rem !important; overflow: visible !important; font-family: ui-monospace, monospace !important; z-index: 9999 !important; }
+          #invoice-area * { visibility: visible !important; }
+          #invoice-area .text-gold, #invoice-area .text-primary { color: #b89d5c !important; }
+           #invoice-area .overflow-y-auto, #invoice-area .custom-scrollbar { overflow: visible !important; }
+          .print-hide { display: none !important; }
+        }
+      `}</style>
+      <div
+        id="invoice-root"
+        className="fixed inset-0 z-100 flex items-center justify-end"
       >
-        {/* Header */}
-        <div className="px-8 py-6 border-b border-border flex items-center justify-between bg-dark/40">
-          <div>
-            <h2 className="text-xl font-extrabold uppercase tracking-tight text-text-main">
-              Acquisition Details
-            </h2>
-            <p className="text-2xs font-mono text-gold uppercase tracking-[0.2em]">
-              ID: {order.id}
-            </p>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0 bg-black/80 backdrop-blur-sm print-hide"
+        />
+
+        <motion.div
+          initial={{ x: "100%" }}
+          animate={{ x: 0 }}
+          exit={{ x: "100%" }}
+          transition={{ type: "spring", damping: 25, stiffness: 200 }}
+          className="relative w-full max-w-2xl h-full bg-surface border-l border-border shadow-2xl flex flex-col"
+        >
+          {/* Header */}
+          <div className="px-8 py-6 border-b border-border flex items-center justify-between bg-dark/40 print-hide">
+            <div>
+              <h2 className="text-xl font-extrabold uppercase tracking-tight text-text-main">
+                Acquisition Details
+              </h2>
+              <p className="text-2xs font-mono text-gold uppercase tracking-[0.2em]">
+                ID: {order.id}
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-text-muted hover:text-text-main transition-colors print-hide"
+            >
+              <X size={24} />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="text-text-muted hover:text-text-main transition-colors"
+
+          {/* Scrollable Content */}
+          <div
+            id="invoice-area"
+            className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar"
           >
-            <X size={24} />
-          </button>
-        </div>
-
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
-          {/* Header Stats */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="p-4 bg-muted-light border border-border">
-              <p className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-1">
-                Date
-              </p>
-              <p className="text-xs font-bold text-text-main">
-                {format(new Date(order.created_at), "dd MMM yyyy, HH:mm")}
-              </p>
-            </div>
-            <div className="p-4 bg-muted-light border border-border">
-              <p className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-1">
-                Total
-              </p>
-              <p className="text-sm font-bold text-gold">
-                {displayPrice(order.total_amount)}
-              </p>
-            </div>
-            <div className="p-4 bg-muted-light border border-border">
-              <p className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-1">
-                Payment
-              </p>
-              <PaymentStatusBadge status={order.payment_status} />
-            </div>
-          </div>
-
-          {/* Customer Info */}
-          <section className="space-y-4">
-            <h3 className="text-xs font-mono font-bold text-text-muted uppercase tracking-[0.3em] flex items-center gap-2">
-              <ArrowUpRight size={14} /> Customer Provenance
-            </h3>
-            <div className="bg-dark-soft border border-border p-6 rounded-sm space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gold/10 border border-gold/20 flex items-center justify-center text-gold font-bold">
-                  {order.user?.full_name?.charAt(0) || "U"}
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-text-main uppercase">
-                    {order.user?.full_name}
-                  </p>
-                  <p className="text-xs text-text-muted font-mono">
-                    {order.user?.email || "No email provided"}
-                  </p>
-                </div>
+            {/* Header Stats */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="p-4 bg-muted-light border border-border rounded-sm">
+                <p className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-1">
+                  Date
+                </p>
+                <p className="text-xs font-bold text-text-main">
+                  {format(new Date(order.created_at), "dd MMM yyyy, HH:mm")}
+                </p>
               </div>
-              <div className="pt-4 border-t border-border/10 grid grid-cols-2 gap-6">
-                <div>
-                  <p className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-2">
-                    Shipping Location
-                  </p>
-                  <p className="text-xs text-text-main leading-relaxed">
-                    Archive ID: {order.shipping_address_id || "N/A"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-2">
-                    Contact Method
-                  </p>
-                  <p className="text-xs text-text-main">Digital Receipt Sent</p>
-                </div>
+              <div className="p-4 bg-muted-light border border-border rounded-sm">
+                <p className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-1">
+                  Total
+                </p>
+                <p className="text-sm font-bold text-gold">
+                  {displayPrice(order.total_amount)}
+                </p>
+              </div>
+              <div className="p-4 bg-muted-light border border-border rounded-sm">
+                <p className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-1">
+                  Payment
+                </p>
+                <PaymentStatusBadge status={order.payment_status} />
               </div>
             </div>
-          </section>
 
-          {/* Items */}
-          <section className="space-y-4">
-            <h3 className="text-xs font-mono font-bold text-text-muted uppercase tracking-[0.3em] flex items-center gap-2">
-              <ShoppingBag size={14} /> Acquisition Manifest
-            </h3>
+            {/* Customer Info */}
+            <section className="space-y-4">
+              <h3 className="text-xs font-mono font-bold text-text-muted uppercase tracking-[0.3em] flex items-center gap-2">
+                <ArrowUpRight size={14} /> Customer Provenance
+              </h3>
+              <div className="bg-dark-soft border border-border p-6 rounded-sm space-y-4">
+                <div className="flex items-center gap-4">
+                  {order.user?.profile_picture ? (
+                    <img
+                      src={order.user.profile_picture}
+                      alt={order.user.full_name || ""}
+                      className="w-12 h-12 rounded-full object-cover border border-gold/20"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-gold/10 border border-gold/20 flex items-center justify-center text-gold font-bold rounded-full">
+                      {order.user?.full_name?.charAt(0) || "U"}
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm font-bold text-text-main uppercase">
+                      {order.user?.full_name}
+                    </p>
+                    <p className="text-xs text-text-muted font-mono">
+                      {order.user?.email || "No email provided"}
+                    </p>
+                  </div>
+                </div>
+                <div className="pt-4 border-t border-border/10 grid grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-2">
+                      Shipping Location
+                    </p>
+                    {order.shipping_address ? (
+                      <div className="text-xs text-text-main leading-relaxed space-y-0.5">
+                        <p>{order.shipping_address.line1}</p>
+                        {order.shipping_address.line2 && (
+                          <p>{order.shipping_address.line2}</p>
+                        )}
+                        <p>
+                          {order.shipping_address.city},{" "}
+                          {order.shipping_address.state} -{" "}
+                          {order.shipping_address.postal_code}
+                        </p>
+                        <p>{order.shipping_address.country}</p>
+                        <p className="text-2xs text-text-muted font-mono mt-1">
+                          {order.shipping_address.phone}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-text-muted">N/A</p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-2">
+                      Contact Method
+                    </p>
+                    <p className="text-xs text-text-main">
+                      Digital Receipt Sent
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
 
-            <div className="border border-border bg-muted-light overflow-hidden">
-              {order.items && order.items.length > 0 ? (
-                order.items.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="p-4 border-b border-border/10 last:border-0 flex justify-between items-center bg-dark/20"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-surface border border-border flex items-center justify-center text-2xs text-text-muted font-mono">
-                        {idx + 1}
+            {/* Items */}
+            <section className="space-y-4">
+              <h3 className="text-xs font-mono font-bold text-text-muted uppercase tracking-[0.3em] flex items-center gap-2">
+                <ShoppingBag size={14} /> Acquisition Manifest
+              </h3>
+
+              <div className="border border-border bg-muted-light rounded-sm overflow-hidden">
+                {order.items && order.items.length > 0 ? (
+                  order.items.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 border-b border-border/10 last:border-0 flex items-center gap-4 bg-dark/20"
+                    >
+                      <div className="w-14 h-14 bg-surface border border-border rounded-sm overflow-hidden shrink-0 flex items-center justify-center">
+                        {item.product_image ? (
+                          <img
+                            src={item.product_image}
+                            alt={item.product_title || ""}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <ImageIcon size={16} className="text-text-muted" />
+                        )}
                       </div>
 
-                      <div>
+                      <div className="flex-1 min-w-0">
                         {item.course_title ? (
                           <>
-                            <p className="text-xs font-bold text-text-main uppercase">
+                            <p className="text-xs font-bold text-text-main uppercase truncate">
                               {item.course_title}
                             </p>
                             <p className="text-2xs text-gold font-mono tracking-widest uppercase">
@@ -1924,80 +2072,95 @@ function OrderDetailsModal({
                           </>
                         ) : (
                           <>
-                            <p className="text-xs font-bold text-text-main uppercase">
+                            <p className="text-xs font-bold text-text-main uppercase truncate">
                               {item.product_title ||
                                 `Product ID: ${item.product_id}`}
                             </p>
-                            {item.variant_name && (
-                              <p className="text-2xs text-text-muted font-mono tracking-widest uppercase">
-                                {item.variant_name}
-                              </p>
-                            )}
+                            <div className="flex items-center gap-2 mt-0.5">
+                              {item.variant_name && (
+                                <span className="text-2xs text-text-muted font-mono tracking-widest uppercase">
+                                  {item.variant_name}
+                                </span>
+                              )}
+                              {item.variant_dimensions && (
+                                <span className="text-2xs text-text-muted/50 font-mono">
+                                  {item.variant_dimensions}
+                                </span>
+                              )}
+                            </div>
                           </>
                         )}
                       </div>
-                    </div>
 
-                    <div className="text-right">
-                      <p className="text-xs font-bold text-text-main">
-                        {displayPrice(item.price)}
-                      </p>
-                      <p className="text-2xs text-text-muted font-mono">
-                        QTY: {item.quantity}
-                      </p>
+                      <div className="text-right shrink-0">
+                        <p className="text-xs font-bold text-text-main">
+                          {displayPrice(item.price)}
+                        </p>
+                        <p className="text-2xs text-text-muted font-mono">
+                          QTY: {item.quantity}
+                        </p>
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-text-muted font-mono text-xs uppercase tracking-wider">
+                    No items found for this order
                   </div>
-                ))
-              ) : (
-                <div className="p-8 text-center text-text-muted font-mono text-xs uppercase tracking-wider">
-                  No items found for this order
-                </div>
-              )}
-            </div>
-          </section>
+                )}
+              </div>
+            </section>
 
-          {/* Actions */}
-          <section className="space-y-4">
-            <h3 className="text-xs font-mono font-bold text-text-muted uppercase tracking-[0.3em]">
-              Update Status
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              {ORDER_STATUSES.map((s) => (
-                <button
-                  key={s}
-                  disabled={isUpdating || order.status === s}
-                  onClick={() => onUpdateStatus(s)}
-                  className={cn(
-                    "px-4 py-3 text-2xs font-mono uppercase tracking-[0.2em] border transition-all",
-                    order.status === s
-                      ? "border-gold bg-gold/10 text-gold"
-                      : "border-border text-text-muted hover:border-gold/50 hover:text-text-main bg-dark/40"
-                  )}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </section>
-        </div>
+            {/* Actions */}
+            <section className="space-y-4 print-hide">
+              <h3 className="text-xs font-mono font-bold text-text-muted uppercase tracking-[0.3em]">
+                Update Status
+              </h3>
+              <div className="grid grid-cols-2 gap-3 rounded-sm overflow-hidden">
+                {ORDER_STATUSES.map((s) => {
+                  const isSaved = order.status === s;
+                  const isSelected = (pendingStatus ?? order.status) === s;
+                  const isDisabled = !allowedNext.includes(s) && !isSaved;
+                  return (
+                    <button
+                      key={s}
+                      disabled={isDisabled}
+                      onClick={() => setPendingStatus(s)}
+                      className={cn(
+                        "px-4 py-3 text-2xs font-mono uppercase tracking-[0.2em] border transition-all rounded",
+                        isSelected
+                          ? "border-gold bg-gold/10 text-gold"
+                          : "border-border text-text-muted hover:border-gold/50 hover:text-text-main bg-dark/40",
+                        isDisabled && "opacity-30 cursor-not-allowed"
+                      )}
+                    >
+                      {s}
+                      {isSaved && " (current)"}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          </div>
 
-        {/* Footer */}
-        <div className="p-8 bg-dark/40 border-t border-border flex gap-4 mt-auto">
-          <PrimaryBtn
-            className="flex-1 justify-center py-4 text-xs"
-            onClick={() => window.print()}
-          >
-            PRINT INVOICE
-          </PrimaryBtn>
-          <GhostBtn
-            className="flex-1 justify-center py-4 text-xs border-border/50"
-            onClick={onClose}
-          >
-            CLOSE ARCHIVE
-          </GhostBtn>
-        </div>
-      </motion.div>
-    </div>
+          {/* Footer */}
+          <div className="p-8 bg-dark/40 border-t border-border flex gap-4 mt-auto print-hide">
+            <PrimaryBtn
+              className="flex-1 justify-center py-4 text-xs"
+              onClick={() => window.print()}
+            >
+              PRINT INVOICE
+            </PrimaryBtn>
+            <PrimaryBtn
+              className="flex-1 justify-center py-4 text-xs"
+              onClick={handleSave}
+              disabled={!hasChanges || isUpdating}
+            >
+              {isUpdating ? "SAVING..." : hasChanges ? "SAVE" : "NO CHANGES"}
+            </PrimaryBtn>
+          </div>
+        </motion.div>
+      </div>
+    </>
   );
 }
 

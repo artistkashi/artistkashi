@@ -23,12 +23,14 @@ import { RevealBlock } from "@/components/ui/misc";
 import { ModalType, StatusModal } from "@/components/ui/StatusModal";
 import { useAuth } from "@/lib/auth-store";
 import { getSafeReturnTo } from "@/lib/auth-utils";
+import { useWishlistStore } from "@/lib/wishlist-store";
 import { cn, displayPrice } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
   BookOpen,
   Check,
+  Heart,
   Maximize,
   Minimize,
   Minus,
@@ -392,6 +394,21 @@ export default function CourseDetailPage({
 
   const isCourseCompleted = (courseProgress?.progress_percentage ?? 0) >= 100;
 
+  const {
+    isCourseWishlisted,
+    loaded: wishlistLoaded,
+    toggleCourse: toggleCourseWishlist,
+  } = useWishlistStore();
+
+  const handleToggleWishlist = async () => {
+    if (!user) {
+      router.push(loginHref);
+      return;
+    }
+    if (!courseId) return;
+    await toggleCourseWishlist(courseId);
+  };
+
   const sections: CourseSectionWithLessonsRead[] =
     curriculumData?.sections ?? [];
 
@@ -706,8 +723,23 @@ export default function CourseDetailPage({
                     )}
                 </div>
                 <div className="p-8">
-                  <div className="text-text-main font-extrabold text-4xl mb-1">
-                    {displayPrice(course.price)}
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="text-text-main font-extrabold text-4xl">
+                      {displayPrice(course.price)}
+                    </div>
+                    <button
+                      onClick={handleToggleWishlist}
+                      className="flex items-center justify-center w-10 h-10 border border-border/60 text-text-muted hover:text-danger hover:border-danger/40 transition-all rounded-sm"
+                    >
+                      <Heart
+                        size={16}
+                        className={
+                          course.id && isCourseWishlisted(course.id)
+                            ? "fill-danger text-danger"
+                            : ""
+                        }
+                      />
+                    </button>
                   </div>
                   <div className="flex items-center gap-4 mb-8">
                     {!!course.average_rating && (

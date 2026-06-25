@@ -20,6 +20,7 @@ import {
   type QuickAddEntityType,
 } from "@/components/admin/QuickAddEntityModal";
 import { PrimaryBtn } from "@/components/ui/buttons";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,7 +28,6 @@ import { getErrorMessage, getValidationErrors } from "@/lib/error-handler";
 import { slugify } from "@/lib/slugify";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Checkbox } from "@/components/ui/checkbox";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronLeft,
@@ -512,7 +512,6 @@ export default function ProductUploadModal({
         if (img.file) {
           payloadItem.file_index = files.length;
           files.push(img.file);
-          payloadItem.image_url = null; // Backend will fill this from upload
         }
 
         return payloadItem;
@@ -595,7 +594,7 @@ export default function ProductUploadModal({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="relative w-full h-full md:h-auto md:max-w-5xl bg-surface border border-border shadow-lg flex flex-col md:max-h-[90vh] overflow-hidden card-luxury"
+            className="relative w-full h-full md:h-auto md:max-w-5xl bg-surface border border-border shadow-lg flex flex-col md:max-h-[90vh] overflow-hidden card-luxury rounded"
           >
             {/* Header */}
             <div className="p-4 md:p-6 border-b border-border flex justify-between items-center bg-surface shrink-0">
@@ -1255,22 +1254,21 @@ export default function ProductUploadModal({
                       Proceed
                     </PrimaryBtn>
                   ) : (
-                      <PrimaryBtn
-                        type="button"
-                        disabled={submitting}
-                        onClick={handleSubmit(onSubmit, onInvalid)}
-                        className="w-full px-6 md:px-12 py-3 md:py-3.5 text-2xs gold-glow-lg"
-                      >
-                        {submitting ? (
-                          <div className="luxury-loader luxury-loader-dark loader-sm" />
-                        ) : (
-                          <span className="flex items-center gap-2">
-                            <Save size={14} />
-                            {product ? "Preserve" : "Archive"}
-                          </span>
-                        )}
-                      </PrimaryBtn>
-                  
+                    <PrimaryBtn
+                      type="button"
+                      disabled={submitting}
+                      onClick={handleSubmit(onSubmit, onInvalid)}
+                      className="w-full px-6 md:px-12 py-3 md:py-3.5 text-2xs gold-glow-lg"
+                    >
+                      {submitting ? (
+                        <div className="luxury-loader luxury-loader-dark scale-75" />
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          <Save size={14} />
+                          {product ? "Preserve" : "Archive"}
+                        </span>
+                      )}
+                    </PrimaryBtn>
                   )}
                 </div>
               </div>

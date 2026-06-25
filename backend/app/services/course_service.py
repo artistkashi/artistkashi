@@ -16,18 +16,21 @@ from app.core.exceptions import (
     NotFoundException,
 )
 from app.core.pagination import build_paginated_response
+from app.crud.cart import crud_cart
 from app.crud.course import (
     crud_course,
     crud_course_category,
     crud_course_lesson,
     crud_course_section,
 )
+from app.models.cart import CartItem
 from app.models.course import Course
 from app.models.course_category import CourseCategory
 from app.models.course_lesson import CourseLesson
 from app.models.course_payment import CoursePayment, CoursePaymentStatus
 from app.models.course_section import CourseSection
 from app.models.review import ReviewType
+from app.models.wishlist import Wishlist
 from app.schemas.course import (
     CourseCreate,
     CourseCurriculumRead,
@@ -304,6 +307,7 @@ class CourseService:
         category_slug: str | None = None,
         min_price: float | None = None,
         max_price: float | None = None,
+        user_id: uuid.UUID | None = None,
     ) -> PaginatedResponse[CourseListRead]:
         filters: dict = {"is_deleted": False}
 
@@ -367,6 +371,30 @@ class CourseService:
             entity_ids=[course.id for course in courses],
         )
 
+        # Enrich with wishlist status
+        wishlisted_course_ids: set[uuid.UUID] = set()
+        if user_id and courses:
+            course_ids = [course.id for course in courses]
+            wishlist_result = await session.execute(
+                select(Wishlist.course_id).where(
+                    Wishlist.user_id == user_id,
+                    Wishlist.course_id.in_(course_ids),
+                )
+            )
+            wishlisted_course_ids = {row[0] for row in wishlist_result if row[0]}
+
+        # Enrich with cart status
+        cart_course_ids: set[uuid.UUID] = set()
+        if user_id and courses:
+            course_ids = [course.id for course in courses]
+            cart_result = await session.execute(
+                select(CartItem.course_id).where(
+                    CartItem.user_id == user_id,
+                    CartItem.course_id.in_(course_ids),
+                )
+            )
+            cart_course_ids = {row[0] for row in cart_result if row[0]}
+
         for course in courses:
             avg_rating, review_count = ratings.get(
                 course.id,
@@ -374,6 +402,8 @@ class CourseService:
             )
             course.average_rating = avg_rating
             course.review_count = review_count
+            course.is_wishlisted = course.id in wishlisted_course_ids
+            course.is_in_cart = course.id in cart_course_ids
 
         return build_paginated_response(
             result={"data": courses, "total_count": result.get("total_count", 0)},

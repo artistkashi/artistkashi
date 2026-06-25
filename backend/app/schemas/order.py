@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.schema import TimestampSchemaRead
 from app.models.order import OrderStatus, PaymentStatus
+from app.schemas.address import AddressRead
 from app.schemas.user import PublicUserRead
 
 # ─── OrderItem Schemas ──────────────────────────────────────────────────────
@@ -33,7 +34,9 @@ class OrderItemDetailRead(OrderItemRead):
     course_title: str | None = None
     course_slug: str | None = None
     product_title: str | None = None
+    product_image: str | None = None
     variant_name: str | None = None
+    variant_dimensions: str | None = None
 
 
 # ─── Order Schemas ──────────────────────────────────────────────────────────
@@ -80,6 +83,7 @@ class AdminOrderRead(OrderRead):
 class AdminOrderDetailRead(OrderRead):
     user: PublicUserRead | None = None
     items: list[OrderItemDetailRead] = []
+    shipping_address: AddressRead | None = None
 
 
 class OrderDashboardRead(TimestampSchemaRead):
@@ -88,7 +92,7 @@ class OrderDashboardRead(TimestampSchemaRead):
     total_amount: Decimal
     status: OrderStatus
     payment_status: PaymentStatus
-    item_count: int
+    item_count: int | None = 0
 
     model_config = ConfigDict(from_attributes=True)
 

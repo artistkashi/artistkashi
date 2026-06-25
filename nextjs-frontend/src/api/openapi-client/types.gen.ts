@@ -291,6 +291,7 @@ export type AdminOrderDetailRead = {
      */
     items?: Array<OrderItemDetailRead>;
     user?: PublicUserRead | null;
+    shipping_address?: AddressRead | null;
 };
 
 /**
@@ -616,6 +617,10 @@ export type CartItemCreate = {
      */
     product_id?: string | null;
     /**
+     * Variant Id
+     */
+    variant_id?: string | null;
+    /**
      * Course Id
      */
     course_id?: string | null;
@@ -634,6 +639,10 @@ export type CartItemRead = {
      */
     product_id?: string | null;
     /**
+     * Variant Id
+     */
+    variant_id?: string | null;
+    /**
      * Course Id
      */
     course_id?: string | null;
@@ -650,6 +659,7 @@ export type CartItemRead = {
      */
     user_id: string;
     product?: ProductCardRead | null;
+    variant?: ProductVariantRead | null;
     course?: CourseRead | null;
 };
 
@@ -675,6 +685,16 @@ export type ChangePasswordRequest = {
      * New Password
      */
     new_password: string;
+};
+
+/**
+ * ClearCartRequest
+ */
+export type ClearCartRequest = {
+    /**
+     * Item Ids
+     */
+    item_ids: Array<number>;
 };
 
 /**
@@ -1342,6 +1362,14 @@ export type CourseListRead = {
      */
     enrollment_count?: number;
     /**
+     * Is Wishlisted
+     */
+    is_wishlisted?: boolean;
+    /**
+     * Is In Cart
+     */
+    is_in_cart?: boolean;
+    /**
      * Computed Thumbnail Url
      */
     readonly computed_thumbnail_url: string | null;
@@ -1832,6 +1860,10 @@ export type GoogleAuthRequest = {
      * Google ID token from the client
      */
     credential: string;
+    /**
+     * Force
+     */
+    force?: boolean;
 };
 
 /**
@@ -2133,7 +2165,7 @@ export type OrderDashboardRead = {
     /**
      * Item Count
      */
-    item_count: number;
+    item_count?: number | null;
 };
 
 /**
@@ -2207,9 +2239,17 @@ export type OrderItemDetailRead = {
      */
     product_title?: string | null;
     /**
+     * Product Image
+     */
+    product_image?: string | null;
+    /**
      * Variant Name
      */
     variant_name?: string | null;
+    /**
+     * Variant Dimensions
+     */
+    variant_dimensions?: string | null;
 };
 
 /**
@@ -2773,6 +2813,26 @@ export type ProductCardRead = {
      */
     primary_image?: string | null;
     /**
+     * Average Rating
+     */
+    average_rating?: number;
+    /**
+     * Review Count
+     */
+    review_count?: number;
+    /**
+     * Sold Count
+     */
+    sold_count?: number;
+    /**
+     * Is Wishlisted
+     */
+    is_wishlisted?: boolean;
+    /**
+     * Is In Cart
+     */
+    is_in_cart?: boolean;
+    /**
      * Is Sold
      */
     readonly is_sold: boolean;
@@ -3033,6 +3093,26 @@ export type ProductDetailRead = {
      * Meta Description
      */
     meta_description?: string | null;
+    /**
+     * Average Rating
+     */
+    average_rating?: number;
+    /**
+     * Review Count
+     */
+    review_count?: number;
+    /**
+     * Sold Count
+     */
+    sold_count?: number;
+    /**
+     * Is Wishlisted
+     */
+    is_wishlisted?: boolean;
+    /**
+     * Is In Cart
+     */
+    is_in_cart?: boolean;
     /**
      * Price
      *
@@ -3625,6 +3705,24 @@ export type SetPasswordRequest = {
 };
 
 /**
+ * StatusCounts
+ */
+export type StatusCounts = {
+    /**
+     * Wishlist Count
+     */
+    wishlist_count: number;
+    /**
+     * Cart Count
+     */
+    cart_count: number;
+    /**
+     * Cart Total
+     */
+    cart_total?: string;
+};
+
+/**
  * SuccessResponse[AddressRead]
  */
 export type SuccessResponseAddressRead = {
@@ -4204,6 +4302,26 @@ export type SuccessResponseReviewRead = {
      */
     message: string;
     data?: ReviewRead | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[StatusCounts]
+ */
+export type SuccessResponseStatusCounts = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    data?: StatusCounts | null;
     meta?: Meta;
 };
 
@@ -5245,6 +5363,10 @@ export type CartItemReadWritable = {
      */
     product_id?: string | null;
     /**
+     * Variant Id
+     */
+    variant_id?: string | null;
+    /**
      * Course Id
      */
     course_id?: string | null;
@@ -5261,6 +5383,7 @@ export type CartItemReadWritable = {
      */
     user_id: string;
     product?: ProductCardReadWritable | null;
+    variant?: ProductVariantReadWritable | null;
     course?: CourseReadWritable | null;
 };
 
@@ -5592,6 +5715,14 @@ export type CourseListReadWritable = {
      * Enrollment Count
      */
     enrollment_count?: number;
+    /**
+     * Is Wishlisted
+     */
+    is_wishlisted?: boolean;
+    /**
+     * Is In Cart
+     */
+    is_in_cart?: boolean;
 };
 
 /**
@@ -5880,6 +6011,26 @@ export type ProductCardReadWritable = {
      * Primary Image
      */
     primary_image?: string | null;
+    /**
+     * Average Rating
+     */
+    average_rating?: number;
+    /**
+     * Review Count
+     */
+    review_count?: number;
+    /**
+     * Sold Count
+     */
+    sold_count?: number;
+    /**
+     * Is Wishlisted
+     */
+    is_wishlisted?: boolean;
+    /**
+     * Is In Cart
+     */
+    is_in_cart?: boolean;
 };
 
 /**
@@ -5969,6 +6120,26 @@ export type ProductDetailReadWritable = {
      * Meta Description
      */
     meta_description?: string | null;
+    /**
+     * Average Rating
+     */
+    average_rating?: number;
+    /**
+     * Review Count
+     */
+    review_count?: number;
+    /**
+     * Sold Count
+     */
+    sold_count?: number;
+    /**
+     * Is Wishlisted
+     */
+    is_wishlisted?: boolean;
+    /**
+     * Is In Cart
+     */
+    is_in_cart?: boolean;
 };
 
 /**
@@ -10461,6 +10632,31 @@ export type UpdateCartItemResponses = {
 
 export type UpdateCartItemResponse = UpdateCartItemResponses[keyof UpdateCartItemResponses];
 
+export type ClearCartData = {
+    body: ClearCartRequest;
+    path?: never;
+    query?: never;
+    url: '/api/cart/clear';
+};
+
+export type ClearCartErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type ClearCartError = ClearCartErrors[keyof ClearCartErrors];
+
+export type ClearCartResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseNoneType;
+};
+
+export type ClearCartResponse = ClearCartResponses[keyof ClearCartResponses];
+
 export type GetMyWishlistData = {
     body?: never;
     path?: never;
@@ -10540,3 +10736,28 @@ export type RemoveFromWishlistResponses = {
 };
 
 export type RemoveFromWishlistResponse = RemoveFromWishlistResponses[keyof RemoveFromWishlistResponses];
+
+export type GetCountsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/status/counts';
+};
+
+export type GetCountsErrors = {
+    /**
+     * Error 422
+     */
+    422: ErrorResponse;
+};
+
+export type GetCountsError = GetCountsErrors[keyof GetCountsErrors];
+
+export type GetCountsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseStatusCounts;
+};
+
+export type GetCountsResponse = GetCountsResponses[keyof GetCountsResponses];

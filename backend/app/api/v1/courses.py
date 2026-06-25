@@ -32,6 +32,7 @@ async def _validate_lesson_course(
 @router.get("/courses", response_model=PaginatedResponse[CourseListRead])
 async def list_courses(
     session: DatabaseDep,
+    user: CurrentUserOptionalDep = None,
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1)] = 20,
     category: Annotated[str | None, Query(max_length=120)] = None,
@@ -46,6 +47,7 @@ async def list_courses(
         category_slug=category,
         min_price=min_price,
         max_price=max_price,
+        user_id=user.id if user else None,
     )
     return result
 

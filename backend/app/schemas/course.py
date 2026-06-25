@@ -120,7 +120,8 @@ class CourseRead(TimestampSchemaRead):
 
 
 class CourseListRead(CourseRead):
-    pass
+    is_wishlisted: bool = False
+    is_in_cart: bool = False
 
 
 class CourseCurriculumRead(CourseRead):

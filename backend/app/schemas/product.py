@@ -381,6 +381,12 @@ class ProductDetailRead(ProductBase, _ProductComputedMixin, TimestampSchemaRead)
     meta_title: str | None = None
     meta_description: str | None = None
 
+    average_rating: float = 0.0
+    review_count: int = 0
+    sold_count: int = 0
+    is_wishlisted: bool = False
+    is_in_cart: bool = False
+
 
 class ProductListRead(_ProductComputedMixin):
     """
@@ -436,6 +442,12 @@ class ProductCardRead(ProductBase):
     price: Decimal = Field(default=Decimal("0.00"), ge=0, decimal_places=2)
 
     primary_image: str | None = None
+
+    average_rating: float = 0.0
+    review_count: int = 0
+    sold_count: int = 0
+    is_wishlisted: bool = False
+    is_in_cart: bool = False
 
 
 class ProductCardJoinRead(ProductBase):

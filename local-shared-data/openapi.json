@@ -6097,6 +6097,11 @@
         ],
         "summary": "List Courses",
         "operationId": "courses_list_courses",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "page",
@@ -6950,6 +6955,11 @@
         ],
         "summary": "List Products",
         "operationId": "Products_list_products",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "page",
@@ -7003,6 +7013,11 @@
         ],
         "summary": "Get Product",
         "operationId": "Products_get_product",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "slug",
@@ -7428,6 +7443,52 @@
         }
       }
     },
+    "/api/cart/clear": {
+      "post": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Clear Cart",
+        "operationId": "clear_cart",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClearCartRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_NoneType_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
     "/api/wishlist": {
       "get": {
         "tags": [
@@ -7553,6 +7614,42 @@
             }
           }
         }
+      }
+    },
+    "/api/status/counts": {
+      "get": {
+        "tags": [
+          "status"
+        ],
+        "summary": "Get Counts",
+        "operationId": "get_counts",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_StatusCounts_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
       }
     }
   },
@@ -8138,6 +8235,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/PublicUserRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "shipping_address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AddressRead"
               },
               {
                 "type": "null"
@@ -8755,6 +8862,18 @@
             ],
             "title": "Product Id"
           },
+          "variant_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variant Id"
+          },
           "course_id": {
             "anyOf": [
               {
@@ -8790,6 +8909,18 @@
             ],
             "title": "Product Id"
           },
+          "variant_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variant Id"
+          },
           "course_id": {
             "anyOf": [
               {
@@ -8820,6 +8951,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ProductCardRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "variant": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProductVariantRead"
               },
               {
                 "type": "null"
@@ -8874,6 +9015,22 @@
           "new_password"
         ],
         "title": "ChangePasswordRequest"
+      },
+      "ClearCartRequest": {
+        "properties": {
+          "item_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Item Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_ids"
+        ],
+        "title": "ClearCartRequest"
       },
       "CommunitySection": {
         "properties": {
@@ -10257,6 +10414,16 @@
             "title": "Enrollment Count",
             "default": 0
           },
+          "is_wishlisted": {
+            "type": "boolean",
+            "title": "Is Wishlisted",
+            "default": false
+          },
+          "is_in_cart": {
+            "type": "boolean",
+            "title": "Is In Cart",
+            "default": false
+          },
           "computed_thumbnail_url": {
             "anyOf": [
               {
@@ -11211,6 +11378,11 @@
             "type": "string",
             "title": "Credential",
             "description": "Google ID token from the client"
+          },
+          "force": {
+            "type": "boolean",
+            "title": "Force",
+            "default": false
           }
         },
         "type": "object",
@@ -11765,8 +11937,16 @@
             "$ref": "#/components/schemas/PaymentStatus"
           },
           "item_count": {
-            "type": "integer",
-            "title": "Item Count"
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Item Count",
+            "default": 0
           }
         },
         "type": "object",
@@ -11775,8 +11955,7 @@
           "id",
           "total_amount",
           "status",
-          "payment_status",
-          "item_count"
+          "payment_status"
         ],
         "title": "OrderDashboardRead"
       },
@@ -11932,6 +12111,17 @@
             ],
             "title": "Product Title"
           },
+          "product_image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product Image"
+          },
           "variant_name": {
             "anyOf": [
               {
@@ -11942,6 +12132,17 @@
               }
             ],
             "title": "Variant Name"
+          },
+          "variant_dimensions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variant Dimensions"
           }
         },
         "type": "object",
@@ -12906,6 +13107,31 @@
             ],
             "title": "Primary Image"
           },
+          "average_rating": {
+            "type": "number",
+            "title": "Average Rating",
+            "default": 0.0
+          },
+          "review_count": {
+            "type": "integer",
+            "title": "Review Count",
+            "default": 0
+          },
+          "sold_count": {
+            "type": "integer",
+            "title": "Sold Count",
+            "default": 0
+          },
+          "is_wishlisted": {
+            "type": "boolean",
+            "title": "Is Wishlisted",
+            "default": false
+          },
+          "is_in_cart": {
+            "type": "boolean",
+            "title": "Is In Cart",
+            "default": false
+          },
           "is_sold": {
             "type": "boolean",
             "title": "Is Sold",
@@ -13468,6 +13694,31 @@
               }
             ],
             "title": "Meta Description"
+          },
+          "average_rating": {
+            "type": "number",
+            "title": "Average Rating",
+            "default": 0.0
+          },
+          "review_count": {
+            "type": "integer",
+            "title": "Review Count",
+            "default": 0
+          },
+          "sold_count": {
+            "type": "integer",
+            "title": "Sold Count",
+            "default": 0
+          },
+          "is_wishlisted": {
+            "type": "boolean",
+            "title": "Is Wishlisted",
+            "default": false
+          },
+          "is_in_cart": {
+            "type": "boolean",
+            "title": "Is In Cart",
+            "default": false
           },
           "price": {
             "anyOf": [
@@ -14691,6 +14942,30 @@
         ],
         "title": "SetPasswordRequest"
       },
+      "StatusCounts": {
+        "properties": {
+          "wishlist_count": {
+            "type": "integer",
+            "title": "Wishlist Count"
+          },
+          "cart_count": {
+            "type": "integer",
+            "title": "Cart Count"
+          },
+          "cart_total": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Cart Total",
+            "default": "0.00"
+          }
+        },
+        "type": "object",
+        "required": [
+          "wishlist_count",
+          "cart_count"
+        ],
+        "title": "StatusCounts"
+      },
       "SuccessResponse_AddressRead_": {
         "properties": {
           "success": {
@@ -15728,6 +16003,42 @@
           "message"
         ],
         "title": "SuccessResponse[ReviewRead]"
+      },
+      "SuccessResponse_StatusCounts_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StatusCounts"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[StatusCounts]"
       },
       "SuccessResponse_TokenResponse_": {
         "properties": {

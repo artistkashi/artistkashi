@@ -170,8 +170,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return afterLogin(tokenData);
   };
 
-  const googleLogin = async (credential: string) => {
-    const tokenData = await unwrap(googleAuth({ body: { credential } }));
+  const googleLogin = async (credential: string, force?: boolean) => {
+    const tokenData = await unwrap(googleAuth({ body: { credential, force } }));
 
     if (!tokenData?.access_token || !tokenData?.refresh_token) {
       throw new Error("Google login failed");
@@ -278,3 +278,4 @@ export function useAuth() {
   }
   return context;
 }
+

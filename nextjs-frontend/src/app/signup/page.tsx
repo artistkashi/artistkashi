@@ -12,7 +12,7 @@ import { signupSchema, type SignupFormValues } from "@/lib/auth-validation";
 import { getErrorMessage } from "@/lib/error-handler";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { AlertTriangle, ArrowRight, Eye, EyeOff, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -62,6 +62,8 @@ export default function SignupPage() {
     }
   };
 
+  const [pendingGoogleCredential, setPendingGoogleCredential] = useState<string | null>(null);
+
   const handleGoogleSuccess = async (credential: string) => {
     setIsSubmitting(true);
     try {
@@ -69,6 +71,31 @@ export default function SignupPage() {
       toast.success("Welcome to Artist Kashi!", {
         description: "Your membership has been activated.",
       });
+      redirectUser(user);
+    } catch (error: unknown) {
+      const axiosErr = error as
+        | { response?: { data?: { error_code?: string } } }
+        | undefined;
+      const errorCode = axiosErr?.response?.data?.error_code;
+      if (errorCode === "MAX_SESSIONS_REACHED") {
+        setPendingGoogleCredential(credential);
+      } else {
+        toast.error(getErrorMessage(error));
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleForceGoogleLogin = async () => {
+    if (!pendingGoogleCredential) return;
+    setIsSubmitting(true);
+    try {
+      const user = await googleLogin(pendingGoogleCredential, true);
+      toast.success("Welcome to Artist Kashi!", {
+        description: "Previous sessions have been revoked.",
+      });
+      setPendingGoogleCredential(null);
       redirectUser(user);
     } catch (error) {
       toast.error(getErrorMessage(error));
@@ -219,6 +246,64 @@ export default function SignupPage() {
           </RevealBlock>
         </div>
       </main>
+
+      {/* Force Login Confirmation Modal */}
+      {pendingGoogleCredential && (
+        <div
+          className="fixed inset-0 z-modal flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setPendingGoogleCredential(null);
+            }
+          }}
+        >
+          <div className="w-full max-w-sm bg-surface border border-border shadow-lg rounded">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+              <div className="flex items-center gap-3">
+                <AlertTriangle size={18} className="text-gold" />
+                <h3 className="text-text-main font-bold text-base">
+                  Session Limit Reached
+                </h3>
+              </div>
+              <button
+                onClick={() => setPendingGoogleCredential(null)}
+                className="text-text-muted hover:text-text-main transition-colors"
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="p-4 bg-gold/5 border border-gold/20">
+                <p className="text-text-muted text-sm">
+                  You have reached the maximum of 3 concurrent sessions. Signing
+                  in here will revoke all other active sessions.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
+              <button
+                onClick={() => setPendingGoogleCredential(null)}
+                disabled={isSubmitting}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-border text-text-muted text-xs font-mono tracking-widest uppercase hover:text-text-main hover:border-gold/50 transition-colors rounded disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleForceGoogleLogin}
+                disabled={isSubmitting}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gold/10 border border-gold/30 text-gold text-xs font-mono tracking-widest uppercase hover:bg-gold/20 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  "Sign In Anyway"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AuthGuard>
   );
 }

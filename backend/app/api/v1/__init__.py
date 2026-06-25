@@ -15,6 +15,7 @@ from .health import router as health_router
 from .orders import router as orders_router
 from .products import router as products_router
 from .progress import router as progress_router
+from .status import router as status_router
 from .users import router as users_router
 from .wishlist import router as wishlist_router
 
@@ -36,3 +37,4 @@ router.include_router(products_router)
 router.include_router(orders_router)
 router.include_router(cart_router)
 router.include_router(wishlist_router)
+router.include_router(status_router)

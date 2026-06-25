@@ -16,6 +16,7 @@ export interface CheckoutItem {
 interface CheckoutState {
   items: CheckoutItem[];
   setItems: (items: CheckoutItem[]) => void;
+  updateItemQuantity: (index: number, quantity: number) => void;
   clearCheckout: () => void;
 }
 
@@ -24,6 +25,12 @@ export const useCheckoutStore = create<CheckoutState>()(
     (set) => ({
       items: [],
       setItems: (items) => set({ items }),
+      updateItemQuantity: (index, quantity) =>
+        set((state) => {
+          const updated = [...state.items];
+          updated[index] = { ...updated[index], quantity: Math.max(1, quantity) };
+          return { items: updated };
+        }),
       clearCheckout: () => set({ items: [] }),
     }),
     {
