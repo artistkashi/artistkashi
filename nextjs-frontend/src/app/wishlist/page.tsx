@@ -168,7 +168,7 @@ export default function WishlistPage() {
                     : `/courses/${slug}`;
                   const image = isProduct
                     ? item.product?.primary_image
-                    : item.course?.thumbnail;
+                    : item.course?.thumbnail_url ?? item.course?.computed_thumbnail_url;
                   const price = isProduct
                     ? item.product?.price
                       ? Number(item.product.price)
@@ -178,7 +178,7 @@ export default function WishlistPage() {
                       : 0;
                   const subtitle = isProduct
                     ? item.product?.medium?.name ?? "Original Work"
-                    : item.course?.category_name ?? "Course";
+                    : item.course?.category?.name ?? "Course";
 
                   return (
                     <motion.div

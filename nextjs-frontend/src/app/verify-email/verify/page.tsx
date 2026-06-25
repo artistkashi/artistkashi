@@ -8,10 +8,10 @@ import { getErrorMessage } from "@/lib/error-handler";
 import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export default function VerifyEmailTokenPage() {
+function VerifyEmailTokenPageContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const { verifyEmail } = useAuth();
@@ -144,5 +144,13 @@ export default function VerifyEmailTokenPage() {
         </RevealBlock>
       </div>
     </main>
+  );
+}
+
+export default function VerifyEmailTokenPage() {
+  return (
+    <Suspense fallback={null}>
+      <VerifyEmailTokenPageContent />
+    </Suspense>
   );
 }

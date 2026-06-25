@@ -47,6 +47,7 @@ from app.services.google_auth_service import verify_google_token
 from app.services.user_service import user_service
 
 MAX_SESSIONS = 3
+STALE_DAYS = 14
 
 
 class AuthService:
@@ -287,7 +288,13 @@ class AuthService:
                     object=update_data,
                 )
 
-            return await self._issue_tokens(session=session, user=existing_user, user_agent=user_agent, ip_address=ip_address, force=force)
+            return await self._issue_tokens(
+                session=session,
+                user=existing_user,
+                user_agent=user_agent,
+                ip_address=ip_address,
+                force=force,
+            )
 
         # CASE 1: New user - create account with Google provider
         user = await crud_user.create(
@@ -387,7 +394,6 @@ class AuthService:
             return_as_model=True,
             return_total_count=False,
         )
-        print(result)
 
         providers = result["data"]
 
@@ -399,6 +405,78 @@ class AuthService:
             providers=providers,
             has_password=has_password,
         )
+
+    async def link_google(
+        self,
+        *,
+        session: AsyncSession,
+        user: UserRead,
+        credential: str,
+    ) -> AuthProvidersResponse:
+        google_data = verify_google_token(credential)
+
+        existing = await crud_auth_provider.get(
+            db=session,
+            provider=ProviderType.GOOGLE,
+            provider_user_id=google_data.sub,
+        )
+        if existing and existing.user_id != user.id:
+            raise ConflictException(
+                message="This Google account is already linked to another user.",
+                error_code=ErrorCode.CONFLICT,
+            )
+
+        already_linked = await crud_auth_provider.get(
+            db=session,
+            user_id=user.id,
+            provider=ProviderType.GOOGLE,
+        )
+        if not already_linked:
+            await crud_auth_provider.create(
+                db=session,
+                object=UserAuthProviderCreate(
+                    user_id=user.id,
+                    provider=ProviderType.GOOGLE,
+                    provider_user_id=google_data.sub,
+                ),
+            )
+
+        return await self.get_auth_providers(session=session, user_id=user.id)
+
+    async def unlink_google(
+        self,
+        *,
+        session: AsyncSession,
+        user: UserRead,
+    ) -> AuthProvidersResponse:
+        result = await crud_auth_provider.get_multi(
+            db=session,
+            user_id=user.id,
+            schema_to_select=UserAuthProviderRead,
+            return_as_model=True,
+        )
+        providers = result.get("data", []) or []
+
+        has_password = any(p.provider == ProviderType.PASSWORD for p in providers)
+        has_google = any(p.provider == ProviderType.GOOGLE for p in providers)
+
+        if not has_google:
+            raise ValidationException("Google account is not linked")
+
+        if not has_password:
+            raise ValidationException(
+                "Cannot unlink Google without a password. Set a password first."
+            )
+
+        google_provider = next(
+            p for p in providers if p.provider == ProviderType.GOOGLE
+        )
+        await crud_auth_provider.delete(
+            db=session,
+            id=google_provider.id,
+        )
+
+        return await self.get_auth_providers(session=session, user_id=user.id)
 
     async def refresh(
         self,
@@ -728,7 +806,7 @@ class AuthService:
         user_id: UUID,
         force: bool = False,
     ) -> None:
-        from datetime import UTC, datetime
+        from datetime import UTC, datetime, timedelta
 
         await self._cleanup_sessions(session=session, user_id=user_id)
 
@@ -751,6 +829,18 @@ class AuthService:
             )
 
         active = [s for s in active if s.expires_at >= now]
+
+        # Auto-revoke stale sessions (no activity in STALE_DAYS) — these are
+        # orphaned sessions from lost localStorage tokens or abandoned devices.
+        stale_cutoff = now - timedelta(days=STALE_DAYS)
+        stale = [s for s in active if s.last_activity < stale_cutoff]
+        for s in stale:
+            await crud_user_session.update(
+                db=session,
+                id=s.id,
+                object={"revoked": True},
+            )
+        active = [s for s in active if s.last_activity >= stale_cutoff]
 
         if len(active) < MAX_SESSIONS:
             return

@@ -1,13 +1,13 @@
 import { client } from "@/api/openapi-client/client.gen";
-import { getItem, STORAGE_KEYS } from "@/lib/storage";
+import { getItem, removeItem, STORAGE_KEYS } from "@/lib/storage";
 
 client.setConfig({
   throwOnError: true,
 });
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
 if (typeof window === "undefined") {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
-  client.setConfig({ baseURL: new URL(apiUrl).origin });
+  client.setConfig({ baseURL: new URL(API_BASE).origin });
 }
 
 // Dynamically attach the auth token on every request via interceptor.
@@ -23,8 +23,6 @@ client.instance.interceptors.request.use((config) => {
 });
 
 export const setAuthToken = (token?: string | null) => {
-  // no-op: the interceptor reads from storage automatically
-  // kept for backwards-compat / manual override
   if (token) {
     client.setConfig({
       headers: {
@@ -34,9 +32,41 @@ export const setAuthToken = (token?: string | null) => {
   }
 };
 
-// extract backend error message so error.message is always the backend message
-// instead of the generic axios "Request failed with status code 4xx"
-client.instance.interceptors.response.use(undefined, (error) => {
+function clearAuthStorage() {
+  removeItem(STORAGE_KEYS.AUTH_TOKEN);
+  removeItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
+  removeItem(STORAGE_KEYS.AUTH_USER);
+}
+
+// When a 401 response is received (and it's not an auth endpoint), try to revoke
+// the session on the backend before clearing local state. This prevents orphaned
+// sessions when localStorage gets cleared or the server invalidates the token.
+client.instance.interceptors.response.use(undefined, async (error) => {
+  const isAuth =
+    error?.config?.url?.includes("/auth/") ?? false;
+
+  if (
+    error?.response?.status === 401 &&
+    !isAuth &&
+    typeof window !== "undefined"
+  ) {
+    const refreshToken = getItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
+    if (refreshToken) {
+      try {
+        await fetch(`${API_BASE.replace("/api/v1", "")}/api/v1/auth/logout`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        });
+      } catch {
+        // best-effort: backend may already have revoked this session
+      }
+    }
+    clearAuthStorage();
+    // Notify auth-store to clear React state
+    window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+  }
+
   const backendMessage = error?.response?.data?.message;
   if (backendMessage) error.message = backendMessage;
   return Promise.reject(error);

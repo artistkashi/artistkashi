@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Filter, Grid, List, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useMemo, useRef, useState } from "react";
 
 const LEVELS = ["all_levels", "beginner", "intermediate", "advanced"] as const;
 const PAGE_SIZE = 12;
@@ -40,7 +40,7 @@ function matchPrice(price: string, min: number, max: number): boolean {
   return num >= min && (max <= 0 || num <= max);
 }
 
-export default function CoursesPage() {
+function CoursesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeLevel = searchParams.get("level") ?? "";
@@ -501,5 +501,13 @@ export default function CoursesPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function CoursesPage() {
+  return (
+    <Suspense fallback={null}>
+      <CoursesPageContent />
+    </Suspense>
   );
 }

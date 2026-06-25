@@ -25,6 +25,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import { GoogleLoginButton } from "@/components/auth/google-login-button";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { unwrap, unwrapVoid } from "@/api/client-service";
@@ -56,7 +57,7 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [greeting, setGreeting] = useState("Welcome");
-  const { user, logout, getAuthProviders, setPassword, changePassword } =
+  const { user, logout, getAuthProviders, setPassword, changePassword, linkGoogle, unlinkGoogle } =
     useAuth();
   const router = useRouter();
 
@@ -93,6 +94,9 @@ export default function DashboardPage() {
 
   const [showSignOutModal, setShowSignOutModal] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isLinking, setIsLinking] = useState(false);
+  const [isUnlinking, setIsUnlinking] = useState(false);
+  const [showGoogleLink, setShowGoogleLink] = useState(false);
 
   const {
     register,
@@ -262,6 +266,33 @@ export default function DashboardPage() {
       toast.error(getErrorMessage(error));
     } finally {
       setIsChangingPassword(false);
+    }
+  };
+
+  const handleLinkGoogle = async (credential: string) => {
+    setIsLinking(true);
+    try {
+      const result = await linkGoogle(credential);
+      setProviders(result as typeof providers);
+      toast.success("Google account linked successfully");
+      setShowGoogleLink(false);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsLinking(false);
+    }
+  };
+
+  const handleUnlinkGoogle = async () => {
+    setIsUnlinking(true);
+    try {
+      const result = await unlinkGoogle();
+      setProviders(result as typeof providers);
+      toast.success("Google account disconnected");
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setIsUnlinking(false);
     }
   };
 
@@ -814,6 +845,39 @@ export default function DashboardPage() {
                           providers?.providers.some(
                             (p) => p.provider === "google"
                           ) ?? false
+                        }
+                        action={
+                          providers?.providers.some(
+                            (p) => p.provider === "google"
+                          ) ? (
+                            <button
+                              onClick={handleUnlinkGoogle}
+                              disabled={isUnlinking}
+                              className="text-red text-xs font-mono tracking-widest uppercase hover:text-red/70 transition-colors disabled:opacity-50"
+                            >
+                              {isUnlinking ? "Disconnecting..." : "Disconnect"}
+                            </button>
+                          ) : showGoogleLink ? (
+                            <div className="flex flex-col items-end gap-2">
+                              <GoogleLoginButton
+                                onSuccess={handleLinkGoogle}
+                              />
+                              <button
+                                onClick={() => setShowGoogleLink(false)}
+                                className="text-text-muted text-tiny font-mono tracking-widest uppercase hover:text-text-main transition-colors"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setShowGoogleLink(true)}
+                              disabled={isLinking}
+                              className="text-gold text-xs font-mono tracking-widest uppercase hover:text-text-main transition-colors disabled:opacity-50"
+                            >
+                              {isLinking ? "Connecting..." : "Connect"}
+                            </button>
+                          )
                         }
                       />
                       <ProviderCard

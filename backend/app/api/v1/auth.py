@@ -183,6 +183,22 @@ async def list_sessions(user: CurrentUserDep, session: DatabaseDep):
     return SuccessResponse(message="Sessions retrieved successfully", data=sessions)
 
 
+@router.post("/link/google", response_model=SuccessResponse[AuthProvidersResponse])
+async def link_google(
+    payload: GoogleAuthRequest, user: CurrentUserDep, session: DatabaseDep
+):
+    result = await auth_service.link_google(
+        session=session, user=user, credential=payload.credential
+    )
+    return SuccessResponse(message="Google account linked successfully", data=result)
+
+
+@router.post("/unlink/google", response_model=SuccessResponse[AuthProvidersResponse])
+async def unlink_google(user: CurrentUserDep, session: DatabaseDep):
+    result = await auth_service.unlink_google(session=session, user=user)
+    return SuccessResponse(message="Google account unlinked successfully", data=result)
+
+
 @router.delete("/sessions/{session_id}", response_model=SuccessResponse[None])
 async def revoke_session(session_id: int, user: CurrentUserDep, session: DatabaseDep):
     await auth_service.revoke_session(

@@ -9366,6 +9366,56 @@ export type ListSessionsResponses = {
 
 export type ListSessionsResponse = ListSessionsResponses[keyof ListSessionsResponses];
 
+export type LinkGoogleData = {
+    body: GoogleAuthRequest;
+    path?: never;
+    query?: never;
+    url: '/api/auth/link/google';
+};
+
+export type LinkGoogleErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type LinkGoogleError = LinkGoogleErrors[keyof LinkGoogleErrors];
+
+export type LinkGoogleResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseAuthProvidersResponse;
+};
+
+export type LinkGoogleResponse = LinkGoogleResponses[keyof LinkGoogleResponses];
+
+export type UnlinkGoogleData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/unlink/google';
+};
+
+export type UnlinkGoogleErrors = {
+    /**
+     * Error 422
+     */
+    422: ErrorResponse;
+};
+
+export type UnlinkGoogleError = UnlinkGoogleErrors[keyof UnlinkGoogleErrors];
+
+export type UnlinkGoogleResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseAuthProvidersResponse;
+};
+
+export type UnlinkGoogleResponse = UnlinkGoogleResponses[keyof UnlinkGoogleResponses];
+
 export type RevokeSessionData = {
     body?: never;
     path: {

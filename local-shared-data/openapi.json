@@ -5306,6 +5306,88 @@
         ]
       }
     },
+    "/api/auth/link/google": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Link Google",
+        "operationId": "link_google",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleAuthRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_AuthProvidersResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/auth/unlink/google": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Unlink Google",
+        "operationId": "unlink_google",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_AuthProvidersResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
     "/api/auth/sessions/{session_id}": {
       "delete": {
         "tags": [

@@ -245,10 +245,10 @@ function ResetPasswordForm() {
             </div>
           </RevealBlock>
         </div>
+        </main>
       </AuthGuard>
     );
   }
-}
 
 export default function ResetPasswordPage() {
   return (

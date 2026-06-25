@@ -15,11 +15,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertTriangle, ArrowRight, Eye, EyeOff, Loader2, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-export default function SignupPage() {
+function SignupPageContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -305,5 +305,13 @@ export default function SignupPage() {
         </div>
       )}
     </AuthGuard>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupPageContent />
+    </Suspense>
   );
 }

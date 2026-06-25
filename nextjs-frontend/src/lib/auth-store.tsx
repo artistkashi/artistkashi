@@ -14,6 +14,7 @@ import {
   forgotPassword as forgotPasswordSdk,
   getAuthProviders as getAuthProvidersSdk,
   googleAuth,
+  linkGoogle as linkGoogleSdk,
   login as loginSdk,
   logout as logoutSdk,
   me as meSdk,
@@ -21,6 +22,7 @@ import {
   requestVerification as requestVerificationSdk,
   resetPassword as resetPasswordSdk,
   setPassword as setPasswordSdk,
+  unlinkGoogle as unlinkGoogleSdk,
   verifyEmail as verifyEmailSdk,
 } from "@/api/openapi-client";
 import {
@@ -40,7 +42,9 @@ interface AuthContextType {
     force?: boolean
   ) => Promise<UserRead>;
   signup: (input: UserCreate) => Promise<UserRead>;
-  googleLogin: (credential: string) => Promise<UserRead>;
+  googleLogin: (credential: string, force?: boolean) => Promise<UserRead>;
+  linkGoogle: (credential: string) => Promise<AuthProvidersResponse>;
+  unlinkGoogle: () => Promise<AuthProvidersResponse>;
   setPassword: (password: string) => Promise<void>;
   getAuthProviders: () => Promise<AuthProvidersResponse>;
   forgotPassword: (email: string) => Promise<void>;
@@ -91,6 +95,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let active = true;
 
+    const handleUnauthorized = () => {
+      clearSession();
+      setUser(null);
+      setToken(null);
+      setRefreshToken(null);
+    };
+
+    window.addEventListener("auth:unauthorized", handleUnauthorized);
+
     const bootstrap = async () => {
       const storedToken = getItem(STORAGE_KEYS.AUTH_TOKEN);
       const storedRefreshToken = getItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
@@ -137,6 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       active = false;
+      window.removeEventListener("auth:unauthorized", handleUnauthorized);
     };
   }, []);
 
@@ -178,6 +192,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     return afterLogin(tokenData);
+  };
+
+  const linkGoogle = async (credential: string) => {
+    const result = await unwrap(
+      linkGoogleSdk({ body: { credential } })
+    );
+    return result as AuthProvidersResponse;
+  };
+
+  const unlinkGoogle = async () => {
+    const result = await unwrap(unlinkGoogleSdk());
+    return result as AuthProvidersResponse;
   };
 
   const setPassword = async (password: string) => {
@@ -255,6 +281,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         signup,
         googleLogin,
+        linkGoogle,
+        unlinkGoogle,
         setPassword,
         getAuthProviders,
         forgotPassword,
