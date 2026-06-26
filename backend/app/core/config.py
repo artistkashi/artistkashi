@@ -61,6 +61,8 @@ class Settings(BaseSettings):
 
         return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
 
+    ENABLE_REDIS: bool = False
+    ENABLE_QUEUE: bool = False
     # ==================== EMAIL ====================
 
     MAIL_USERNAME: str | None = None

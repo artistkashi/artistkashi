@@ -105,14 +105,14 @@ def lifespan_factory(
 def create_application(
     router: APIRouter,
     settings: Settings,
-    enable_redis: bool = True,
-    enable_queue: bool = True,
     lifespan: Callable[[FastAPI], AsyncGenerator[None]] | None = None,
     **kwargs: object,
 ) -> FastAPI:
     if lifespan is None:
         lifespan = lifespan_factory(
-            settings=settings, enable_redis=enable_redis, enable_queue=enable_queue
+            settings=settings,
+            enable_redis=settings.ENABLE_REDIS,
+            enable_queue=settings.ENABLE_QUEUE,
         )
 
     kwargs.setdefault("title", settings.APP_NAME)

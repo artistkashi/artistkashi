@@ -14,8 +14,6 @@ app = create_application(
     router=api_router,
     settings=settings,
     generate_unique_id_function=simple_generate_unique_route_id,
-    enable_redis=True,
-    enable_queue=True,
 )
 
 logger.info(
