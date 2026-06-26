@@ -35,9 +35,7 @@ async def initialize_queue() -> None:
     logger.info("✅ Job queue initialized successfully")
 
 
-def lifespan_factory(
-    settings: Settings, enable_redis: bool = True, enable_queue: bool = True
-) -> Callable[[FastAPI], AsyncGenerator[None]]:
+def lifespan_factory(settings: Settings) -> Callable[[FastAPI], AsyncGenerator[None]]:
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
         logger.info(
@@ -56,13 +54,13 @@ def lifespan_factory(
                 "(use Alembic migrations in production)"
             )
 
-        if enable_redis:
+        if settings.ENABLE_REDIS:
             try:
                 await initialize_redis()
             except Exception:
                 logger.exception("Redis initialization failed")
 
-        if enable_queue:
+        if settings.ENABLE_QUEUE:
             try:
                 await initialize_queue()
             except Exception:
@@ -83,14 +81,14 @@ def lifespan_factory(
 
         logger.info("🛑 Shutting down application...")
 
-        if enable_queue:
+        if settings.ENABLE_QUEUE:
             try:
                 await close_queue()
                 logger.info("📋 Job queue closed")
             except Exception:
                 logger.exception("Queue shutdown failed")
 
-        if enable_redis:
+        if settings.ENABLE_REDIS:
             try:
                 await close_redis()
                 logger.info("🔴 Redis connection closed")
@@ -109,11 +107,7 @@ def create_application(
     **kwargs: object,
 ) -> FastAPI:
     if lifespan is None:
-        lifespan = lifespan_factory(
-            settings=settings,
-            enable_redis=settings.ENABLE_REDIS,
-            enable_queue=settings.ENABLE_QUEUE,
-        )
+        lifespan = lifespan_factory(settings=settings)
 
     kwargs.setdefault("title", settings.APP_NAME)
     kwargs.setdefault("description", settings.APP_DESCRIPTION)
