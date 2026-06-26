@@ -4,13 +4,13 @@ set -e
 
 echo "=== Starting ArtistKashi Backend ==="
 
-# Run database migrations
 echo "Running database migrations..."
 alembic upgrade head
 
-# Create admin user if not exists
 echo "Checking/Creating admin user..."
-python scripts/create_admin.py
+python -m commands.create_admin
 
 echo "Starting application..."
-exec fastapi run app/main.py --host 0.0.0.0 --port 8000
+exec fastapi run app/main.py \
+    --host 0.0.0.0 \
+    --port ${PORT:-8000}
