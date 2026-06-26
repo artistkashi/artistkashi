@@ -609,6 +609,24 @@ export type BodyAuthLogin = {
 };
 
 /**
+ * Body_users-update_own_profile
+ */
+export type BodyUsersUpdateOwnProfile = {
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
+     * Profile Picture File
+     */
+    profile_picture_file?: Blob | File | null;
+};
+
+/**
  * CartItemCreate
  */
 export type CartItemCreate = {
@@ -5005,24 +5023,6 @@ export type UserSessionRead = {
      * User Id
      */
     user_id: string;
-};
-
-/**
- * UserUpdate
- */
-export type UserUpdate = {
-    /**
-     * Full Name
-     */
-    full_name?: string | null;
-    /**
-     * Phone
-     */
-    phone?: string | null;
-    /**
-     * Profile Picture
-     */
-    profile_picture?: string | null;
 };
 
 /**
@@ -9509,7 +9509,7 @@ export type ReadOwnProfileResponses = {
 export type ReadOwnProfileResponse = ReadOwnProfileResponses[keyof ReadOwnProfileResponses];
 
 export type UpdateOwnProfileData = {
-    body: UserUpdate;
+    body?: BodyUsersUpdateOwnProfile;
     path?: never;
     query?: never;
     url: '/api/profiles/me';

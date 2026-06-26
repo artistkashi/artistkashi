@@ -5,6 +5,7 @@ import { productsListProducts } from "@/api/openapi-client";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { PrimaryBtn } from "@/components/ui/buttons";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 import { RevealBlock } from "@/components/ui/misc";
 import {
   Pagination,
@@ -385,7 +386,7 @@ export default function ShopPage() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-24">
-            <div className="luxury-loader luxury-loader-gold loader-lg" />
+            <LuxuryLoader size="lg" />
           </div>
         ) : paginatedProducts.length === 0 ? (
           <div className="text-center py-24 border border-dashed border-border rounded bg-gold-bg">

@@ -1143,14 +1143,15 @@ export const readOwnProfile = <ThrowOnError extends boolean = false>(options?: O
 /**
  * Update Own Profile
  */
-export const updateOwnProfile = <ThrowOnError extends boolean = false>(options: Options<UpdateOwnProfileData, ThrowOnError>) => (options.client ?? client).patch<UpdateOwnProfileResponses, UpdateOwnProfileErrors, ThrowOnError>({
+export const updateOwnProfile = <ThrowOnError extends boolean = false>(options?: Options<UpdateOwnProfileData, ThrowOnError>) => (options?.client ?? client).patch<UpdateOwnProfileResponses, UpdateOwnProfileErrors, ThrowOnError>({
+    ...formDataBodySerializer,
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/profiles/me',
     ...options,
     headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
+        'Content-Type': null,
+        ...options?.headers
     }
 });
 

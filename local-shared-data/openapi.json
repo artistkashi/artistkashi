@@ -5574,13 +5574,12 @@
         "operationId": "update_own_profile",
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/UserUpdate"
+                "$ref": "#/components/schemas/Body_users-update_own_profile"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -9364,6 +9363,46 @@
           "password"
         ],
         "title": "Body_auth-login"
+      },
+      "Body_users-update_own_profile": {
+        "properties": {
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "profile_picture_file": {
+            "anyOf": [
+              {
+                "type": "string",
+                "contentMediaType": "application/octet-stream"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Picture File"
+          }
+        },
+        "type": "object",
+        "title": "Body_users-update_own_profile"
       },
       "CartItemCreate": {
         "properties": {
@@ -17767,47 +17806,6 @@
           "user_id"
         ],
         "title": "UserSessionRead"
-      },
-      "UserUpdate": {
-        "properties": {
-          "full_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Full Name"
-          },
-          "phone": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Phone"
-          },
-          "profile_picture": {
-            "anyOf": [
-              {
-                "type": "string",
-                "pattern": "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Profile Picture"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "UserUpdate"
       },
       "ValidationError": {
         "properties": {

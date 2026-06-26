@@ -19,7 +19,9 @@ import {
 import { GhostBtn, PrimaryBtn } from "@/components/ui/buttons";
 import { CourseReviewsSection } from "@/components/ui/CourseReviewsSection";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
+import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 import { RevealBlock } from "@/components/ui/misc";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { ModalType, StatusModal } from "@/components/ui/StatusModal";
 import { useAuth } from "@/lib/auth-store";
 import { getSafeReturnTo } from "@/lib/auth-utils";
@@ -564,22 +566,8 @@ export default function CourseDetailPage({
   if (courseLoading) {
     return (
       <main className="min-h-screen">
-        <div className="animate-pulse min-h-[85vh] flex items-center pt-24 bg-dark">
-          <div className="w-full max-w-360 mx-auto px-8 lg:px-16 py-24">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-              <div className="lg:col-span-8 space-y-6">
-                <div className="h-4 w-32 bg-muted" />
-                <div className="h-10 w-3/4 bg-muted" />
-                <div className="h-5 w-1/2 bg-muted" />
-                <div className="h-4 w-48 bg-muted" />
-              </div>
-              <div className="lg:col-span-4 space-y-4">
-                <div className="aspect-video bg-muted" />
-                <div className="h-8 w-1/3 bg-muted" />
-                <div className="h-12 bg-muted" />
-              </div>
-            </div>
-          </div>
+        <div className="min-h-screen flex items-center justify-center">
+          <LuxuryLoader size="lg" />
         </div>
       </main>
     );

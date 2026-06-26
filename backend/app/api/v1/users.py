@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, File, Form, Query, UploadFile
 from fastcrud import compute_offset
 
 from app.api.dependencies import CurrentUserDep, DatabaseDep
@@ -14,7 +14,6 @@ from app.schemas.user import (
     DeleteAccountRequest,
     PublicUserRead,
     UserProfileRead,
-    UserUpdate,
 )
 from app.services.address_service import address_service
 from app.services.user_service import user_service
@@ -68,12 +67,19 @@ async def list_profiles(
 
 @router.patch("/profiles/me", response_model=SuccessResponse[UserProfileRead])
 async def update_own_profile(
-    payload: UserUpdate,
     user: CurrentUserDep,
     session: DatabaseDep,
+    full_name: str | None = Form(None),
+    phone: str | None = Form(None),
+    profile_picture_file: UploadFile | None = File(None),
 ):
-    update_data = payload.model_dump(exclude_unset=True)
-    if not update_data:
+    update_data: dict[str, str | None] = {}
+    if full_name is not None:
+        update_data["full_name"] = full_name
+    if phone is not None:
+        update_data["phone"] = phone
+
+    if not update_data and not profile_picture_file:
         return SuccessResponse(
             message="No fields to update",
             data=await crud_user.get_with_relations(
@@ -88,6 +94,7 @@ async def update_own_profile(
         session=session,
         user_id=user.id,
         update_data=update_data,
+        profile_picture_file=profile_picture_file,
     )
 
     updated = await crud_user.get_with_relations(

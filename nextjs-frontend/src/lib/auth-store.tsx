@@ -56,6 +56,7 @@ interface AuthContextType {
   requestVerification: (email: string) => Promise<void>;
   verifyEmail: (token: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -274,6 +275,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      const current = await unwrap(meSdk());
+      if (current) {
+        setUser(current);
+        setJSON(STORAGE_KEYS.AUTH_USER, current);
+      }
+    } catch {
+      // Silent fail - user may not be logged in
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -291,6 +304,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         requestVerification,
         verifyEmail,
         logout,
+        refreshUser,
         isLoading,
       }}
     >

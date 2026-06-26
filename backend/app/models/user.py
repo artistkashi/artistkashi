@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from app.models.course_payment import CoursePayment
     from app.models.lesson_progress import LessonProgress
     from app.models.order import Order
-    from app.models.review import Review
+    from app.models.review import Review, ReviewReport
     from app.models.user_auth_provider import UserAuthProvider
     from app.models.user_session import UserSession
     from app.models.wishlist import Wishlist

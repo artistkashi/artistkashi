@@ -42,6 +42,7 @@ import React, { useState } from "react";
 import { useForm, type Path } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -766,7 +767,7 @@ function CatalogTabPanel({
             className={cn("w-full justify-center gap-2.5 px-6 py-3")}
           >
             {creating ? (
-              <div className="luxury-loader scale-50" />
+              <LuxuryLoader size="sm" />
             ) : (
               <>
                 <Plus size={15} />

@@ -210,7 +210,7 @@ export function AnimatedCounter({
   const finalFontSize = fontSize ?? 28;
 
   return (
-    <span className="inline-flex items-baseline gap-0.5">
+    <span className="flex items-center gap-0.5">
       <Counter
         value={target}
         fontSize={finalFontSize}
@@ -221,10 +221,7 @@ export function AnimatedCounter({
         horizontalPadding={0}
       />
       {suffix && (
-        <span
-          className="flex items-center"
-          style={{ fontSize: finalFontSize }}
-        >
+        <span className="flex items-center" style={{ fontSize: finalFontSize }}>
           {suffix}
         </span>
       )}

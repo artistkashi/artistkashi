@@ -78,13 +78,7 @@ class UserCreateDB(BaseModel):
 class UserUpdate(BaseModel):
     full_name: str | None = None
     phone: str | None = None
-    profile_picture: Annotated[
-        str | None,
-        Field(
-            pattern=r"^(https?|ftp)://[^\s/$.?#].[^\s]*$",
-            default=None,
-        ),
-    ]
+    profile_picture: str | None = None
     model_config = ConfigDict(extra="forbid")
 
 

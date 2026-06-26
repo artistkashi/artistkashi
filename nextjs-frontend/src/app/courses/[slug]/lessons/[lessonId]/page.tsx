@@ -43,7 +43,9 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
+import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 function formatDuration(seconds: number | undefined | null): string {
@@ -417,7 +419,11 @@ export default function CourseLessonPlayerPage({
   const fullscreenRef = useRef<HTMLDivElement>(null);
   const completedRef = useRef(false);
 
-  const { data: course } = useQuery<CourseRead>({
+  const {
+    data: course,
+    isError: courseError,
+    error: courseErrorObj,
+  } = useQuery<CourseRead>({
     queryKey: ["course", slug],
     queryFn: () => fetchCourseBySlug(slug),
   });
@@ -450,7 +456,12 @@ export default function CourseLessonPlayerPage({
     enabled: !!courseId,
   });
 
-  const { data: lessonVideo, isPending: lessonVideoLoading } = useQuery({
+  const {
+    data: lessonVideo,
+    isPending: lessonVideoLoading,
+    isError: lessonError,
+    error: lessonErrorObj,
+  } = useQuery({
     queryKey: ["lesson-video", courseId, lessonId],
     queryFn: () =>
       unwrap(
@@ -587,6 +598,26 @@ export default function CourseLessonPlayerPage({
       document.title = course.title;
     }
   }, [course?.title]);
+
+  useEffect(() => {
+    const err = courseErrorObj as
+      | { response?: { status?: number } }
+      | null
+      | undefined;
+    if (courseError && err?.response?.status === 404) {
+      notFound();
+    }
+  }, [courseError, courseErrorObj]);
+
+  useEffect(() => {
+    const err = lessonErrorObj as
+      | { response?: { status?: number } }
+      | null
+      | undefined;
+    if (lessonError && err?.response?.status === 404) {
+      notFound();
+    }
+  }, [lessonError, lessonErrorObj]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -736,6 +767,16 @@ export default function CourseLessonPlayerPage({
     completedCount != null && totalLessons > 0
       ? Math.round((completedCount / totalLessons) * 100)
       : 0;
+
+  if (!course) {
+    return (
+      <AuthGuard allowedRoles={["user", "admin"]}>
+        <main className="h-screen flex flex-col bg-dark items-center justify-center">
+          <LuxuryLoader size="lg" />
+        </main>
+      </AuthGuard>
+    );
+  }
 
   return (
     <AuthGuard allowedRoles={["user", "admin"]}>

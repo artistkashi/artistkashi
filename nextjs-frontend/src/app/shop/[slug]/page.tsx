@@ -38,7 +38,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { notFound, usePathname, useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -841,6 +841,10 @@ export default function ProductDetailPage({
 
   useEffect(() => {
     if (productQuery.isError) {
+      const err = productQuery.error as { response?: { status?: number } } | null;
+      if (err?.response?.status === 404) {
+        notFound();
+      }
       console.error("Product query error:", productQuery.error);
     }
   }, [productQuery.isError, productQuery.error]);

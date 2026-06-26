@@ -10,6 +10,7 @@ import {
   CourseCardListItem,
 } from "@/components/lms/CourseCard";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 import { RevealBlock } from "@/components/ui/misc";
 import {
   Pagination,
@@ -415,7 +416,7 @@ function CoursesPageContent() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-24">
-            <div className="luxury-loader luxury-loader-gold loader-lg" />
+            <LuxuryLoader size="lg" />
           </div>
         ) : (
           <>

@@ -44,6 +44,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 
 // ─── Filter types ───────────────────────────────────────────────────────────
 
@@ -1075,7 +1076,7 @@ export default function AdminOrdersPage() {
                   exit={{ opacity: 0 }}
                   className="absolute inset-0 z-20 bg-dark/60 backdrop-blur-xs flex flex-col items-center justify-center gap-4 rounded-sm"
                 >
-                  <div className="luxury-loader luxury-loader-gold loader-lg" />
+                  <LuxuryLoader size="lg" />
                   <p className="text-2xs font-mono text-gold uppercase tracking-[0.4em] animate-pulse">
                     Synchronizing Archive
                   </p>

@@ -26,7 +26,7 @@ export function GoogleLoginButton({
   }
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center w-full">
       <GoogleLogin
         onSuccess={handleSuccess}
         onError={onError}
@@ -34,7 +34,7 @@ export function GoogleLoginButton({
         size="large"
         shape="rectangular"
         text="continue_with"
-        width="400"
+        width="300"
       />
     </div>
   );

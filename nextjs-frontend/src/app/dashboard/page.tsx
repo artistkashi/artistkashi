@@ -29,7 +29,7 @@ import { GoogleLoginButton } from "@/components/auth/google-login-button";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { unwrap, unwrapVoid } from "@/api/client-service";
-import type { CourseListRead, OrderRead } from "@/api/openapi-client";
+import type { BodyUsersUpdateOwnProfile, CourseListRead, OrderRead } from "@/api/openapi-client";
 import {
   coursesListCourses,
   listMyEnrollments,
@@ -52,12 +52,13 @@ import { CourseCard } from "@/components/dashboard/CourseCard";
 import { DangerZone } from "@/components/dashboard/DangerZone";
 import { ProviderCard } from "@/components/dashboard/ProviderCard";
 import { SessionManager } from "@/components/dashboard/SessionManager";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [greeting, setGreeting] = useState("Welcome");
-  const { user, logout, getAuthProviders, setPassword, changePassword, linkGoogle, unlinkGoogle } =
+  const { user, logout, getAuthProviders, setPassword, changePassword, linkGoogle, unlinkGoogle, refreshUser } =
     useAuth();
   const router = useRouter();
 
@@ -81,6 +82,7 @@ export default function DashboardPage() {
     user?.profile_picture || null
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const selectedFileRef = useRef<File | null>(null);
 
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [cpCurrent, setCpCurrent] = useState("");
@@ -96,7 +98,7 @@ export default function DashboardPage() {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isLinking, setIsLinking] = useState(false);
   const [isUnlinking, setIsUnlinking] = useState(false);
-  const [showGoogleLink, setShowGoogleLink] = useState(false);
+  const [showGoogleModal, setShowGoogleModal] = useState(false);
 
   const {
     register,
@@ -109,7 +111,6 @@ export default function DashboardPage() {
     mode: "onBlur",
     defaultValues: {
       fullName: user?.full_name || user?.email || "",
-      email: user?.email || "",
       phone: user?.phone || "",
     },
   });
@@ -148,7 +149,6 @@ export default function DashboardPage() {
     if (user) {
       reset({
         fullName: user.full_name || user.email || "",
-        email: user.email || "",
         phone: user.phone || "",
       });
       setProfilePicture(user.profile_picture || null);
@@ -158,14 +158,20 @@ export default function DashboardPage() {
   const onProfileSubmit = async (data: ProfileFormValues) => {
     setIsSavingProfile(true);
     try {
-      const body: Record<string, string | undefined> = {};
-      if (data.fullName !== user?.full_name) body.full_name = data.fullName;
+      const body: BodyUsersUpdateOwnProfile = {};
+      if (data.fullName !== user?.full_name)
+        body.full_name = data.fullName;
       if (data.phone !== (user?.phone || ""))
-        body.phone = data.phone || undefined;
+        body.phone = data.phone ?? "";
+      if (selectedFileRef.current)
+        body.profile_picture_file = selectedFileRef.current;
 
       if (Object.keys(body).length > 0) {
         await unwrapVoid(updateOwnProfile({ body }));
       }
+
+      selectedFileRef.current = null;
+      await refreshUser();
 
       toast.success("Profile updated successfully");
       setIsEditing(false);
@@ -189,17 +195,13 @@ export default function DashboardPage() {
       return;
     }
 
+    selectedFileRef.current = file;
+
     const reader = new FileReader();
     reader.onload = (event) => {
       setProfilePicture(event.target?.result as string);
     };
     reader.readAsDataURL(file);
-
-    // Note: Profile picture upload endpoint not available in backend.
-    // User can set profile_picture URL via profile update.
-    toast.success(
-      "Profile picture updated locally. Save profile to persist URL."
-    );
   };
 
   const loadProviders = useCallback(async () => {
@@ -275,7 +277,7 @@ export default function DashboardPage() {
       const result = await linkGoogle(credential);
       setProviders(result as typeof providers);
       toast.success("Google account linked successfully");
-      setShowGoogleLink(false);
+      setShowGoogleModal(false);
     } catch (error) {
       toast.error(getErrorMessage(error));
     } finally {
@@ -345,7 +347,7 @@ export default function DashboardPage() {
         <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-16 py-8 md:py-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
             {/* Sidebar */}
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-3 lg:sticky lg:top-24 lg:self-start">
               <div className="border border-border bg-surface rounded overflow-hidden">
                 <div className="p-6 border-b border-border">
                   <div className="w-14 h-14 rounded-full overflow-hidden bg-gold-bg border border-gold/20 flex items-center justify-center mb-4">
@@ -726,31 +728,15 @@ export default function DashboardPage() {
                           </div>
                         </div>
 
-                        {/* Email */}
+                        {/* Email (read-only) */}
                         <div className="px-6 md:px-8 py-5 md:py-6 flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
                           <label className="text-label font-mono text-text-muted tracking-widest uppercase md:w-32 shrink-0">
                             Email
                           </label>
                           <div className="flex-1">
-                            {isEditing ? (
-                              <input
-                                {...register("email")}
-                                type="email"
-                                className={cn(
-                                  "w-full glass-input rounded text-text-main px-4 py-3 text-sm focus:border-gold transition-colors",
-                                  errors.email ? "border-red" : "border-border"
-                                )}
-                              />
-                            ) : (
-                              <div className="text-text-main text-sm py-3">
-                                {user?.email}
-                              </div>
-                            )}
-                            {errors.email && (
-                              <p className="mt-1 text-xs text-red font-mono">
-                                {errors.email.message}
-                              </p>
-                            )}
+                            <div className="text-text-main text-sm py-3">
+                              {user?.email}
+                            </div>
                           </div>
                         </div>
 
@@ -789,13 +775,13 @@ export default function DashboardPage() {
                               type="button"
                               onClick={() => {
                                 setIsEditing(false);
+                                selectedFileRef.current = null;
                                 setProfilePicture(
                                   user?.profile_picture || null
                                 );
                                 reset({
                                   fullName:
                                     user?.full_name || user?.email || "",
-                                  email: user?.email || "",
                                   phone: user?.phone || "",
                                 });
                               }}
@@ -831,305 +817,307 @@ export default function DashboardPage() {
                     </form>
                   </div>
 
+                  {/* Saved Addresses */}
+                  <AddressManager />
+
                   {/* Connected Sign-In Methods */}
                   <div>
                     <h2 className="text-text-main font-bold text-2xl md:text-3xl mb-6">
                       Connected Sign-In Methods
                     </h2>
-                    <div className="border border-border bg-surface rounded overflow-hidden divide-y divide-border">
-                      <ProviderCard
-                        name="Google"
-                        description="Sign in with your Google account"
-                        icon={<Globe size={18} className="text-gold" />}
-                        isConnected={
-                          providers?.providers.some(
-                            (p) => p.provider === "google"
-                          ) ?? false
-                        }
-                        action={
-                          providers?.providers.some(
-                            (p) => p.provider === "google"
-                          ) ? (
-                            <button
-                              onClick={handleUnlinkGoogle}
-                              disabled={isUnlinking}
-                              className="text-red text-xs font-mono tracking-widest uppercase hover:text-red/70 transition-colors disabled:opacity-50"
-                            >
-                              {isUnlinking ? "Disconnecting..." : "Disconnect"}
-                            </button>
-                          ) : showGoogleLink ? (
-                            <div className="flex flex-col items-end gap-2">
-                              <GoogleLoginButton
-                                onSuccess={handleLinkGoogle}
-                              />
-                              <button
-                                onClick={() => setShowGoogleLink(false)}
-                                className="text-text-muted text-tiny font-mono tracking-widest uppercase hover:text-text-main transition-colors"
-                              >
-                                Cancel
-                              </button>
+                    {!providers ? (
+                      <div className="border border-border bg-surface rounded overflow-hidden divide-y divide-border">
+                        {Array.from({ length: 2 }).map((_, i) => (
+                          <div key={i} className="px-6 md:px-8 py-5 md:py-6 flex items-center gap-4">
+                            <Skeleton className="w-10 h-10 rounded-sm shrink-0" />
+                            <div className="flex-1 space-y-2">
+                              <Skeleton className="h-4 w-24" />
+                              <Skeleton className="h-3 w-40" />
                             </div>
-                          ) : (
-                            <button
-                              onClick={() => setShowGoogleLink(true)}
-                              disabled={isLinking}
-                              className="text-gold text-xs font-mono tracking-widest uppercase hover:text-text-main transition-colors disabled:opacity-50"
-                            >
-                              {isLinking ? "Connecting..." : "Connect"}
-                            </button>
-                          )
-                        }
-                      />
-                      <ProviderCard
-                        name="Password"
-                        description="Sign in with your email and password"
-                        icon={<KeyRound size={18} className="text-gold" />}
-                        isConnected={providers?.has_password ?? false}
-                        action={
-                          !providers?.has_password ? (
-                            <button
-                              onClick={() => setShowSetPassword(true)}
-                              className="text-gold text-xs font-mono tracking-widest uppercase hover:text-text-main transition-colors"
-                            >
-                              Set Password
-                            </button>
-                          ) : undefined
-                        }
-                      />
-                    </div>
-
-                    {/* Set Password Form */}
-                    {showSetPassword && (
-                      <div className="mt-3 border border-border bg-surface rounded p-5">
-                        <h2 className="text-text-main font-semibold text-lg mb-1">
-                          Set a Password
-                        </h2>
-                        <p className="text-text-muted text-tiny font-mono mb-3">
-                          Add password-based login to your account so you can
-                          sign in without Google.
-                        </p>
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                          <div className="relative flex-1">
-                            <input
-                              type={showNewPassword ? "text" : "password"}
-                              value={newPassword}
-                              onChange={(e) => setNewPassword(e.target.value)}
-                              placeholder="Enter new password"
-                              className="w-full glass-input rounded text-text-main px-3 py-2.5 pr-10 text-sm focus:border-gold transition-colors"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowNewPassword((v) => !v)}
-                              className="absolute inset-y-0 right-0 flex items-center px-3 text-text-muted hover:text-text-main transition-colors"
-                              aria-label={
-                                showNewPassword
-                                  ? "Hide password"
-                                  : "Show password"
-                              }
-                            >
-                              {showNewPassword ? (
-                                <EyeOff size={14} />
-                              ) : (
-                                <Eye size={14} />
-                              )}
-                            </button>
+                            <Skeleton className="h-4 w-20 shrink-0" />
                           </div>
-                          <PrimaryBtn
-                            onClick={handleSetPassword}
-                            disabled={isSettingPassword}
-                            className="shrink-0 px-6! text-xs! py-3!"
-                          >
-                            {isSettingPassword ? (
-                              <Loader2 size={14} className="animate-spin" />
-                            ) : (
-                              "Set Password"
-                            )}
-                          </PrimaryBtn>
-                          <button
-                            onClick={() => {
-                              setShowSetPassword(false);
-                              setNewPassword("");
-                            }}
-                            className="text-text-muted text-xs font-mono tracking-widest uppercase hover:text-text-main transition-colors shrink-0"
-                          >
-                            Cancel
-                          </button>
-                        </div>
+                        ))}
                       </div>
-                    )}
-                  </div>
-
-                  {/* Change Password */}
-
-                  {providers?.has_password && (
-                    <div>
-                      <div className="border border-border bg-surface rounded overflow-hidden">
-                        <div className="px-5 md:px-6 py-4 border-b border-border">
-                          <h2 className="text-text-main font-semibold text-lg">
-                            Change Password
-                          </h2>
-                          <p className="text-text-muted text-tiny font-mono mt-0.5">
-                            Use 8+ characters with one uppercase letter and one
-                            special character.
-                          </p>
+                    ) : (
+                      <>
+                        <div className="border border-border bg-surface rounded overflow-hidden divide-y divide-border">
+                          <ProviderCard
+                            name="Google"
+                            description="Sign in with your Google account"
+                            icon={<Globe size={18} className="text-gold" />}
+                            isConnected={
+                              providers.providers.some(
+                                (p) => p.provider === "google"
+                              )
+                            }
+                            action={
+                              providers.providers.some(
+                                (p) => p.provider === "google"
+                              ) ? (
+                                <button
+                                  onClick={handleUnlinkGoogle}
+                                  disabled={isUnlinking}
+                                  className="text-red text-xs font-mono tracking-widest uppercase hover:text-red/70 transition-colors disabled:opacity-50"
+                                >
+                                  {isUnlinking ? "Disconnecting..." : "Disconnect"}
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => setShowGoogleModal(true)}
+                                  disabled={isLinking}
+                                  className="text-gold text-xs font-mono tracking-widest uppercase hover:text-text-main transition-colors disabled:opacity-50"
+                                >
+                                  {isLinking ? "Connecting..." : "Connect"}
+                                </button>
+                              )
+                            }
+                          />
+                          <ProviderCard
+                            name="Password"
+                            description="Sign in with your email and password"
+                            icon={<KeyRound size={18} className="text-gold" />}
+                            isConnected={providers.has_password}
+                            action={
+                              !providers.has_password ? (
+                                <button
+                                  onClick={() => setShowSetPassword(true)}
+                                  className="text-gold text-xs font-mono tracking-widest uppercase hover:text-text-main transition-colors"
+                                >
+                                  Set Password
+                                </button>
+                              ) : undefined
+                            }
+                          />
                         </div>
-                        {showChangePassword ? (
-                          <div className="p-5 space-y-4">
-                            <div>
-                              <label className="block text-label font-mono text-text-muted tracking-widest uppercase mb-1">
-                                Current Password
-                              </label>
-                              <div className="relative">
+
+                        {/* Set Password Form */}
+                        {showSetPassword && (
+                          <div className="mt-3 border border-border bg-surface rounded p-5">
+                            <h2 className="text-text-main font-semibold text-lg mb-1">
+                              Set a Password
+                            </h2>
+                            <p className="text-text-muted text-tiny font-mono mb-3">
+                              Add password-based login to your account so you can
+                              sign in without Google.
+                            </p>
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                              <div className="relative flex-1">
                                 <input
-                                  type={showCpCurrent ? "text" : "password"}
-                                  value={cpCurrent}
-                                  onChange={(e) => setCpCurrent(e.target.value)}
-                                  className="w-full glass-input rounded text-text-main px-3 py-2.5 pr-10 text-sm focus:border-gold transition-colors"
-                                  placeholder="Enter current password"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => setShowCpCurrent((v) => !v)}
-                                  className="absolute inset-y-0 right-0 flex items-center px-3 text-text-muted hover:text-text-main transition-colors"
-                                  aria-label={
-                                    showCpCurrent
-                                      ? "Hide password"
-                                      : "Show password"
-                                  }
-                                >
-                                  {showCpCurrent ? (
-                                    <EyeOff size={14} />
-                                  ) : (
-                                    <Eye size={14} />
-                                  )}
-                                </button>
-                              </div>
-                            </div>
-                            <div>
-                              <label className="block text-label font-mono text-text-muted tracking-widest uppercase mb-1">
-                                New Password
-                              </label>
-                              <div className="relative">
-                                <input
-                                  type={showCpNew ? "text" : "password"}
-                                  value={cpNew}
-                                  onChange={(e) => setCpNew(e.target.value)}
-                                  className="w-full glass-input rounded text-text-main px-3 py-2.5 pr-10 text-sm focus:border-gold transition-colors"
+                                  type={showNewPassword ? "text" : "password"}
+                                  value={newPassword}
+                                  onChange={(e) => setNewPassword(e.target.value)}
                                   placeholder="Enter new password"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => setShowCpNew((v) => !v)}
-                                  className="absolute inset-y-0 right-0 flex items-center px-3 text-text-muted hover:text-text-main transition-colors"
-                                  aria-label={
-                                    showCpNew
-                                      ? "Hide password"
-                                      : "Show password"
-                                  }
-                                >
-                                  {showCpNew ? (
-                                    <EyeOff size={14} />
-                                  ) : (
-                                    <Eye size={14} />
-                                  )}
-                                </button>
-                              </div>
-                            </div>
-                            <div>
-                              <label className="block text-label font-mono text-text-muted tracking-widest uppercase mb-1">
-                                Confirm New Password
-                              </label>
-                              <div className="relative">
-                                <input
-                                  type={showCpConfirm ? "text" : "password"}
-                                  value={cpConfirm}
-                                  onChange={(e) => setCpConfirm(e.target.value)}
                                   className="w-full glass-input rounded text-text-main px-3 py-2.5 pr-10 text-sm focus:border-gold transition-colors"
-                                  placeholder="Confirm new password"
                                 />
                                 <button
                                   type="button"
-                                  onClick={() => setShowCpConfirm((v) => !v)}
+                                  onClick={() => setShowNewPassword((v) => !v)}
                                   className="absolute inset-y-0 right-0 flex items-center px-3 text-text-muted hover:text-text-main transition-colors"
                                   aria-label={
-                                    showCpConfirm
+                                    showNewPassword
                                       ? "Hide password"
                                       : "Show password"
                                   }
                                 >
-                                  {showCpConfirm ? (
+                                  {showNewPassword ? (
                                     <EyeOff size={14} />
                                   ) : (
                                     <Eye size={14} />
                                   )}
                                 </button>
                               </div>
-                            </div>
-                            {cpErrors.length > 0 && (
-                              <div className="p-2.5 bg-red/5 border border-red/20 rounded">
-                                <ul className="space-y-0.5">
-                                  {cpErrors.map((err, i) => (
-                                    <li
-                                      key={i}
-                                      className="text-tiny text-red font-mono flex items-start gap-1.5"
-                                    >
-                                      <span className="mt-0.5 shrink-0">•</span>
-                                      {err}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            <div className="flex items-center justify-end gap-3 pt-1">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setShowChangePassword(false);
-                                  setCpCurrent("");
-                                  setCpNew("");
-                                  setCpConfirm("");
-                                  setCpErrors([]);
-                                }}
-                                disabled={isChangingPassword}
-                                className="text-text-muted text-xs font-mono tracking-widest uppercase hover:text-text-main transition-colors disabled:opacity-50"
-                              >
-                                Cancel
-                              </button>
                               <PrimaryBtn
-                                onClick={handleChangePassword}
-                                disabled={isChangingPassword}
-                                className="px-6! text-xs! py-3!"
-                              >
-                                {isChangingPassword ? (
-                                  <Loader2 size={14} className="animate-spin" />
-                                ) : (
-                                  "Save Password"
-                                )}
-                              </PrimaryBtn>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="p-5">
-                            <div className="flex items-center justify-between gap-4">
-                              <p className="text-text-muted text-xs font-mono">
-                                Use a strong, unique password.
-                              </p>
-                              <PrimaryBtn
-                                type="button"
-                                onClick={() => setShowChangePassword(true)}
+                                onClick={handleSetPassword}
+                                disabled={isSettingPassword}
                                 className="shrink-0 px-6! text-xs! py-3!"
                               >
-                                <KeyRound size={14} /> Change Password
+                                {isSettingPassword ? (
+                                  <Loader2 size={14} className="animate-spin" />
+                                ) : (
+                                  "Set Password"
+                                )}
                               </PrimaryBtn>
+                              <button
+                                onClick={() => {
+                                  setShowSetPassword(false);
+                                  setNewPassword("");
+                                }}
+                                className="text-text-muted text-xs font-mono tracking-widest uppercase hover:text-text-main transition-colors shrink-0"
+                              >
+                                Cancel
+                              </button>
                             </div>
                           </div>
                         )}
-                      </div>
-                    </div>
-                  )}
 
-                  {/* Saved Addresses */}
-                  <AddressManager />
+                        {/* Change Password */}
+                        {providers.has_password && (
+                          <div className="mt-3 border border-border bg-surface rounded overflow-hidden">
+                            <div className="px-5 md:px-6 py-4 border-b border-border">
+                              <h2 className="text-text-main font-semibold text-lg">
+                                Change Password
+                              </h2>
+                              <p className="text-text-muted text-tiny font-mono mt-0.5">
+                                Use 8+ characters with one uppercase letter and one
+                                special character.
+                              </p>
+                            </div>
+                            {showChangePassword ? (
+                              <div className="p-5 space-y-4">
+                                <div>
+                                  <label className="block text-label font-mono text-text-muted tracking-widest uppercase mb-1">
+                                    Current Password
+                                  </label>
+                                  <div className="relative">
+                                    <input
+                                      type={showCpCurrent ? "text" : "password"}
+                                      value={cpCurrent}
+                                      onChange={(e) => setCpCurrent(e.target.value)}
+                                      className="w-full glass-input rounded text-text-main px-3 py-2.5 pr-10 text-sm focus:border-gold transition-colors"
+                                      placeholder="Enter current password"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowCpCurrent((v) => !v)}
+                                      className="absolute inset-y-0 right-0 flex items-center px-3 text-text-muted hover:text-text-main transition-colors"
+                                      aria-label={
+                                        showCpCurrent
+                                          ? "Hide password"
+                                          : "Show password"
+                                      }
+                                    >
+                                      {showCpCurrent ? (
+                                        <EyeOff size={14} />
+                                      ) : (
+                                        <Eye size={14} />
+                                      )}
+                                    </button>
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="block text-label font-mono text-text-muted tracking-widest uppercase mb-1">
+                                    New Password
+                                  </label>
+                                  <div className="relative">
+                                    <input
+                                      type={showCpNew ? "text" : "password"}
+                                      value={cpNew}
+                                      onChange={(e) => setCpNew(e.target.value)}
+                                      className="w-full glass-input rounded text-text-main px-3 py-2.5 pr-10 text-sm focus:border-gold transition-colors"
+                                      placeholder="Enter new password"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowCpNew((v) => !v)}
+                                      className="absolute inset-y-0 right-0 flex items-center px-3 text-text-muted hover:text-text-main transition-colors"
+                                      aria-label={
+                                        showCpNew
+                                          ? "Hide password"
+                                          : "Show password"
+                                      }
+                                    >
+                                      {showCpNew ? (
+                                        <EyeOff size={14} />
+                                      ) : (
+                                        <Eye size={14} />
+                                      )}
+                                    </button>
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="block text-label font-mono text-text-muted tracking-widest uppercase mb-1">
+                                    Confirm New Password
+                                  </label>
+                                  <div className="relative">
+                                    <input
+                                      type={showCpConfirm ? "text" : "password"}
+                                      value={cpConfirm}
+                                      onChange={(e) => setCpConfirm(e.target.value)}
+                                      className="w-full glass-input rounded text-text-main px-3 py-2.5 pr-10 text-sm focus:border-gold transition-colors"
+                                      placeholder="Confirm new password"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowCpConfirm((v) => !v)}
+                                      className="absolute inset-y-0 right-0 flex items-center px-3 text-text-muted hover:text-text-main transition-colors"
+                                      aria-label={
+                                        showCpConfirm
+                                          ? "Hide password"
+                                          : "Show password"
+                                      }
+                                    >
+                                      {showCpConfirm ? (
+                                        <EyeOff size={14} />
+                                      ) : (
+                                        <Eye size={14} />
+                                      )}
+                                    </button>
+                                  </div>
+                                </div>
+                                {cpErrors.length > 0 && (
+                                  <div className="p-2.5 bg-red/5 border border-red/20 rounded">
+                                    <ul className="space-y-0.5">
+                                      {cpErrors.map((err, i) => (
+                                        <li
+                                          key={i}
+                                          className="text-tiny text-red font-mono flex items-start gap-1.5"
+                                        >
+                                          <span className="mt-0.5 shrink-0">•</span>
+                                          {err}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                <div className="flex items-center justify-end gap-3 pt-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setShowChangePassword(false);
+                                      setCpCurrent("");
+                                      setCpNew("");
+                                      setCpConfirm("");
+                                      setCpErrors([]);
+                                    }}
+                                    disabled={isChangingPassword}
+                                    className="text-text-muted text-xs font-mono tracking-widest uppercase hover:text-text-main transition-colors disabled:opacity-50"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <PrimaryBtn
+                                    onClick={handleChangePassword}
+                                    disabled={isChangingPassword}
+                                    className="px-6! text-xs! py-3!"
+                                  >
+                                    {isChangingPassword ? (
+                                      <Loader2 size={14} className="animate-spin" />
+                                    ) : (
+                                      "Save Password"
+                                    )}
+                                  </PrimaryBtn>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="p-5">
+                                <div className="flex items-center justify-between gap-4">
+                                  <p className="text-text-muted text-xs font-mono">
+                                    Use a strong, unique password.
+                                  </p>
+                                  <PrimaryBtn
+                                    type="button"
+                                    onClick={() => setShowChangePassword(true)}
+                                    className="shrink-0 px-6! text-xs! py-3!"
+                                  >
+                                    <KeyRound size={14} /> Change Password
+                                  </PrimaryBtn>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
 
                   {/* Active Sessions */}
                   <SessionManager />
@@ -1141,6 +1129,43 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Google Connect Modal */}
+        {showGoogleModal && (
+          <div
+            className="fixed inset-0 z-modal flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowGoogleModal(false);
+              }
+            }}
+          >
+            <div className="w-full max-w-sm bg-surface border border-border/60 shadow-2xl rounded overflow-hidden">
+              <div className="relative px-8 pt-10 pb-6 text-center">
+                <button
+                  onClick={() => setShowGoogleModal(false)}
+                  className="absolute top-4 right-4 text-text-muted hover:text-text-main transition-colors"
+                  aria-label="Close"
+                >
+                  <X size={18} />
+                </button>
+                <div className="w-14 h-14 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-5">
+                  <Globe size={28} className="text-gold" />
+                </div>
+                <h3 className="text-text-main font-bold text-lg mb-2">
+                  Link Your Google Account
+                </h3>
+                <p className="text-text-muted text-sm leading-relaxed">
+                  Connect your Google account for one-click sign-in. Your profile
+                  picture and name will sync automatically.
+                </p>
+              </div>
+              <div className="px-8 pb-8 flex justify-center">
+                <GoogleLoginButton onSuccess={handleLinkGoogle} />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Sign Out Confirmation Modal */}
         {showSignOutModal && (

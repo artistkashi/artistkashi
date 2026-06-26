@@ -1,5 +1,7 @@
+import type { AxiosError, InternalAxiosRequestConfig } from "axios";
+
 import { client } from "@/api/openapi-client/client.gen";
-import { getItem, removeItem, STORAGE_KEYS } from "@/lib/storage";
+import { getItem, removeItem, setItem, STORAGE_KEYS } from "@/lib/storage";
 
 client.setConfig({
   throwOnError: true,
@@ -11,8 +13,6 @@ if (typeof window === "undefined") {
   client.setConfig({ baseURL: new URL(API_BASE).origin });
 }
 
-// Dynamically attach the auth token on every request via interceptor.
-// This avoids stale headers from setConfig() and prevents "Authorization: undefined".
 client.instance.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = getItem(STORAGE_KEYS.AUTH_TOKEN);
@@ -39,35 +39,123 @@ function clearAuthStorage() {
   removeItem(STORAGE_KEYS.AUTH_USER);
 }
 
-// When a 401 response is received (and it's not an auth endpoint), try to revoke
-// the session on the backend before clearing local state. This prevents orphaned
-// sessions when localStorage gets cleared or the server invalidates the token.
-client.instance.interceptors.response.use(undefined, async (error) => {
-  const isAuth = error?.config?.url?.includes("/auth/") ?? false;
+let isRefreshing = false;
+let pendingRequests: Array<{
+  config: InternalAxiosRequestConfig;
+  resolve: (value: unknown) => void;
+  reject: (reason: unknown) => void;
+}> = [];
 
-  if (
-    error?.response?.status === 401 &&
-    !isAuth &&
-    typeof window !== "undefined"
-  ) {
-    const refreshToken = getItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
-    if (refreshToken) {
-      try {
-        await fetch(`${API_BASE.replace("/api/v1", "")}/api/v1/auth/logout`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ refresh_token: refreshToken }),
-        });
-      } catch {
-        // best-effort: backend may already have revoked this session
-      }
-    }
-    clearAuthStorage();
-    // Notify auth-store to clear React state
-    window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+async function refreshAccessToken(): Promise<string> {
+  const refreshTokenValue = getItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
+  if (!refreshTokenValue) {
+    throw new Error("No refresh token available");
   }
 
-  const backendMessage = error?.response?.data?.message;
-  if (backendMessage) error.message = backendMessage;
-  return Promise.reject(error);
-});
+  const response = await fetch(`${new URL(API_BASE).origin}/api/auth/refresh`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh_token: refreshTokenValue }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to refresh token");
+  }
+
+  const result = await response.json();
+  const accessToken: string | undefined = result?.data?.access_token;
+  const newRefreshToken: string | undefined = result?.data?.refresh_token;
+
+  if (!accessToken) {
+    throw new Error("No access token in refresh response");
+  }
+
+  setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
+  if (newRefreshToken) {
+    setItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN, newRefreshToken);
+  }
+
+  return accessToken;
+}
+
+client.instance.interceptors.response.use(
+  undefined,
+  async (error: AxiosError) => {
+    const originalConfig = error.config as
+      | (InternalAxiosRequestConfig & { _retry?: boolean })
+      | undefined;
+    const isAuth = originalConfig?.url?.includes("/auth/") ?? false;
+
+    if (
+      error?.response?.status === 401 &&
+      !isAuth &&
+      originalConfig &&
+      !originalConfig._retry &&
+      typeof window !== "undefined"
+    ) {
+      originalConfig._retry = true;
+
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          pendingRequests.push({
+            config: originalConfig,
+            resolve,
+            reject,
+          });
+        });
+      }
+
+      isRefreshing = true;
+
+      try {
+        const newToken = await refreshAccessToken();
+
+        const pending = [...pendingRequests];
+        pendingRequests = [];
+
+        for (const { config, resolve } of pending) {
+          config.headers.Authorization = `Bearer ${newToken}`;
+          resolve(client.instance(config));
+        }
+
+        originalConfig.headers.Authorization = `Bearer ${newToken}`;
+        return client.instance(originalConfig);
+      } catch {
+        const pending = [...pendingRequests];
+        pendingRequests = [];
+
+        for (const { reject } of pending) {
+          reject(error);
+        }
+
+        const refreshTokenValue = getItem(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
+        if (refreshTokenValue) {
+          try {
+            await fetch(`${new URL(API_BASE).origin}/api/auth/logout`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ refresh_token: refreshTokenValue }),
+            });
+          } catch {
+            // best-effort
+          }
+        }
+
+        clearAuthStorage();
+        window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+
+        return Promise.reject(error);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    const backendMessage = (
+      error?.response?.data as Record<string, unknown> | undefined
+    )?.message;
+    if (backendMessage && typeof backendMessage === "string") {
+      error.message = backendMessage;
+    }
+    return Promise.reject(error);
+  }
+);

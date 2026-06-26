@@ -3,6 +3,7 @@
 import { unwrap } from "@/api/client-service";
 import type { UserSessionRead } from "@/api/openapi-client";
 import { listSessions, revokeSession } from "@/api/openapi-client";
+import { Skeleton } from "@/components/ui/Skeleton";
 import {
   Globe,
   Laptop,
@@ -96,8 +97,14 @@ export function SessionManager() {
       </h2>
       <div className="border border-border bg-surface rounded overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 size={20} className="animate-spin text-text-muted" />
+          <div className="divide-y divide-border">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="px-6 md:px-8 py-5 md:py-6 space-y-3">
+                <Skeleton className="h-4 w-48" />
+                <Skeleton className="h-3 w-64" />
+                <Skeleton className="h-3 w-24" />
+              </div>
+            ))}
           </div>
         ) : sessions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 gap-3 text-text-muted">
