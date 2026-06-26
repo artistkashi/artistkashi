@@ -124,7 +124,7 @@ nextjs-frontend/out/
 # Keep source lib folder tracked
 !nextjs-frontend/src/lib/
 !nextjs-frontend/src/lib/**
-
+!backend/app/lib/
 # Turbopack / Typescript
 *.tsbuildinfo
 

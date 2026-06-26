@@ -1,0 +1,11 @@
+from app.lib.constants import (
+    DEFAULT_COURSES,
+    DEFAULT_HOME_PAGE_CONFIG,
+    DEFAULT_PAINTINGS,
+)
+
+__all__ = [
+    "DEFAULT_HOME_PAGE_CONFIG",
+    "DEFAULT_PAINTINGS",
+    "DEFAULT_COURSES",
+]
