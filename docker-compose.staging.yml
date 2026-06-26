@@ -1,0 +1,48 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
+    env_file:
+      - ./backend/.env.staging
+
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+
+    ports:
+      - "8000:8000"
+
+    networks:
+      - my_network
+
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/alembic_migrations:/app/alembic_migrations
+      - ./backend/alembic.ini:/app/alembic.ini
+      - ./local-shared-data:/app/shared-data
+
+    depends_on:
+      redis:
+        condition: service_healthy
+
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - my_network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+    restart: always
+
+networks:
+  my_network:
+    driver: bridge
