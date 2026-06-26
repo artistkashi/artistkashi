@@ -7,6 +7,7 @@ from app.api.dependencies import DatabaseDep
 from app.core.exceptions import ErrorCode, NotFoundException, ValidationException
 from app.core.pagination import build_paginated_response
 from app.crud.order import crud_order
+from app.crud.user import crud_user as crud_user_admin_order
 from app.schemas.order import (
     AdminOrderDetailRead,
     OrderDashboardRead,
@@ -15,6 +16,12 @@ from app.schemas.order import (
     OrderUpdate,
 )
 from app.schemas.responses import PaginatedResponse, SuccessResponse
+from app.schemas.user import UserRead
+from app.services.email.email import (
+    send_order_cancelled_email,
+    send_order_delivered_email,
+    send_order_shipped_email,
+)
 from app.services.order_service import order_service
 
 router = APIRouter(prefix="/orders", tags=["admin-orders"])
@@ -65,4 +72,21 @@ async def update_order_status(
             )
 
     updated_order = await crud_order.update(db=db, id=order_id, object=payload)
+
+    if payload.status is not None:
+        try:
+            user = await crud_user_admin_order.get(
+                db=db, id=order.user_id, schema_to_select=UserRead, return_as_model=True
+            )
+            if user:
+                order_id_str = str(order_id)
+                if payload.status.value == "shipped":
+                    await send_order_shipped_email(user=user, order_id=order_id_str)
+                elif payload.status.value == "delivered":
+                    await send_order_delivered_email(user=user, order_id=order_id_str)
+                elif payload.status.value == "cancelled":
+                    await send_order_cancelled_email(user=user, order_id=order_id_str)
+        except Exception:
+            pass
+
     return SuccessResponse(message="Order status updated", data=updated_order)

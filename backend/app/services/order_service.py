@@ -16,6 +16,7 @@ from app.core.exceptions import (
 )
 from app.crud.order import crud_order, crud_order_item
 from app.crud.product import crud_product_variant
+from app.crud.user import crud_user as crud_user_order
 from app.models.order import Order, OrderItem, OrderStatus, PaymentStatus
 from app.models.product import Product
 from app.models.user import User
@@ -35,7 +36,8 @@ from app.schemas.product import (
     ProductVariantCheckDB,
     ProductVariantRead,
 )
-from app.schemas.user import PublicUserRead
+from app.schemas.user import PublicUserRead, UserRead
+from app.services.email.email import send_order_confirmation_email
 from app.services.product_service import product_variant_service
 
 
@@ -266,6 +268,18 @@ class OrderService:
                 )
 
             await db.commit()
+
+            try:
+                user = await crud_user_order.get(
+                    db=db, id=user_id, schema_to_select=UserRead, return_as_model=True
+                )
+                if user:
+                    await send_order_confirmation_email(
+                        user=user,
+                        order_id=str(order.id),
+                    )
+            except Exception:
+                pass
 
             return await crud_order.get_with_relations(
                 db=db,

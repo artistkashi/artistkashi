@@ -2,7 +2,7 @@
 
 import { unwrap } from "@/api/client-service";
 import type { UserSessionRead } from "@/api/openapi-client";
-import { listSessions, revokeSession } from "@/api/openapi-client";
+import { listSessions, logoutAll, revokeSession } from "@/api/openapi-client";
 import { Skeleton } from "@/components/ui/Skeleton";
 import {
   Globe,
@@ -60,6 +60,7 @@ export function SessionManager() {
   const [sessions, setSessions] = useState<UserSessionRead[]>([]);
   const [loading, setLoading] = useState(true);
   const [revokingId, setRevokingId] = useState<number | null>(null);
+  const [loggingOutAll, setLoggingOutAll] = useState(false);
 
   const fetchSessions = async () => {
     setLoading(true);
@@ -77,6 +78,19 @@ export function SessionManager() {
     fetchSessions();
   }, []);
 
+  const handleLogoutAll = async () => {
+    setLoggingOutAll(true);
+    try {
+      await unwrap(logoutAll({}));
+      toast.success("All other sessions revoked");
+      fetchSessions();
+    } catch {
+      toast.error("Failed to revoke sessions");
+    } finally {
+      setLoggingOutAll(false);
+    }
+  };
+
   const handleRevoke = async (sessionId: number) => {
     setRevokingId(sessionId);
     try {
@@ -92,9 +106,26 @@ export function SessionManager() {
 
   return (
     <div>
-      <h2 className="text-text-main font-bold text-2xl md:text-3xl mb-6">
-        Active Sessions
-      </h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-text-main font-bold text-2xl md:text-3xl">
+          Active Sessions
+        </h2>
+        {sessions.length > 1 && (
+          <button
+            onClick={handleLogoutAll}
+            disabled={loggingOutAll}
+            className="flex items-center gap-1.5 text-2xs font-mono text-text-muted hover:text-red-400 transition-colors uppercase tracking-widest disabled:opacity-50"
+            title="Revoke all other sessions"
+          >
+            {loggingOutAll ? (
+              <Loader2 size={12} className="animate-spin" />
+            ) : (
+              <LogOut size={12} />
+            )}
+            Logout All
+          </button>
+        )}
+      </div>
       <div className="border border-border bg-surface rounded overflow-hidden">
         {loading ? (
           <div className="divide-y divide-border">
@@ -157,14 +188,16 @@ export function SessionManager() {
                       <button
                         onClick={() => handleRevoke(s.id)}
                         disabled={revokingId === s.id}
-                        className="flex items-center justify-center w-8 h-8 border border-border/60 text-text-muted hover:text-red-400 hover:border-red-400/40 transition-all rounded-sm disabled:opacity-50"
-                        title="Revoke session"
+                        className="flex items-center justify-center w-8 h-8 border border-border/60 text-text-muted hover:text-red-400 hover:border-red-400/40 transition-all rounded-sm disabled:opacity-50 group relative"
                       >
                         {revokingId === s.id ? (
                           <Loader2 size={12} className="animate-spin" />
                         ) : (
                           <LogOut size={12} />
                         )}
+                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-surface border border-border text-2xs font-mono text-text-muted px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                          Revoke
+                        </span>
                       </button>
                     )}
                   </div>

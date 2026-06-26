@@ -18,6 +18,7 @@ from app.core.exceptions import (
     ValidationException,
 )
 from app.crud.course import crud_course, crud_course_enrollment, crud_course_payment
+from app.crud.user import crud_user as crud_user_payment
 from app.models.course import Course
 from app.models.course_payment import CoursePayment, CoursePaymentStatus
 from app.models.user import User
@@ -30,6 +31,8 @@ from app.schemas.course_payment import (
     CoursePaymentVerificationRequest,
     CoursePurchaseResponse,
 )
+from app.schemas.user import UserRead
+from app.services.email.email import send_course_purchase_email
 from app.services.enrollment_service import enrollment_service
 
 
@@ -211,6 +214,22 @@ class CoursePaymentService:
                 session=session, user_id=user_id, course_id=course.id
             )
             await session.commit()
+
+            try:
+                user = await crud_user_payment.get(
+                    db=session,
+                    id=user_id,
+                    schema_to_select=UserRead,
+                    return_as_model=True,
+                )
+                if user:
+                    await send_course_purchase_email(
+                        user=user,
+                        course_title=course.title,
+                        course_slug=slug,
+                    )
+            except Exception:
+                pass
 
             return enrollment
 

@@ -5,8 +5,11 @@ import uuid
 from fastapi import APIRouter
 
 from app.api.dependencies import CurrentUserDep, DatabaseDep
+from app.crud.course import crud_course as crud_course_enroll
+from app.schemas.course import CourseRead
 from app.schemas.course_enrollment import CourseEnrollmentCreate, CourseEnrollmentRead
 from app.schemas.responses import SuccessResponse
+from app.services.email.email import send_course_purchase_email
 from app.services.enrollment_service import enrollment_service
 
 router = APIRouter(prefix="/enrollments", tags=["enrollments"])
@@ -23,6 +26,23 @@ async def enroll_in_course(
         user_id=current_user.id,
         course_id=payload.course_id,
     )
+
+    try:
+        course = await crud_course_enroll.get(
+            db=session,
+            id=payload.course_id,
+            schema_to_select=CourseRead,
+            return_as_model=True,
+        )
+        if course:
+            await send_course_purchase_email(
+                user=current_user,
+                course_title=course.title,
+                course_slug=course.slug,
+            )
+    except Exception:
+        pass
+
     return SuccessResponse(message="Enrolled successfully", data=enrollment)
 
 

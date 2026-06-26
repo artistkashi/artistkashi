@@ -73,6 +73,7 @@ async def send_welcome_email(user: UserRead):
         recipients=[user.email],
         template_body={
             "username": user.full_name or user.email,
+            "dashboard_link": f"{settings.FRONTEND_URL}/dashboard",
         },
         subtype=MessageType.html,
     )
@@ -83,3 +84,183 @@ async def send_welcome_email(user: UserRead):
         message,
         template_name="welcome.html",
     )
+
+
+async def send_course_purchase_email(
+    user: UserRead,
+    course_title: str,
+    course_slug: str,
+):
+    conf = get_email_config()
+    course_link = f"{settings.FRONTEND_URL}/courses/{course_slug}"
+    dashboard_link = f"{settings.FRONTEND_URL}/dashboard"
+
+    message = MessageSchema(
+        subject="Course Enrollment Confirmed – ArtistKashi",
+        recipients=[user.email],
+        template_body={
+            "username": user.full_name or user.email,
+            "course_title": course_title,
+            "course_link": course_link,
+            "dashboard_link": dashboard_link,
+        },
+        subtype=MessageType.html,
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message, template_name="course_purchase.html")
+
+
+async def send_course_completion_email(
+    user: UserRead,
+    course_title: str,
+    course_slug: str,
+):
+    conf = get_email_config()
+    course_link = f"{settings.FRONTEND_URL}/courses/{course_slug}"
+    dashboard_link = f"{settings.FRONTEND_URL}/dashboard"
+
+    message = MessageSchema(
+        subject="Congratulations on Completing Your Course! – ArtistKashi",
+        recipients=[user.email],
+        template_body={
+            "username": user.full_name or user.email,
+            "course_title": course_title,
+            "course_link": course_link,
+            "dashboard_link": dashboard_link,
+        },
+        subtype=MessageType.html,
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message, template_name="course_completion.html")
+
+
+async def send_order_confirmation_email(
+    user: UserRead,
+    order_id: str,
+):
+    conf = get_email_config()
+    order_link = f"{settings.FRONTEND_URL}/orders/{order_id}"
+    dashboard_link = f"{settings.FRONTEND_URL}/dashboard"
+
+    message = MessageSchema(
+        subject="Order Confirmed – ArtistKashi",
+        recipients=[user.email],
+        template_body={
+            "username": user.full_name or user.email,
+            "order_id": order_id,
+            "order_link": order_link,
+            "dashboard_link": dashboard_link,
+        },
+        subtype=MessageType.html,
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message, template_name="order_confirmation.html")
+
+
+async def send_order_shipped_email(
+    user: UserRead,
+    order_id: str,
+):
+    conf = get_email_config()
+    order_link = f"{settings.FRONTEND_URL}/orders/{order_id}"
+    dashboard_link = f"{settings.FRONTEND_URL}/dashboard"
+
+    message = MessageSchema(
+        subject="Your Order Has Been Shipped! – ArtistKashi",
+        recipients=[user.email],
+        template_body={
+            "username": user.full_name or user.email,
+            "order_id": order_id,
+            "order_link": order_link,
+            "dashboard_link": dashboard_link,
+        },
+        subtype=MessageType.html,
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message, template_name="order_shipped.html")
+
+
+async def send_order_delivered_email(
+    user: UserRead,
+    order_id: str,
+):
+    conf = get_email_config()
+    order_link = f"{settings.FRONTEND_URL}/orders/{order_id}"
+    dashboard_link = f"{settings.FRONTEND_URL}/dashboard"
+
+    message = MessageSchema(
+        subject="Your Order Has Been Delivered! – ArtistKashi",
+        recipients=[user.email],
+        template_body={
+            "username": user.full_name or user.email,
+            "order_id": order_id,
+            "order_link": order_link,
+            "dashboard_link": dashboard_link,
+        },
+        subtype=MessageType.html,
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message, template_name="order_delivered.html")
+
+
+async def send_order_cancelled_email(
+    user: UserRead,
+    order_id: str,
+):
+    conf = get_email_config()
+    dashboard_link = f"{settings.FRONTEND_URL}/dashboard"
+
+    message = MessageSchema(
+        subject="Order Cancelled – ArtistKashi",
+        recipients=[user.email],
+        template_body={
+            "username": user.full_name or user.email,
+            "order_id": order_id,
+            "dashboard_link": dashboard_link,
+        },
+        subtype=MessageType.html,
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message, template_name="order_cancelled.html")
+
+
+async def send_password_changed_email(user: UserRead):
+    conf = get_email_config()
+    dashboard_link = f"{settings.FRONTEND_URL}/dashboard"
+
+    message = MessageSchema(
+        subject="Your Password Has Been Changed – ArtistKashi",
+        recipients=[user.email],
+        template_body={
+            "username": user.full_name or user.email,
+            "dashboard_link": dashboard_link,
+        },
+        subtype=MessageType.html,
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message, template_name="password_changed.html")
+
+
+async def send_account_deleted_email(user: UserRead):
+    conf = get_email_config()
+    dashboard_link = f"{settings.FRONTEND_URL}/dashboard"
+
+    message = MessageSchema(
+        subject="Account Deleted – ArtistKashi",
+        recipients=[user.email],
+        template_body={
+            "username": user.full_name or user.email,
+            "dashboard_link": dashboard_link,
+        },
+        subtype=MessageType.html,
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message, template_name="account_deleted.html")

@@ -39,6 +39,7 @@ from app.schemas.auth_provider import (
 from app.schemas.user import UserCreate, UserCreateDB, UserRead, UserReadDB
 from app.schemas.user_session import UserSessionCreate, UserSessionRead
 from app.services.email.email import (
+    send_password_changed_email,
     send_reset_password_email,
     send_verification_email,
     send_welcome_email,
@@ -691,6 +692,11 @@ class AuthService:
             hashed_password=hash_password(password),
         )
 
+        try:
+            await send_password_changed_email(user)
+        except Exception:
+            pass
+
     async def change_password(
         self,
         *,
@@ -727,6 +733,11 @@ class AuthService:
             user_id=user.id,
             hashed_password=hash_password(payload.new_password),
         )
+
+        try:
+            await send_password_changed_email(user)
+        except Exception:
+            pass
 
     async def logout(
         self,
@@ -892,6 +903,7 @@ class AuthService:
             db=session,
             id=session_id,
             schema_to_select=UserSessionRead,
+            return_as_model=True,
         )
         if not session_record:
             raise NotFoundException("Session not found")

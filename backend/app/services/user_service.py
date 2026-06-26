@@ -12,6 +12,7 @@ from app.crud.cart import crud_cart
 from app.crud.user import crud_user, crud_user_session
 from app.crud.wishlist import crud_wishlist
 from app.schemas.user import UserRead, UserReadDB
+from app.services.email.email import send_account_deleted_email
 from app.services.storage_service import storage_service
 
 AVATAR_KEY_PATTERN = re.compile(rf"^{settings.S3_FOLDER_AVATARS}/")
@@ -106,6 +107,11 @@ class UserService:
         )
 
         suffix = uuid4().hex[:8]
+
+        try:
+            await send_account_deleted_email(user)
+        except Exception:
+            pass
 
         if user and user.profile_picture:
             old_key = self._extract_s3_key(user.profile_picture)

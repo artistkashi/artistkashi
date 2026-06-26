@@ -13,6 +13,7 @@ from app.core.exceptions import (
     NotFoundException,
 )
 from app.crud.course import crud_course, crud_course_enrollment
+from app.crud.user import crud_user as crud_user_enrollment
 from app.models.course import Course
 from app.models.course_category import CourseCategory
 from app.schemas.course import CourseListRead
@@ -21,6 +22,8 @@ from app.schemas.course_enrollment import (
     CourseEnrollmentCreate,
     CourseEnrollmentRead,
 )
+from app.schemas.user import UserRead
+from app.services.email.email import send_course_completion_email
 
 
 class EnrollmentService:
@@ -224,13 +227,34 @@ class EnrollmentService:
             course_id=course_id,
         )
 
-        return await crud_course_enrollment.update(
+        result = await crud_course_enrollment.update(
             db=session,
             id=enrollment.id,
             object={"completed_at": datetime.now(UTC)},
             schema_to_select=CourseEnrollmentRead,
             return_as_model=True,
         )
+
+        try:
+            user = await crud_user_enrollment.get(
+                db=session, id=user_id, schema_to_select=UserRead, return_as_model=True
+            )
+            course = await crud_course.get(
+                db=session,
+                id=course_id,
+                schema_to_select=CourseListRead,
+                return_as_model=True,
+            )
+            if user and course:
+                await send_course_completion_email(
+                    user=user,
+                    course_title=course.title,
+                    course_slug=course.slug,
+                )
+        except Exception:
+            pass
+
+        return result
 
     async def get_enrolled_courses(
         self,
