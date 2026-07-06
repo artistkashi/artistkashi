@@ -44,7 +44,7 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 import ProductUploadModal from "./ProductUploadModal";
 

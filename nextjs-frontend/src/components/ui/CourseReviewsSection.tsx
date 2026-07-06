@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { PrimaryBtn } from "./buttons";
 import { CourseReviewCard } from "./CourseReviewCard";
 import { StarRating } from "./StarRating";

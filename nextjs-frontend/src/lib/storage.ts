@@ -5,6 +5,7 @@ export const STORAGE_KEYS = {
   AUTH_TOKEN: "artistkashi_auth_token",
   AUTH_REFRESH_TOKEN: "artistkashi_auth_refresh_token",
   AUTH_USER: "artistkashi_auth_user",
+  DEVICE_ID: "artistkashi_device_id",
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

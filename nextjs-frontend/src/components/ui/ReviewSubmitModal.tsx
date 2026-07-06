@@ -6,7 +6,7 @@ import { createCourseReview, createProductReview } from "@/api/openapi-client";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
-import { Send, Sparkles, Star, X } from "lucide-react";
+import { Send, Sparkles, X } from "lucide-react";
 import { useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";

@@ -40,7 +40,7 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { useForm, type Path } from "react-hook-form";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { z } from "zod";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 

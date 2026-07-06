@@ -400,3 +400,8 @@
   border-width: 1px;
   border-style: solid;
 }
+
+[data-sonner-toast] [data-close-button] {
+  left: auto !important;
+  right: 0 !important;
+}

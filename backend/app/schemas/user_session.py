@@ -11,6 +11,7 @@ class UserSessionCreate(BaseModel):
     user_agent: str | None = None
     ip_address: str | None = None
     device_info: str | None = None
+    device_id: str | None = None
 
 
 class UserSessionRead(BaseModel):

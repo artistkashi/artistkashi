@@ -17,11 +17,12 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 function SignupPageContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = getSafeReturnTo(searchParams.get("returnTo"));
@@ -45,6 +46,7 @@ function SignupPageContent() {
 
   const onSubmit = async (data: SignupFormValues) => {
     setIsSubmitting(true);
+    setFormError(null);
     try {
       const user = await signup({
         full_name: data.fullName,
@@ -56,7 +58,7 @@ function SignupPageContent() {
       });
       redirectUser(user);
     } catch (error) {
-      toast.error(getErrorMessage(error));
+      setFormError(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -80,7 +82,7 @@ function SignupPageContent() {
       if (errorCode === "MAX_SESSIONS_REACHED") {
         setPendingGoogleCredential(credential);
       } else {
-        toast.error(getErrorMessage(error));
+        setFormError(getErrorMessage(error));
       }
     } finally {
       setIsSubmitting(false);
@@ -200,6 +202,12 @@ function SignupPageContent() {
                   </p>
                 )}
               </div>
+              {formError && (
+                <div className="p-3 bg-danger/10 border border-danger/30 text-danger text-sm font-mono tracking-wider flex items-start gap-2 rounded">
+                  <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                  <span>{formError}</span>
+                </div>
+              )}
               <PrimaryBtn
                 type="submit"
                 className="w-full justify-center"

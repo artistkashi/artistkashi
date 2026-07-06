@@ -21,7 +21,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Eye, Filter, Plus, RefreshCw, Search, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 
 function formatDuration(seconds: number | undefined | null): string {

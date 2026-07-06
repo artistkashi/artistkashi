@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 
 type AdminUserStatus = "all" | "active" | "deleted";

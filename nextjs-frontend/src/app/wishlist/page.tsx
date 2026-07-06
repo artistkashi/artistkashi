@@ -1,32 +1,16 @@
 "use client";
 
 import type { WishlistRead } from "@/api/openapi-client";
-import { useAuth } from "@/lib/auth-store";
 import { useCartStore } from "@/lib/cart-store";
-import { useWishlistStore } from "@/lib/wishlist-store";
+import { toast } from "@/lib/toast";
 import { cn, displayPrice } from "@/lib/utils";
-import {
-  ArrowRight,
-  Heart,
-  Loader2,
-  ShoppingBag,
-  Trash2,
-} from "lucide-react";
+import { useWishlistStore } from "@/lib/wishlist-store";
+import { ArrowRight, Heart, Loader2, ShoppingBag, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
-
 export default function WishlistPage() {
-  const { user } = useAuth();
-  const {
-    items,
-    loaded,
-    fetchWishlist,
-    removeItem,
-    toggleProduct,
-    toggleCourse,
-  } = useWishlistStore();
+  const { items, loaded, fetchWishlist, removeItem } = useWishlistStore();
   const addItemToCart = useCartStore((s) => s.addItem);
   const [activeTab, setActiveTab] = useState<"courses" | "paintings">(
     "paintings"
@@ -56,7 +40,10 @@ export default function WishlistPage() {
     if (!item.product_id && !item.course_id) return;
     setProcessingId(item.id);
     try {
-      await addItemToCart(item.product_id || item.course_id!, item.product_id ? "product" : "course");
+      await addItemToCart(
+        item.product_id || item.course_id!,
+        item.product_id ? "product" : "course"
+      );
       toast.success("Added to cart");
     } catch {
       toast.error("Failed to add to cart");
@@ -65,12 +52,11 @@ export default function WishlistPage() {
     }
   };
 
-  const currentItems =
-    activeTab === "paintings" ? productItems : courseItems;
+  const currentItems = activeTab === "paintings" ? productItems : courseItems;
 
   return (
     <div className="pt-32 pb-24 px-6 bg-background min-h-screen">
-      <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-24">
+      <div className="max-w-480 mx-auto px-6 md:px-12 lg:px-24">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-8 border-b border-border pb-12">
           <div>
             <span className="text-primary text-2xs uppercase tracking-[0.5em] mb-4 font-bold block font-mono">
@@ -158,17 +144,16 @@ export default function WishlistPage() {
                 {currentItems.map((item) => {
                   const isProduct = !!item.product;
                   const title = isProduct
-                    ? item.product?.title ?? "Artwork"
-                    : item.course?.title ?? "Course";
+                    ? (item.product?.title ?? "Artwork")
+                    : (item.course?.title ?? "Course");
                   const slug = isProduct
                     ? item.product?.slug
                     : item.course?.slug;
-                  const href = isProduct
-                    ? `/shop/${slug}`
-                    : `/courses/${slug}`;
+                  const href = isProduct ? `/shop/${slug}` : `/courses/${slug}`;
                   const image = isProduct
                     ? item.product?.primary_image
-                    : item.course?.thumbnail_url ?? item.course?.computed_thumbnail_url;
+                    : (item.course?.thumbnail_url ??
+                      item.course?.computed_thumbnail_url);
                   const price = isProduct
                     ? item.product?.price
                       ? Number(item.product.price)
@@ -177,8 +162,8 @@ export default function WishlistPage() {
                       ? Number(item.course.price)
                       : 0;
                   const subtitle = isProduct
-                    ? item.product?.medium?.name ?? "Original Work"
-                    : item.course?.category?.name ?? "Course";
+                    ? (item.product?.medium?.name ?? "Original Work")
+                    : (item.course?.category?.name ?? "Course");
 
                   return (
                     <motion.div

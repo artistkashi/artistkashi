@@ -66,6 +66,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       {!hideNavFooter && <Footer />}
       <Toaster
         position="bottom-right"
+        closeButton
+        expand
         toastOptions={{
           style: {
             background: "var(--color-surface)",

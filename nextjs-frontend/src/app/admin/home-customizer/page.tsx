@@ -27,7 +27,7 @@ import {
 } from "@/lib/home-customization";
 import { getHomePageSettings } from "@/api/openapi-client";
 import { saveHomeSettingsAction } from "@/app/admin/home-customizer/actions";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { unwrap } from "@/api/client-service";
 
 export default function HomeCustomizerPage() {

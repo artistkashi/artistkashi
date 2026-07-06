@@ -43,7 +43,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 
 // ─── Filter types ───────────────────────────────────────────────────────────
@@ -1891,7 +1891,6 @@ function OrderDetailsModal({
     }
   };
 
-  const currentStatus = pendingStatus ?? order.status;
   return (
     <>
       <style>{`

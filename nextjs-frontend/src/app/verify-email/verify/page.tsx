@@ -9,7 +9,7 @@ import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 function VerifyEmailTokenPageContent() {
   const searchParams = useSearchParams();

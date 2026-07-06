@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -133,6 +134,7 @@ class AuthService:
         payload: LoginRequest,
         user_agent: str | None = None,
         ip_address: str | None = None,
+        device_id: str | None = None,
         force: bool = False,
     ) -> TokenResponse:
 
@@ -167,6 +169,7 @@ class AuthService:
             user=user,
             user_agent=user_agent,
             ip_address=ip_address,
+            device_id=device_id,
             force=force,
         )
 
@@ -177,6 +180,7 @@ class AuthService:
         user: UserReadDB,
         user_agent: str | None = None,
         ip_address: str | None = None,
+        device_id: str | None = None,
         force: bool = False,
     ) -> TokenResponse:
         await self._enforce_max_sessions(session=session, user_id=user.id, force=force)
@@ -195,15 +199,48 @@ class AuthService:
         if refresh_payload is None:
             raise UnauthorizedException("Failed to create refresh token")
 
+        new_jti = get_token_jti(refresh_payload)
+        new_expires_at = get_token_expiry(refresh_payload)
+
+        # Deduplicate: if device_id provided, update existing session for this device
+        if device_id:
+            existing = await crud_user_session.get(
+                db=session,
+                user_id=user.id,
+                device_id=device_id,
+                revoked=False,
+                schema_to_select=UserSessionRead,
+                return_as_model=True,
+            )
+            if existing:
+                await crud_user_session.update(
+                    db=session,
+                    id=existing.id,
+                    object={
+                        "refresh_token_jti": new_jti,
+                        "expires_at": new_expires_at,
+                        "user_agent": user_agent,
+                        "ip_address": ip_address,
+                        "device_info": parse_user_agent(user_agent),
+                        "last_activity": datetime.now(UTC),
+                    },
+                )
+                return TokenResponse(
+                    access_token=access_token,
+                    refresh_token=refresh_token,
+                    token_type="bearer",
+                )
+
         await crud_user_session.create(
             db=session,
             object=UserSessionCreate(
                 user_id=user.id,
-                refresh_token_jti=get_token_jti(refresh_payload),
-                expires_at=get_token_expiry(refresh_payload),
+                refresh_token_jti=new_jti,
+                expires_at=new_expires_at,
                 user_agent=user_agent,
                 ip_address=ip_address,
                 device_info=parse_user_agent(user_agent),
+                device_id=device_id,
             ),
         )
         return TokenResponse(
@@ -219,6 +256,7 @@ class AuthService:
         credential: str,
         user_agent: str | None = None,
         ip_address: str | None = None,
+        device_id: str | None = None,
         force: bool = False,
     ) -> TokenResponse:
         # SECURITY: Verify the Google ID token server-side.
@@ -247,6 +285,7 @@ class AuthService:
                 user=user,
                 user_agent=user_agent,
                 ip_address=ip_address,
+                device_id=device_id,
                 force=force,
             )
 
@@ -294,6 +333,7 @@ class AuthService:
                 user=existing_user,
                 user_agent=user_agent,
                 ip_address=ip_address,
+                device_id=device_id,
                 force=force,
             )
 
@@ -333,7 +373,7 @@ class AuthService:
         if not user_model:
             raise UnauthorizedException("Failed to create user")
 
-        return await self._issue_tokens(session=session, user=user_model)
+        return await self._issue_tokens(session=session, user=user_model, device_id=device_id)
 
     async def set_password(
         self,
@@ -485,6 +525,7 @@ class AuthService:
         session: AsyncSession,
         user_agent: str | None = None,
         ip_address: str | None = None,
+        device_id: str | None = None,
     ) -> TokenResponse:
 
         payload = decode_refresh_token(refresh_token)
@@ -496,6 +537,8 @@ class AuthService:
         session_record = await crud_user_session.get(
             db=session,
             refresh_token_jti=jti,
+            schema_to_select=UserSessionRead,
+            return_as_model=True,
         )
         if not session_record:
             raise UnauthorizedException("Session not found")
@@ -503,13 +546,6 @@ class AuthService:
         if session_record.revoked:
             raise UnauthorizedException("Session revoked")
 
-        await crud_user_session.update(
-            db=session,
-            id=session_record.id,
-            object={
-                "revoked": True,
-            },
-        )
         user_id: UUID = get_user_id_from_token(
             payload,
         )
@@ -532,16 +568,19 @@ class AuthService:
         if new_payload is None:
             raise UnauthorizedException("Failed to create refresh token")
 
-        await crud_user_session.create(
+        # Update session in-place instead of revoke+create
+        await crud_user_session.update(
             db=session,
-            object=UserSessionCreate(
-                user_id=user_id,
-                refresh_token_jti=get_token_jti(new_payload),
-                expires_at=get_token_expiry(new_payload),
-                user_agent=user_agent,
-                ip_address=ip_address,
-                device_info=parse_user_agent(user_agent),
-            ),
+            id=session_record.id,
+            object={
+                "refresh_token_jti": get_token_jti(new_payload),
+                "expires_at": get_token_expiry(new_payload),
+                "user_agent": user_agent,
+                "ip_address": ip_address,
+                "device_info": parse_user_agent(user_agent),
+                "device_id": device_id,
+                "last_activity": datetime.now(UTC),
+            },
         )
         return TokenResponse(
             access_token=create_access_token(

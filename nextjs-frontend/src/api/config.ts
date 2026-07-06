@@ -1,6 +1,7 @@
 import type { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 import { client } from "@/api/openapi-client/client.gen";
+import { getDeviceId } from "@/lib/device-id";
 import { getItem, removeItem, setItem, STORAGE_KEYS } from "@/lib/storage";
 
 client.setConfig({
@@ -9,9 +10,7 @@ client.setConfig({
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
-if (typeof window === "undefined") {
-  client.setConfig({ baseURL: new URL(API_BASE).origin });
-}
+client.setConfig({ baseURL: new URL(API_BASE).origin });
 
 client.instance.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
@@ -19,6 +18,7 @@ client.instance.interceptors.request.use((config) => {
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    config.headers["X-Device-Id"] = getDeviceId();
   }
   return config;
 });
@@ -54,7 +54,10 @@ async function refreshAccessToken(): Promise<string> {
 
   const response = await fetch(`${new URL(API_BASE).origin}/api/auth/refresh`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "X-Device-Id": getDeviceId(),
+    },
     body: JSON.stringify({ refresh_token: refreshTokenValue }),
   });
 
@@ -133,7 +136,10 @@ client.instance.interceptors.response.use(
           try {
             await fetch(`${new URL(API_BASE).origin}/api/auth/logout`, {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: {
+                "Content-Type": "application/json",
+                "X-Device-Id": getDeviceId(),
+              },
               body: JSON.stringify({ refresh_token: refreshTokenValue }),
             });
           } catch {

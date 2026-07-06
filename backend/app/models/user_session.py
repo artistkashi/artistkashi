@@ -47,6 +47,12 @@ class UserSession(Base):
         nullable=True,
     )
 
+    device_id: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+        index=True,
+    )
+
     revoked: Mapped[bool] = mapped_column(
         Boolean,
         default=False,

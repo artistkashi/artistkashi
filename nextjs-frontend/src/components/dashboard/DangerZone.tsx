@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth-store";
 import { getErrorMessage } from "@/lib/error-handler";
 import { AlertTriangle, Eye, EyeOff, Loader2, Trash2, X } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 export function DangerZone() {
   const [showModal, setShowModal] = useState(false);

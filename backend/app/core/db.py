@@ -25,7 +25,7 @@ async_db_connection_url = (
 
 engine = create_async_engine(
     async_db_connection_url,
-    echo=True,
+    echo=False,
     future=True,
     poolclass=NullPool,
 )

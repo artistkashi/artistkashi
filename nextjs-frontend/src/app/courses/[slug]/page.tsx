@@ -21,7 +21,6 @@ import { CourseReviewsSection } from "@/components/ui/CourseReviewsSection";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 import { RevealBlock } from "@/components/ui/misc";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { ModalType, StatusModal } from "@/components/ui/StatusModal";
 import { useAuth } from "@/lib/auth-store";
 import { getSafeReturnTo } from "@/lib/auth-utils";
@@ -398,7 +397,6 @@ export default function CourseDetailPage({
 
   const {
     isCourseWishlisted,
-    loaded: wishlistLoaded,
     toggleCourse: toggleCourseWishlist,
   } = useWishlistStore();
 

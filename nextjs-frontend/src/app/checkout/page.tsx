@@ -20,7 +20,7 @@ import { CheckCircle2, Minus, Plus, ShieldCheck, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -97,8 +97,6 @@ export default function CheckoutPage() {
       typeof item.price === "string" ? parseFloat(item.price) : item.price;
     return acc + price * item.quantity;
   }, 0);
-
-  const PACKAGING_FEE = 99;
 
   const handleCreateOrder = async () => {
     if (!selectedAddressId) {

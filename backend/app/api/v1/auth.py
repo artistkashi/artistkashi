@@ -30,10 +30,11 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 auth_service = AuthService()
 
 
-def _extract_client_info(request: Request) -> tuple[str | None, str | None]:
+def _extract_client_info(request: Request) -> tuple[str | None, str | None, str | None]:
     ua = request.headers.get("User-Agent")
     ip = request.client.host if request.client else None
-    return ua, ip
+    device_id = request.headers.get("X-Device-Id")
+    return ua, ip, device_id
 
 
 @router.post("/register", response_model=SuccessResponse[None])
@@ -55,12 +56,13 @@ async def login(
     force: bool = Query(False),
 ):
     payload = LoginRequest(email=form_data.username, password=form_data.password)
-    user_agent, ip_address = _extract_client_info(request)
+    user_agent, ip_address, device_id = _extract_client_info(request)
     result = await auth_service.login(
         session=session,
         payload=payload,
         user_agent=user_agent,
         ip_address=ip_address,
+        device_id=device_id,
         force=force,
     )
 
@@ -71,12 +73,13 @@ async def login(
 async def google_auth(
     payload: GoogleAuthRequest, request: Request, session: DatabaseDep
 ):
-    user_agent, ip_address = _extract_client_info(request)
+    user_agent, ip_address, device_id = _extract_client_info(request)
     result = await auth_service.google_auth(
         session=session,
         credential=payload.credential,
         user_agent=user_agent,
         ip_address=ip_address,
+        device_id=device_id,
         force=payload.force,
     )
 
@@ -103,12 +106,13 @@ async def get_auth_providers(user: CurrentUserDep, session: DatabaseDep):
 async def refresh_token(
     payload: RefreshTokenRequest, request: Request, session: DatabaseDep
 ):
-    user_agent, ip_address = _extract_client_info(request)
+    user_agent, ip_address, device_id = _extract_client_info(request)
     result = await auth_service.refresh(
         refresh_token=payload.refresh_token,
         session=session,
         user_agent=user_agent,
         ip_address=ip_address,
+        device_id=device_id,
     )
 
     return SuccessResponse(message="Token refreshed successfully", data=result)

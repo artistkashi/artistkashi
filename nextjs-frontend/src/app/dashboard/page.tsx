@@ -44,7 +44,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { AddressManager } from "@/components/dashboard/AddressManager";
 import { ContinueWatching } from "@/components/dashboard/ContinueWatching";

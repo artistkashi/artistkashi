@@ -10,7 +10,7 @@ import { displayPrice } from "@/lib/utils";
 import { Check, Clock, Heart, Play, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 function compactNum(n: number): string {
   if (n < 1000) return String(n);

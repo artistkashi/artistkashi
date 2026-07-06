@@ -13,7 +13,7 @@ import { ArrowLeft, ArrowRight, MailCheck } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import * as z from "zod";
 
 const requestVerificationSchema = z.object({

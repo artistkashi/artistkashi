@@ -12,7 +12,6 @@ import { GhostBtn, PrimaryBtn } from "@/components/ui/buttons";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  Home,
   MapPin,
   Pen,
   Phone,
@@ -22,7 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 export function AddressManager() {
   const [addresses, setAddresses] = useState<AddressRead[]>([]);

@@ -14,7 +14,7 @@ import { Check, ChevronLeft, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 export default function NewCoursePage() {
   const [createdCourse, setCreatedCourse] = useState<{

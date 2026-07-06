@@ -5,7 +5,7 @@ import type { ReviewRead } from "@/api/openapi-client";
 import { listAllReviews, ReviewType } from "@/api/openapi-client";
 import { useAuth } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
-import { Plus, Star, Filter, ChevronDown } from "lucide-react";
+import { Plus, Star, Filter } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PrimaryBtn } from "./buttons";
 import { ReviewSubmitModal } from "./ReviewSubmitModal";

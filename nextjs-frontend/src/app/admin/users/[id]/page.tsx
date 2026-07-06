@@ -17,7 +17,6 @@ import {
   CreditCard,
   GraduationCap,
   IndianRupee,
-  Loader2,
   Lock,
   LockOpen,
   Mail,
