@@ -33,6 +33,7 @@ from app.models.review import ReviewType
 from app.models.wishlist import Wishlist
 from app.schemas.course import (
     CourseCreate,
+    CourseCreateDB,
     CourseCurriculumRead,
     CourseListRead,
     CourseRead,
@@ -178,7 +179,7 @@ class CourseService:
 
         course = await crud_course.create(
             db=session,
-            object=course_dict,
+            object=CourseCreateDB(**course_dict),
             return_as_model=True,
             schema_to_select=CourseRead,
         )

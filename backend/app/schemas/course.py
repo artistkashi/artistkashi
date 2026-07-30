@@ -43,6 +43,12 @@ class CourseCreate(CourseBase):
         return self
 
 
+class CourseCreateDB(CourseCreate):
+    id: uuid.UUID
+    thumbnail_key: str | None = None
+    demo_video_key: str | None = None
+
+
 class CourseUpdate(BaseModel):
     title: str | None = Field(None, min_length=1, max_length=255)
     slug: str | None = Field(None, max_length=255)

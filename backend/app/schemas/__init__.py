@@ -1,6 +1,7 @@
 from app.schemas.address import AddressCreate, AddressRead, AddressUpdate
 from app.schemas.course import (
     CourseCreate,
+    CourseCreateDB,
     CourseCurriculumRead,
     CourseListRead,
     CourseRead,
@@ -48,6 +49,7 @@ __all__ = [
     "ReviewUpdate",
     "ReviewReadPublic",
     "CourseCreate",
+    "CourseCreateDB",
     "CourseUpdate",
     "CourseRead",
     "CourseListRead",
