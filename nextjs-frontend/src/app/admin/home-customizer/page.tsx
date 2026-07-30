@@ -25,8 +25,7 @@ import {
   defaultHomeSettings,
   type HomePageSettings,
 } from "@/lib/home-customization";
-import { getHomePageSettings } from "@/api/openapi-client";
-import { saveHomeSettingsAction } from "@/app/admin/home-customizer/actions";
+import { getHomePageSettings, updateHomePageSettings } from "@/api/openapi-client";
 import { toast } from "@/lib/toast";
 import { unwrap } from "@/api/client-service";
 
@@ -107,7 +106,7 @@ export default function HomeCustomizerPage() {
   const onSubmit = async (data: HomePageSettings) => {
     setIsLoading(true);
     try {
-      const saved = await saveHomeSettingsAction(data);
+      const saved = await unwrap(updateHomePageSettings({ body: data }));
       if (saved) {
         reset(saved as HomePageSettings);
       }
