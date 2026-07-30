@@ -123,6 +123,11 @@ class Settings(BaseSettings):
     S3_REGION: str = "us-east-1"
     S3_USE_SSL: bool = False
     S3_PUBLIC_URL: str
+    S3_PRESIGNED_URL: str | None = None
+
+    @property
+    def S3_PRESIGNED_URL_RESOLVED(self) -> str:
+        return self.S3_PRESIGNED_URL or self.S3_PUBLIC_URL
 
     S3_FOLDER_PRODUCTS: str = "products"
     S3_FOLDER_PAINTINGS: str = "paintings"

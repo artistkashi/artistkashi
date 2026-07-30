@@ -138,7 +138,7 @@ class StorageService:
     def _to_public_url(self, url: str) -> str:
         prefix = f"{settings.S3_ENDPOINT_URL}/{self.bucket}/"
         suffix = url[len(prefix) :] if url.startswith(prefix) else url
-        public_base = settings.S3_PUBLIC_URL.rstrip("/")
+        public_base = settings.S3_PRESIGNED_URL_RESOLVED.rstrip("/")
         return f"{public_base}/{suffix}"
 
     def generate_presigned_read_url(
