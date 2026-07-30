@@ -52,6 +52,20 @@ async def list_courses(
     return result
 
 
+@router.get("/courses/by-ids", response_model=SuccessResponse[list[CourseListRead]])
+async def get_courses_by_ids(
+    ids: Annotated[list[uuid.UUID], Query()],
+    session: DatabaseDep,
+    user: CurrentUserOptionalDep = None,
+):
+    courses = await course_service.get_published_courses_by_ids(
+        session=session,
+        ids=ids,
+        user_id=user.id if user else None,
+    )
+    return SuccessResponse(message="Courses retrieved", data=courses)
+
+
 @router.get("/courses/{slug}", response_model=SuccessResponse[CourseRead])
 async def get_course(slug: str, session: DatabaseDep):
     course = await course_service.get_course(session=session, slug=slug, check=True)

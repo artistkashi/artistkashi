@@ -1898,7 +1898,7 @@ function OrderDetailsModal({
           body * { visibility: hidden !important; }
           #invoice-area { visibility: visible !important; position: fixed !important; inset: 0 !important; background: #fff !important; color: #000 !important; padding: 1.5rem !important; overflow: visible !important; font-family: ui-monospace, monospace !important; z-index: 9999 !important; }
           #invoice-area * { visibility: visible !important; }
-          #invoice-area .text-gold, #invoice-area .text-primary { color: #b89d5c !important; }
+          #invoice-area .text-gold, #invoice-area .text-primary { color: #d4af37 !important; }
            #invoice-area .overflow-y-auto, #invoice-area .custom-scrollbar { overflow: visible !important; }
           .print-hide { display: none !important; }
         }

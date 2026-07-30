@@ -27,12 +27,14 @@ from app.crud.product import (
 )
 from app.crud.wishlist import crud_wishlist
 from app.crud.cart import crud_cart
+from app.models.cart import CartItem
 from app.models.order import Order, OrderItem, PaymentStatus
 from app.models.product import (
     ImageSourceType,
     ProductStatus,
 )
 from app.models.review import ReviewType
+from app.models.wishlist import Wishlist
 from app.schemas.product import (
     ProductBase,
     ProductCardJoinRead,
@@ -396,6 +398,71 @@ class ProductService:
         result["data"] = products
 
         return result
+
+    async def get_published_products_by_ids(
+        self,
+        *,
+        session: AsyncSession,
+        ids: list[uuid.UUID],
+        user_id: uuid.UUID | None = None,
+    ) -> list[ProductCardRead]:
+        if not ids:
+            return []
+
+        result = await crud_product.get_multi_joined(
+            db=session,
+            schema_to_select=ProductCardJoinRead,
+            joins_config=PRODUCT_LIST_JOINS,
+            return_as_model=True,
+            nest_joins=True,
+            status=ProductStatus.PUBLISHED,
+            id__in=ids,
+        )
+
+        products = [ProductCardRead.model_validate(item) for item in result["data"]]
+
+        if products:
+            product_ids = [p.id for p in products]
+
+            ratings = await review_service.get_bulk_ratings(
+                session=session,
+                review_type=ReviewType.PRODUCT,
+                entity_ids=product_ids,
+            )
+
+            sold_counts = await self._get_sold_counts(
+                session=session, product_ids=product_ids
+            )
+
+            wishlisted_product_ids: set[uuid.UUID] = set()
+            if user_id:
+                result = await session.execute(
+                    select(Wishlist.product_id).where(
+                        Wishlist.user_id == user_id,
+                        Wishlist.product_id.in_(product_ids),
+                    )
+                )
+                wishlisted_product_ids = {row[0] for row in result if row[0]}
+
+            cart_product_ids: set[uuid.UUID] = set()
+            if user_id:
+                result = await session.execute(
+                    select(CartItem.product_id).where(
+                        CartItem.user_id == user_id,
+                        CartItem.product_id.in_(product_ids),
+                    )
+                )
+                cart_product_ids = {row[0] for row in result if row[0]}
+
+            for product in products:
+                avg_rating, review_count = ratings.get(product.id, (0.0, 0))
+                product.average_rating = avg_rating
+                product.review_count = review_count
+                product.sold_count = sold_counts.get(product.id, 0)
+                product.is_wishlisted = product.id in wishlisted_product_ids
+                product.is_in_cart = product.id in cart_product_ids
+
+        return products
 
     async def list_published_products(
         self,

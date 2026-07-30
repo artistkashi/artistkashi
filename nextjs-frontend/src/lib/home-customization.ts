@@ -43,25 +43,25 @@ export const homePageSchema = z.object({
   featuredPaintings: z.object({
     label: z.string().max(50, "Label too long"),
     title: z.string().max(150, "Title too long"),
-    items: z.array(z.number()),
+    items: z.array(z.string()),
   }),
 
   featuredCourses: z.object({
     label: z.string().max(50, "Label too long"),
     title: z.string().max(150, "Title too long"),
-    items: z.array(z.number()),
+    items: z.array(z.string()),
   }),
 
   collection: z.object({
     label: z.string().max(50, "Label too long"),
     title: z.string().max(150, "Title too long"),
-    items: z.array(z.number()),
+    items: z.array(z.string()),
   }),
 
   bestSellers: z.object({
     label: z.string().max(50, "Label too long"),
     title: z.string().max(150, "Title too long"),
-    items: z.array(z.number()),
+    items: z.array(z.string()),
   }),
 
   // About Instructor Section
@@ -132,22 +132,22 @@ export const defaultHomeSettings: HomePageSettings = {
   featuredPaintings: {
     label: "Original Works",
     title: "Paintings\nAvailable Now",
-    items: [1, 2, 3, 4],
+    items: [],
   },
   featuredCourses: {
     label: "Masterclass Series",
     title: "Learn from\nMaster Painters",
-    items: [1, 2, 3],
+    items: [],
   },
   collection: {
     label: "The Gallery",
     title: "Works in the\nCollection",
-    items: [1, 2, 4, 5, 6],
+    items: [],
   },
   bestSellers: {
     label: "Most Collected",
     title: "Best Sellers",
-    items: [1, 2],
+    items: [],
   },
   about: {
     label: "The Artist Behind the Vision",

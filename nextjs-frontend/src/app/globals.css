@@ -113,7 +113,7 @@
   }
 
   ::selection {
-    background: rgba(184, 157, 92, 0.25);
+    background: rgba(212, 175, 55, 0.25);
     color: var(--color-text-main);
   }
 
@@ -131,7 +131,7 @@
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(184, 157, 92, 0.1),
+      rgba(212, 175, 55, 0.1),
       transparent
     );
     background-size: 200% 100%;
@@ -199,11 +199,11 @@
   }
 
   .gold-glow {
-    box-shadow: 0 0 15px rgba(184, 157, 92, 0.2);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
   }
 
   .gold-glow-lg {
-    box-shadow: 0 0 25px rgba(184, 157, 92, 0.3);
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.3);
   }
 
   .danger-glow {
@@ -211,7 +211,7 @@
   }
 
   .bg-gold-bg {
-    background-color: rgba(184, 157, 92, 0.05);
+    background-color: rgba(212, 175, 55, 0.05);
   }
 
   .btn-gold {
@@ -271,7 +271,7 @@
 
 .luxury-loader {
   --loader-color: var(--color-gold);
-  --loader-shadow: rgba(184, 157, 92, 0.4);
+  --loader-shadow: rgba(212, 175, 55, 0.4);
 
   width: 15px;
   aspect-ratio: 1;
@@ -284,7 +284,7 @@
 /* Gold (default) */
 .luxury-loader-gold {
   --loader-color: var(--color-gold);
-  --loader-shadow: rgba(184, 157, 92, 0.4);
+  --loader-shadow: rgba(212, 175, 55, 0.4);
 }
 
 /* White */
@@ -361,7 +361,7 @@
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
 
-  border: 1px solid rgba(184, 157, 92, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.12);
 }
 
 .glass-luxury::before {
@@ -384,7 +384,7 @@
   backdrop-filter: blur(30px) saturate(200%);
   -webkit-backdrop-filter: blur(30px) saturate(200%);
 
-  border: 1px solid rgba(184, 157, 92, 0.18);
+  border: 1px solid rgba(212, 175, 55, 0.18);
 
   box-shadow:
     0 12px 40px rgba(0, 0, 0, 0.45),

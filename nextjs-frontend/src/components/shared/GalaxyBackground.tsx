@@ -32,7 +32,7 @@ export function GalaxyBackground() {
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
         // More subtle gold color with lower base opacity
-        ctx.fillStyle = `rgba(184, 157, 92, ${star.alpha * 0.4})`;
+        ctx.fillStyle = `rgba(212, 175, 55, ${star.alpha * 0.4})`;
         ctx.fill();
 
         // Slower twinkle effect

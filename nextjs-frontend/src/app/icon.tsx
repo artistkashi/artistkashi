@@ -37,7 +37,7 @@ export default function Icon() {
         }}
       >
         <span style={{ color: "#f5f5f5" }}>A</span>
-        <span style={{ color: "#b89d5c" }}>K</span>
+        <span style={{ color: "#d4af37" }}>K</span>
       </div>
     </div>,
     size

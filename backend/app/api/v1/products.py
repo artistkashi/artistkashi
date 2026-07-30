@@ -1,4 +1,7 @@
-from fastapi import APIRouter
+import uuid
+from typing import Annotated
+
+from fastapi import APIRouter, Query
 
 from app.api.dependencies import CurrentUserOptionalDep, DatabaseDep
 from app.core.exceptions import ErrorCode, NotFoundException
@@ -30,6 +33,20 @@ async def list_products(
     return build_paginated_response(
         result=products, page=page, page_size=page_size, message="Products retrieved"
     )
+
+
+@router.get("/by-ids", response_model=SuccessResponse[list[ProductCardRead]])
+async def get_products_by_ids(
+    ids: Annotated[list[uuid.UUID], Query()],
+    session: DatabaseDep,
+    user: CurrentUserOptionalDep = None,
+):
+    products = await product_service.get_published_products_by_ids(
+        session=session,
+        ids=ids,
+        user_id=user.id if user else None,
+    )
+    return SuccessResponse(message="Products retrieved", data=products)
 
 
 @router.get("/{slug}", response_model=SuccessResponse[ProductDetailRead])

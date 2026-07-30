@@ -2,13 +2,13 @@ import {
   defaultHomeSettings,
   type HomePageSettings,
 } from "@/lib/home-customization";
-import { getHomePageSettings } from "@/api/openapi-client";
+import { getHomePageConfigPublic } from "@/api/openapi-client";
 import { HomePageClient } from "@/components/home/HomePageClient";
 import { unwrap } from "@/api/client-service";
 
 export default async function HomePage() {
   try {
-    const settings = await unwrap(getHomePageSettings());
+    const settings = await unwrap(getHomePageConfigPublic());
     return (
       <HomePageClient
         initialSettings={(settings || defaultHomeSettings) as HomePageSettings}

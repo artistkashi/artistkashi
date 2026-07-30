@@ -1853,9 +1853,9 @@ export type FeaturedSection = {
     /**
      * Items
      *
-     * IDs of featured entities
+     * UUIDs of featured products/courses
      */
-    items?: Array<number>;
+    items?: Array<string>;
 };
 
 /**
@@ -4763,6 +4763,52 @@ export type SuccessResponseListWishlistRead = {
      * Data
      */
     data?: Array<WishlistRead> | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[list[ProductCardRead]]
+ */
+export type SuccessResponseListProductCardRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<ProductCardRead> | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[list[CourseListRead]]
+ */
+export type SuccessResponseListCourseListRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<CourseListRead> | null;
     meta?: Meta;
 };
 
@@ -11006,3 +11052,82 @@ export type GetCountsResponses = {
 };
 
 export type GetCountsResponse = GetCountsResponses[keyof GetCountsResponses];
+
+export type GetHomePageConfigPublicData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/config/home';
+};
+
+export type GetHomePageConfigPublicErrors = {
+    /**
+     * Error 422
+     */
+    422: ErrorResponse;
+};
+
+export type GetHomePageConfigPublicError = GetHomePageConfigPublicErrors[keyof GetHomePageConfigPublicErrors];
+
+export type GetHomePageConfigPublicResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseHomePageConfig;
+};
+
+export type GetHomePageConfigPublicResponse = GetHomePageConfigPublicResponses[keyof GetHomePageConfigPublicResponses];
+
+export type GetProductsByIdsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        ids: Array<string>;
+    };
+    url: '/api/products/by-ids';
+};
+
+export type GetProductsByIdsErrors = {
+    /**
+     * Error 422
+     */
+    422: ErrorResponse;
+};
+
+export type GetProductsByIdsError = GetProductsByIdsErrors[keyof GetProductsByIdsErrors];
+
+export type GetProductsByIdsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseListProductCardRead;
+};
+
+export type GetProductsByIdsResponse = GetProductsByIdsResponses[keyof GetProductsByIdsResponses];
+
+export type GetCoursesByIdsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        ids: Array<string>;
+    };
+    url: '/api/courses/by-ids';
+};
+
+export type GetCoursesByIdsErrors = {
+    /**
+     * Error 422
+     */
+    422: ErrorResponse;
+};
+
+export type GetCoursesByIdsError = GetCoursesByIdsErrors[keyof GetCoursesByIdsErrors];
+
+export type GetCoursesByIdsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseListCourseListRead;
+};
+
+export type GetCoursesByIdsResponse = GetCoursesByIdsResponses[keyof GetCoursesByIdsResponses];

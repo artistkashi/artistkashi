@@ -23,8 +23,8 @@ class HeroSection(BaseModel):
 class FeaturedSection(BaseModel):
     label: str = Field(..., max_length=50)
     title: str = Field(..., max_length=150)
-    items: list[int] = Field(
-        default_factory=list, description="IDs of featured entities"
+    items: list[str] = Field(
+        default_factory=list, description="UUIDs of featured products/courses"
     )
 
 

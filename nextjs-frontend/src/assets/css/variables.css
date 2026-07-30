@@ -1,36 +1,36 @@
 @theme {
   /* =========================================
-   COLORS — CINEMATIC LUXURY PALETTE
+   COLORS — ONYX & GOLD PALETTE
    ========================================= */
 
-  --color-gold: #b89d5c;
-  --color-gold-bg: rgba(184, 157, 92, 0.12);
+  --color-gold: #d4af37;
+  --color-gold-bg: rgba(212, 175, 55, 0.14);
 
-  --color-dark: #0a0a0a;
-  --color-dark-soft: #0d0d0d;
+  --color-dark: #0b0b0f;
+  --color-dark-soft: #121218;
 
-  --color-surface: #121212;
-  --color-surface-hover: #1a1a1a;
-  --color-surface-elevated: #1f1f1f;
+  --color-surface: #15151b;
+  --color-surface-hover: #1c1c24;
+  --color-surface-elevated: #24242d;
 
-  --color-muted: #171717;
-  --color-muted-light: #131313;
+  --color-muted: #18181f;
+  --color-muted-light: #131319;
 
-  --color-border-soft: #1a1a1a;
-  --color-border: #2a2a2a;
-  --color-border-strong: #3a3a3a;
+  --color-border-soft: #2b2a31;
+  --color-border: #3b3a40;
+  --color-border-strong: #4a4952;
 
-  --color-text-main: #f5f5f5;
-  --color-text-muted: #8b8b8b;
+  --color-text-main: #f5f0e6;
+  --color-text-muted: #b7ad9a;
 
-  --color-green: #728c63;
-  --color-green-bg: rgba(114, 140, 99, 0.12);
+  --color-green: #6f8a62;
+  --color-green-bg: rgba(111, 138, 98, 0.14);
 
-  --color-red: #a86262;
-  --color-red-bg: rgba(168, 98, 98, 0.12);
+  --color-red: #a06a4b;
+  --color-red-bg: rgba(160, 106, 75, 0.14);
 
-  --color-blue: #6484a8;
-  --color-blue-bg: rgba(100, 132, 168, 0.12);
+  --color-blue: #6b7088;
+  --color-blue-bg: rgba(107, 112, 136, 0.14);
 
   /* Semantic aliases */
 

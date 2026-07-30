@@ -412,6 +412,81 @@ class CourseService:
             message="Courses retrieved successfully",
         )
 
+    async def get_published_courses_by_ids(
+        self,
+        *,
+        session: AsyncSession,
+        ids: list[uuid.UUID],
+        user_id: uuid.UUID | None = None,
+    ) -> list[CourseListRead]:
+        if not ids:
+            return []
+
+        result = await crud_course.get_multi_joined(
+            db=session,
+            schema_to_select=CourseListRead,
+            joins_config=[
+                JoinConfig(
+                    model=CourseCategory,
+                    join_on=Course.category_id == CourseCategory.id,
+                    join_prefix="category",
+                    schema_to_select=CourseCategoryRead,
+                    relationship_type="one-to-one",
+                )
+            ],
+            counts_config=[
+                CountConfig(
+                    model=CourseLesson,
+                    join_on=Course.id == CourseLesson.course_id,
+                    alias="lessons_count",
+                )
+            ],
+            return_as_model=True,
+            nest_joins=True,
+            is_deleted=False,
+            is_published=True,
+            id__in=ids,
+        )
+        courses = result["data"]
+
+        if courses:
+            course_ids = [c.id for c in courses]
+
+            ratings = await review_service.get_bulk_ratings(
+                session=session,
+                review_type=ReviewType.COURSE,
+                entity_ids=course_ids,
+            )
+
+            wishlisted_course_ids: set[uuid.UUID] = set()
+            if user_id:
+                wishlist_result = await session.execute(
+                    select(Wishlist.course_id).where(
+                        Wishlist.user_id == user_id,
+                        Wishlist.course_id.in_(course_ids),
+                    )
+                )
+                wishlisted_course_ids = {row[0] for row in wishlist_result if row[0]}
+
+            cart_course_ids: set[uuid.UUID] = set()
+            if user_id:
+                cart_result = await session.execute(
+                    select(CartItem.course_id).where(
+                        CartItem.user_id == user_id,
+                        CartItem.course_id.in_(course_ids),
+                    )
+                )
+                cart_course_ids = {row[0] for row in cart_result if row[0]}
+
+            for course in courses:
+                avg_rating, review_count = ratings.get(course.id, (0.0, 0))
+                course.average_rating = avg_rating
+                course.review_count = review_count
+                course.is_wishlisted = course.id in wishlisted_course_ids
+                course.is_in_cart = course.id in cart_course_ids
+
+        return courses
+
     async def get_course_with_curriculum(
         self,
         *,

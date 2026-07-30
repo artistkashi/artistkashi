@@ -267,7 +267,7 @@ function CoursesPageContent() {
                 className={cn(
                   "px-3 py-2 text-2xs font-mono uppercase tracking-widest transition-all duration-300 rounded-sm flex items-center gap-1.5",
                   view === "list"
-                    ? "bg-gold text-dark shadow-[0_0_15px_rgba(184,157,92,0.3)] font-black"
+                    ? "bg-gold text-dark shadow-[0_0_15px_rgba(212, 175, 55,0.3)] font-black"
                     : "text-text-muted hover:text-foreground"
                 )}
               >
@@ -278,7 +278,7 @@ function CoursesPageContent() {
                 className={cn(
                   "px-3 py-2 text-2xs font-mono uppercase tracking-widest transition-all duration-300 rounded-sm flex items-center gap-1.5",
                   view === "grid"
-                    ? "bg-gold text-dark shadow-[0_0_15px_rgba(184,157,92,0.3)] font-black"
+                    ? "bg-gold text-dark shadow-[0_0_15px_rgba(212, 175, 55,0.3)] font-black"
                     : "text-text-muted hover:text-foreground"
                 )}
               >

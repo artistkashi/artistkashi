@@ -880,7 +880,7 @@ function CatalogTabPanel({
                       className={cn(
                         "w-1.5 h-1.5 rounded-full shrink-0 transition-colors duration-300",
                         item.is_active
-                          ? "bg-gold group-hover:shadow-[0_0_6px_rgba(184,157,92,0.6)]"
+                          ? "bg-gold group-hover:shadow-[0_0_6px_rgba(212, 175, 55,0.6)]"
                           : "bg-text-muted/20"
                       )}
                     />
