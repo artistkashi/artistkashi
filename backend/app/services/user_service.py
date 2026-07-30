@@ -90,10 +90,8 @@ class UserService:
 
     def _extract_s3_key(self, url: str) -> str | None:
         public_url = settings.S3_PUBLIC_URL.rstrip("/")
-        bucket = settings.S3_BUCKET_NAME
-        prefix = f"{public_url}/{bucket}/"
-        if url.startswith(prefix):
-            return url[len(prefix) :]
+        if url.startswith(public_url):
+            return url[len(public_url) :].lstrip("/")
         return None
 
     async def delete_account(

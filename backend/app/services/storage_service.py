@@ -69,7 +69,7 @@ class StorageService:
             raise ValidationException("Only JPEG, PNG, WEBP and GIF images are allowed")
 
         s3_key = await self._upload(file, folder, key=key)
-        return f"{settings.S3_PUBLIC_URL}/{self.bucket}/{s3_key}"
+        return f"{settings.S3_PUBLIC_URL}/{s3_key}"
 
     async def upload_video(
         self,
@@ -94,7 +94,7 @@ class StorageService:
             )
 
         s3_key = await self._upload(file, folder, key=key)
-        return f"{settings.S3_PUBLIC_URL}/{self.bucket}/{s3_key}"
+        return f"{settings.S3_PUBLIC_URL}/{s3_key}"
 
     async def upload_images(
         self,

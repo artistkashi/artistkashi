@@ -685,7 +685,7 @@ class ProductService:
             img = existing_images_map[img_id]
             if img.source_type == ImageSourceType.UPLOAD:
                 try:
-                    key = img.image_url.split(f"/{settings.S3_BUCKET_NAME}/", 1)[1]
+                    key = img.image_url.split(settings.S3_PUBLIC_URL, 1)[1].lstrip("/")
                     deleted_keys.append(key)
                 except (IndexError, AttributeError):
                     pass
@@ -769,7 +769,7 @@ class ProductService:
         for image in product.images:
             if image.source_type == ImageSourceType.UPLOAD and image.image_url:
                 try:
-                    key = image.image_url.split(f"/{settings.S3_BUCKET_NAME}/", 1)[1]
+                    key = image.image_url.split(settings.S3_PUBLIC_URL, 1)[1].lstrip("/")
                     keys.append(key)
                 except (IndexError, AttributeError):
                     pass
