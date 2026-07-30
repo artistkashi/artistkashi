@@ -135,6 +135,12 @@ class StorageService:
         except Exception:
             pass
 
+    def _to_public_url(self, url: str) -> str:
+        prefix = f"{settings.S3_ENDPOINT_URL}/{self.bucket}/"
+        suffix = url[len(prefix) :] if url.startswith(prefix) else url
+        public_base = settings.S3_PUBLIC_URL.rstrip("/")
+        return f"{public_base}/{suffix}"
+
     def generate_presigned_read_url(
         self,
         key: str,
@@ -148,7 +154,7 @@ class StorageService:
             },
             ExpiresIn=expires_in,
         )
-        return url.replace(settings.S3_ENDPOINT_URL, settings.S3_PUBLIC_URL, 1)
+        return self._to_public_url(url)
 
     def generate_presigned_upload_url(
         self,
@@ -165,11 +171,7 @@ class StorageService:
             },
             ExpiresIn=expires_in,
         )
-        # boto3 generates URL with the internal endpoint
-        # (S3_ENDPOINT_URL, e.g. http://minio:9000) but the browser
-        # needs the externally-accessible public URL
-        # (S3_PUBLIC_URL, e.g. http://localhost:9000)
-        return url.replace(settings.S3_ENDPOINT_URL, settings.S3_PUBLIC_URL, 1)
+        return self._to_public_url(url)
 
     async def delete_file(self, key: str) -> bool:
         try:
