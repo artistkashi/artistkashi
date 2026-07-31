@@ -469,57 +469,59 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
 
       {/* ── FAQ ── */}
       <section className="max-w-360 mx-auto px-8 lg:px-16 pt-32">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-          <RevealBlock className="lg:col-span-4">
+        <RevealBlock>
+          <div className="text-center mb-16">
             <div className="text-label font-mono text-gold tracking-[0.2em] uppercase mb-4">
               {settings.faq.label}
             </div>
             <h2 className="text-h2 font-extrabold tracking-[-0.02em] text-text-main leading-tight">
               {settings.faq.title}
             </h2>
-            <GoldDivider />
-            <p className="text-text-muted leading-relaxed text-sm">
+            <div className="flex justify-center">
+              <GoldDivider />
+            </div>
+            <p className="text-text-muted leading-relaxed text-sm max-w-md mx-auto">
               {settings.faq.description}
             </p>
-          </RevealBlock>
-          <div className="lg:col-span-8">
-            {settings.faq.items.map((item, i) => (
-              <RevealBlock key={i} delay={i * 0.06}>
-                <div className="border-b border-border">
-                  <button
-                    onClick={() => setFaqOpen(faqOpen === i ? null : i)}
-                    className="w-full flex items-center justify-between py-6 text-left group"
-                  >
-                    <span className="text-text-main font-semibold text-base pr-8 group-hover:text-gold transition-colors">
-                      {item.question}
-                    </span>
-                    <div className="shrink-0 w-6 h-6 border border-border flex items-center justify-center">
-                      {faqOpen === i ? (
-                        <Minus size={12} className="text-gold" />
-                      ) : (
-                        <Plus size={12} className="text-text-muted" />
-                      )}
-                    </div>
-                  </button>
-                  <AnimatePresence>
-                    {faqOpen === i && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                        className="overflow-hidden"
-                      >
-                        <p className="text-text-muted text-sm leading-relaxed pb-6">
-                          {item.answer}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </RevealBlock>
-            ))}
           </div>
+        </RevealBlock>
+        <div className="max-w-3xl mx-auto">
+          {settings.faq.items.map((item, i) => (
+            <RevealBlock key={i} delay={i * 0.06}>
+              <div className="border-b border-border">
+                <button
+                  onClick={() => setFaqOpen(faqOpen === i ? null : i)}
+                  className="w-full flex items-center justify-between py-6 text-left group"
+                >
+                  <span className="text-text-main font-semibold text-base pr-8 group-hover:text-gold transition-colors">
+                    {item.question}
+                  </span>
+                  <div className="shrink-0 w-6 h-6 border border-border flex items-center justify-center">
+                    {faqOpen === i ? (
+                      <Minus size={12} className="text-gold" />
+                    ) : (
+                      <Plus size={12} className="text-text-muted" />
+                    )}
+                  </div>
+                </button>
+                <AnimatePresence>
+                  {faqOpen === i && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <p className="text-text-muted text-sm leading-relaxed pb-6">
+                        {item.answer}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </RevealBlock>
+          ))}
         </div>
       </section>
 
