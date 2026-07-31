@@ -24,6 +24,11 @@ import { RevealBlock } from "@/components/ui/misc";
 import { ModalType, StatusModal } from "@/components/ui/StatusModal";
 import { useAuth } from "@/lib/auth-store";
 import { getSafeReturnTo } from "@/lib/auth-utils";
+import {
+  enterVideoFullscreen,
+  exitVideoFullscreen,
+  isInFullscreen,
+} from "@/lib/video-fullscreen";
 import { useWishlistStore } from "@/lib/wishlist-store";
 import { cn, displayPrice } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -52,6 +57,7 @@ import Link from "next/link";
 import { notFound, usePathname, useRouter } from "next/navigation";
 import { use, useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import type { PointerEvent as ReactPointerEvent } from "react";
 
 function formatDuration(seconds: number | undefined | null): string {
   if (!seconds) return "Self-paced";
@@ -74,12 +80,14 @@ function DemoVideoPlayer({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
   const [paused, setPaused] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
+  const [isScrubbing, setIsScrubbing] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -110,9 +118,13 @@ function DemoVideoPlayer({
   }, []);
 
   useEffect(() => {
-    const onChange = () => setFullscreen(!!document.fullscreenElement);
+    const onChange = () => setFullscreen(isInFullscreen());
     document.addEventListener("fullscreenchange", onChange);
-    return () => document.removeEventListener("fullscreenchange", onChange);
+    document.addEventListener("webkitfullscreenchange", onChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onChange);
+      document.removeEventListener("webkitfullscreenchange", onChange);
+    };
   }, []);
 
   const togglePlay = useCallback(() => {
@@ -123,11 +135,48 @@ function DemoVideoPlayer({
   }, []);
 
   const handleFullscreen = useCallback(() => {
-    if (!containerRef.current) return;
-    if (!document.fullscreenElement)
-      containerRef.current.requestFullscreen().catch(() => {});
-    else document.exitFullscreen();
+    if (!isInFullscreen()) {
+      enterVideoFullscreen(videoRef.current, containerRef.current);
+    } else {
+      exitVideoFullscreen();
+    }
   }, []);
+
+  const seekFromClientX = useCallback((clientX: number) => {
+    const el = timelineRef.current;
+    const video = videoRef.current;
+    if (!el || !video || !video.duration) return;
+    const rect = el.getBoundingClientRect();
+    const pos = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
+    video.currentTime = pos * video.duration;
+    setTime(video.currentTime);
+  }, []);
+
+  const handleTimelinePointerDown = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+      setIsScrubbing(true);
+      seekFromClientX(e.clientX);
+    },
+    [seekFromClientX]
+  );
+
+  const handleTimelinePointerMove = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (isScrubbing) seekFromClientX(e.clientX);
+    },
+    [isScrubbing, seekFromClientX]
+  );
+
+  const handleTimelinePointerUp = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (!isScrubbing) return;
+      seekFromClientX(e.clientX);
+      setIsScrubbing(false);
+    },
+    [isScrubbing, seekFromClientX]
+  );
 
   const fmtTime = (s: number | undefined | null) => {
     if (!s || s <= 0) return "0:00";
@@ -148,18 +197,19 @@ function DemoVideoPlayer({
         <div
           ref={containerRef}
           className={cn(
-            "flex-1 flex flex-col bg-dark min-w-0 min-h-0",
+            "flex-1 flex flex-col bg-dark min-w-0 min-h-0 select-none",
             fullscreen && "relative"
           )}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="relative flex-1 flex items-center justify-center bg-dark min-h-0 overflow-hidden">
+          <div className="relative flex-1 flex items-center justify-center bg-dark min-h-0 overflow-hidden select-none">
             <video
               ref={videoRef}
               src={url}
               className="w-full h-full object-contain"
               playsInline
               preload="metadata"
+              draggable={false}
             />
             {paused && (
               <div
@@ -186,7 +236,7 @@ function DemoVideoPlayer({
           </div>
           <div
             className={cn(
-              "px-4 sm:px-8 py-4 transition-opacity duration-300",
+              "px-4 sm:px-8 py-4 transition-opacity duration-300 select-none",
               fullscreen
                 ? "absolute bottom-0 left-0 right-0 z-10 bg-muted-light"
                 : "bg-muted-light border-t border-border",
@@ -199,27 +249,31 @@ function DemoVideoPlayer({
                 {fmtTime(time)}
               </span>
               <div
-                className="flex-1 h-1 bg-border relative cursor-pointer group"
-                onClick={(e) => {
-                  const video = videoRef.current;
-                  if (!video || !video.duration) return;
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const pos = (e.clientX - rect.left) / rect.width;
-                  video.currentTime = pos * video.duration;
-                }}
+                ref={timelineRef}
+                className="flex-1 h-8 flex items-center cursor-pointer touch-none group"
+                onPointerDown={handleTimelinePointerDown}
+                onPointerMove={handleTimelinePointerMove}
+                onPointerUp={handleTimelinePointerUp}
+                onPointerCancel={handleTimelinePointerUp}
               >
-                <div
-                  className="h-full bg-gold transition-all duration-300"
-                  style={{
-                    width: `${duration > 0 ? (time / duration) * 100 : 0}%`,
-                  }}
-                />
-                <button
-                  className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-text-main border-2 border-gold rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  style={{
-                    left: `${duration > 0 ? (time / duration) * 100 : 0}%`,
-                  }}
-                />
+                <div className="relative w-full h-1.5 bg-border rounded-full">
+                  <div
+                    className="absolute inset-y-0 left-0 bg-gold rounded-full"
+                    style={{
+                      width: `${
+                        duration > 0 ? Math.min((time / duration) * 100, 100) : 0
+                      }%`,
+                    }}
+                  />
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 bg-gold border-2 border-dark rounded-full shadow-[0_0_8px_rgba(212,175,55,0.7)] pointer-events-none transition-transform group-hover:scale-110"
+                    style={{
+                      left: `${
+                        duration > 0 ? Math.min((time / duration) * 100, 100) : 0
+                      }%`,
+                    }}
+                  />
+                </div>
               </div>
               <span className="text-label font-mono text-text-muted shrink-0 w-14 text-xs">
                 {fmtTime(duration)}

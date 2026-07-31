@@ -18,9 +18,12 @@ import {
   MessageSquare,
   HelpCircle,
   Share2,
+  Megaphone,
+  Clapperboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PrimaryBtn } from "@/components/ui/buttons";
+import { ImagePicker } from "@/components/admin/ImagePicker";
 import {
   homePageSchema,
   defaultHomeSettings,
@@ -40,6 +43,7 @@ export default function HomeCustomizerPage() {
     reset,
     control,
     watch,
+    setValue,
     formState: { isDirty },
   } = useForm<HomePageSettings>({
     resolver: zodResolver(homePageSchema),
@@ -294,10 +298,56 @@ export default function HomeCustomizerPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
-                    Media URL (S3/CDN Link)
+                    Media (S3/CDN Link)
+                  </label>
+                  <ImagePicker
+                    label="hero media"
+                    value={watch("hero.mediaUrl")}
+                    onChange={(url) =>
+                      setValue("hero.mediaUrl", url, { shouldDirty: true })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-border/40">
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Primary Button Text
                   </label>
                   <input
-                    {...register("hero.mediaUrl")}
+                    {...register("hero.primaryBtnText")}
+                    placeholder="Begin Learning"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Primary Button Link
+                  </label>
+                  <input
+                    {...register("hero.primaryBtnLink")}
+                    placeholder="/courses"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Ghost Button Text
+                  </label>
+                  <input
+                    {...register("hero.ghostBtnText")}
+                    placeholder="View Paintings"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Ghost Button Link
+                  </label>
+                  <input
+                    {...register("hero.ghostBtnLink")}
+                    placeholder="/shop"
                     className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
                   />
                 </div>
@@ -399,6 +449,39 @@ export default function HomeCustomizerPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="space-y-2">
                   <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Label
+                  </label>
+                  <input
+                    {...register("about.label")}
+                    placeholder="The Artist Behind the Vision"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Title
+                  </label>
+                  <input
+                    {...register("about.title")}
+                    placeholder="Mastering the Art of Visual Storytelling"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Instructor Role
+                  </label>
+                  <input
+                    {...register("about.instructorRole")}
+                    placeholder="Lead Instructor"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
                     Instructor Name
                   </label>
                   <input
@@ -408,11 +491,14 @@ export default function HomeCustomizerPage() {
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
-                    Image URL
+                    Instructor Image
                   </label>
-                  <input
-                    {...register("about.image")}
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  <ImagePicker
+                    label="instructor image"
+                    value={watch("about.image")}
+                    onChange={(url) =>
+                      setValue("about.image", url, { shouldDirty: true })
+                    }
                   />
                 </div>
               </div>
@@ -504,6 +590,15 @@ export default function HomeCustomizerPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-2">
                     <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                      FAQ Section Label
+                    </label>
+                    <input
+                      {...register("faq.label")}
+                      className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
                       FAQ Section Title
                     </label>
                     <input
@@ -511,7 +606,7 @@ export default function HomeCustomizerPage() {
                       className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 md:col-span-2">
                     <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
                       Section Description
                     </label>
@@ -580,6 +675,35 @@ export default function HomeCustomizerPage() {
           />
           {activeSection === "community" && (
             <div className="p-8 space-y-8 animate-in fade-in duration-300">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Section Label
+                  </label>
+                  <input
+                    {...register("community.label")}
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Section Title
+                  </label>
+                  <input
+                    {...register("community.title")}
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Section Description
+                  </label>
+                  <textarea
+                    {...register("community.description")}
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none h-20 resize-none"
+                  />
+                </div>
+              </div>
               <div className="flex items-center justify-between">
                 <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
                   Community Reviews
@@ -646,6 +770,134 @@ export default function HomeCustomizerPage() {
                     />
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* --- Video CTA Section --- */}
+        <div className="overflow-hidden">
+          <SectionHeader id="videoCta" title="Video CTA Banner" icon={Clapperboard} />
+          {activeSection === "videoCta" && (
+            <div className="p-8 space-y-8 animate-in fade-in duration-300">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Label
+                  </label>
+                  <input
+                    {...register("videoCta.label")}
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Title
+                  </label>
+                  <input
+                    {...register("videoCta.title")}
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Background Image
+                  </label>
+                  <ImagePicker
+                    label="video CTA background"
+                    value={watch("videoCta.bgImage")}
+                    onChange={(url) =>
+                      setValue("videoCta.bgImage", url, { shouldDirty: true })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Video URL
+                  </label>
+                  <input
+                    {...register("videoCta.videoUrl")}
+                    placeholder="https://www.youtube.com/embed/..."
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  />
+                  <CharCount value={watch("videoCta.videoUrl")} max={500} />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* --- CTA Banner Section --- */}
+        <div className="overflow-hidden">
+          <SectionHeader id="banner" title="Bottom CTA Banner" icon={Megaphone} />
+          {activeSection === "banner" && (
+            <div className="p-8 space-y-8 animate-in fade-in duration-300">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Label
+                  </label>
+                  <input
+                    {...register("banner.label")}
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Title
+                  </label>
+                  <textarea
+                    {...register("banner.title")}
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none h-24 resize-none"
+                  />
+                  <CharCount value={watch("banner.title")} max={150} />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Description
+                  </label>
+                  <textarea
+                    {...register("banner.description")}
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none h-24 resize-none"
+                  />
+                  <CharCount value={watch("banner.description")} max={400} />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Primary Button Text
+                  </label>
+                  <input
+                    {...register("banner.primaryBtnText")}
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Primary Button Link
+                  </label>
+                  <input
+                    {...register("banner.primaryBtnLink")}
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Ghost Button Text
+                  </label>
+                  <input
+                    {...register("banner.ghostBtnText")}
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Ghost Button Link
+                  </label>
+                  <input
+                    {...register("banner.ghostBtnLink")}
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                  />
+                </div>
               </div>
             </div>
           )}

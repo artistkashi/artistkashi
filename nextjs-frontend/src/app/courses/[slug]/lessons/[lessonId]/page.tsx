@@ -20,6 +20,12 @@ import {
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useAuth } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
+import {
+  enterVideoFullscreen,
+  exitVideoFullscreen,
+  isInFullscreen,
+} from "@/lib/video-fullscreen";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -262,6 +268,7 @@ function VideoPlayer({
   userName,
   userEmail,
   showWatermark,
+  onTap,
 }: {
   videoUrl: string | null | undefined;
   lessonStatus: string | undefined;
@@ -272,6 +279,7 @@ function VideoPlayer({
   userName?: string;
   userEmail?: string;
   showWatermark?: boolean;
+  onTap?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -330,8 +338,8 @@ function VideoPlayer({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full bg-black cursor-pointer flex items-center justify-center"
-      onClick={togglePlay}
+      className="relative w-full h-full bg-black cursor-pointer flex items-center justify-center select-none"
+      onClick={onTap ?? togglePlay}
     >
       {!videoUrl ||
       lessonStatus === "processing" ||
@@ -367,6 +375,7 @@ function VideoPlayer({
             className="w-full h-full object-contain"
             playsInline
             preload="metadata"
+            draggable={false}
           />
 
           {!isPlaying && (
@@ -571,7 +580,10 @@ export default function CourseLessonPlayerPage({
   const [videoMuted, setVideoMuted] = useState(false);
   const [isPaused, setIsPaused] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [controlsVisible, setControlsVisible] = useState(false);
+  const [isScrubbing, setIsScrubbing] = useState(false);
   const [lastLessonCompleted, setLastLessonCompleted] = useState(false);
+  const timelineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -588,10 +600,27 @@ export default function CourseLessonPlayerPage({
   }, []);
 
   useEffect(() => {
-    const onChange = () => setIsFullscreen(!!document.fullscreenElement);
+    const onChange = () => {
+      const inFs = isInFullscreen();
+      setIsFullscreen(inFs);
+      if (!inFs) setControlsVisible(false);
+    };
     document.addEventListener("fullscreenchange", onChange);
-    return () => document.removeEventListener("fullscreenchange", onChange);
+    document.addEventListener("webkitfullscreenchange", onChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onChange);
+      document.removeEventListener("webkitfullscreenchange", onChange);
+    };
   }, []);
+
+  useEffect(() => {
+    if (!isFullscreen || !controlsVisible) return;
+    const timer = setTimeout(() => {
+      const video = document.querySelector("video");
+      if (video && !video.paused) setControlsVisible(false);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [isFullscreen, controlsVisible, isPaused]);
 
   useEffect(() => {
     if (course?.title) {
@@ -637,11 +666,13 @@ export default function CourseLessonPlayerPage({
           break;
         case "KeyF":
           e.preventDefault();
-          if (!fullscreenRef.current) return;
-          if (!document.fullscreenElement) {
-            fullscreenRef.current.requestFullscreen().catch(() => {});
+          if (!isInFullscreen()) {
+            enterVideoFullscreen(
+              document.querySelector("video"),
+              fullscreenRef.current
+            );
           } else {
-            document.exitFullscreen().catch(() => {});
+            exitVideoFullscreen();
           }
           break;
         case "ArrowLeft":
@@ -671,13 +702,60 @@ export default function CourseLessonPlayerPage({
   }, []);
 
   const handleFullscreenToggle = useCallback(() => {
-    if (!fullscreenRef.current) return;
-    if (!document.fullscreenElement) {
-      fullscreenRef.current.requestFullscreen().catch(() => {});
+    const video = document.querySelector("video");
+    if (!isInFullscreen()) {
+      enterVideoFullscreen(video, fullscreenRef.current);
     } else {
-      document.exitFullscreen().catch(() => {});
+      exitVideoFullscreen();
     }
   }, []);
+
+  const seekFromClientX = useCallback((clientX: number) => {
+    const el = timelineRef.current;
+    const video = document.querySelector("video");
+    if (!el || !video || !video.duration) return;
+    const rect = el.getBoundingClientRect();
+    const pos = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
+    video.currentTime = pos * video.duration;
+    setVideoTime(video.currentTime);
+  }, []);
+
+  const handleTimelinePointerDown = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+      setIsScrubbing(true);
+      seekFromClientX(e.clientX);
+    },
+    [seekFromClientX]
+  );
+
+  const handleTimelinePointerMove = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (isScrubbing) seekFromClientX(e.clientX);
+    },
+    [isScrubbing, seekFromClientX]
+  );
+
+  const handleTimelinePointerUp = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (!isScrubbing) return;
+      seekFromClientX(e.clientX);
+      setIsScrubbing(false);
+    },
+    [isScrubbing, seekFromClientX]
+  );
+
+  const handleVideoTap = useCallback(() => {
+    const video = document.querySelector("video");
+    if (!video) return;
+    if (!isFullscreen) {
+      if (video.paused) video.play().catch(() => {});
+      else video.pause();
+    } else {
+      setControlsVisible((v) => !v);
+    }
+  }, [isFullscreen]);
 
   const handleProgress = useCallback((currentTime: number) => {
     progressRef.current = currentTime;
@@ -799,7 +877,7 @@ export default function CourseLessonPlayerPage({
           <div
             ref={fullscreenRef}
             className={cn(
-              "flex-1 flex flex-col bg-dark min-w-0 min-h-0",
+              "flex-1 flex flex-col bg-dark min-w-0 min-h-0 select-none",
               isFullscreen && "relative"
             )}
           >
@@ -860,6 +938,7 @@ export default function CourseLessonPlayerPage({
                     isEnrolled ||
                     currentLesson?.is_preview === false
                   }
+                  onTap={handleVideoTap}
                 />
               )}
             </div>
@@ -867,11 +946,12 @@ export default function CourseLessonPlayerPage({
             {/* Controls Bar */}
             <div
               className={cn(
-                "px-4 sm:px-8 py-4 transition-opacity duration-300",
+                "px-4 sm:px-8 py-4 transition-opacity duration-300 select-none",
                 isFullscreen
                   ? "absolute bottom-0 left-0 right-0 z-10 bg-muted-light"
                   : "bg-muted-light border-t border-border",
-                isFullscreen && !isPaused && "opacity-0 pointer-events-none"
+                isFullscreen && !isPaused && !controlsVisible &&
+                  "opacity-0 pointer-events-none"
               )}
               onClick={(e) => e.stopPropagation()}
             >
@@ -880,27 +960,41 @@ export default function CourseLessonPlayerPage({
                   {formatDuration(videoTime)}
                 </span>
                 <div
-                  className="flex-1 h-1 bg-border relative cursor-pointer group"
-                  onClick={(e) => {
-                    const video = document.querySelector("video");
-                    if (!video || !video.duration) return;
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const pos = (e.clientX - rect.left) / rect.width;
-                    video.currentTime = pos * video.duration;
-                  }}
+                  ref={timelineRef}
+                  className="flex-1 h-8 flex items-center cursor-pointer touch-none group"
+                  onPointerDown={handleTimelinePointerDown}
+                  onPointerMove={handleTimelinePointerMove}
+                  onPointerUp={handleTimelinePointerUp}
+                  onPointerCancel={handleTimelinePointerUp}
                 >
-                  <div
-                    className="h-full bg-gold transition-all duration-300"
-                    style={{
-                      width: `${videoDuration > 0 ? (videoTime / videoDuration) * 100 : 0}%`,
-                    }}
-                  />
-                  <button
-                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-text-main border-2 border-gold rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{
-                      left: `${videoDuration > 0 ? (videoTime / videoDuration) * 100 : 0}%`,
-                    }}
-                  />
+                  <div className="relative w-full h-1.5 bg-border rounded-full">
+                    <div
+                      className="absolute inset-y-0 left-0 bg-gold rounded-full"
+                      style={{
+                        width: `${
+                          videoDuration > 0
+                            ? Math.min(
+                                (videoTime / videoDuration) * 100,
+                                100
+                              )
+                            : 0
+                        }%`,
+                      }}
+                    />
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 bg-gold border-2 border-dark rounded-full shadow-[0_0_8px_rgba(212,175,55,0.7)] pointer-events-none transition-transform group-hover:scale-110"
+                      style={{
+                        left: `${
+                          videoDuration > 0
+                            ? Math.min(
+                                (videoTime / videoDuration) * 100,
+                                100
+                              )
+                            : 0
+                        }%`,
+                      }}
+                    />
+                  </div>
                 </div>
                 <span className="text-label font-mono text-text-muted shrink-0 w-14 text-xs">
                   {formatDuration(videoDuration)}
