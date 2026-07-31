@@ -102,6 +102,13 @@ class HomePageConfig(BaseModel):
     banner: BannerSection
 
 
+class SiteConfigCreate(BaseModel):
+    key: str
+    value: dict
+    description: str | None = None
+    is_public: bool = True
+
+
 class SiteConfigUpdate(BaseModel):
     value: HomePageConfig
 

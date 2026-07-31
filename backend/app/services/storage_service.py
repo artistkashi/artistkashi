@@ -18,7 +18,7 @@ class StorageService:
             endpoint_url=settings.S3_ENDPOINT_URL,
             aws_access_key_id=settings.S3_ACCESS_KEY,
             aws_secret_access_key=settings.S3_SECRET_KEY,
-            region_name=settings.S3_REGION,
+            region_name="auto",
         )
 
         self.bucket = settings.S3_BUCKET_NAME
@@ -135,12 +135,6 @@ class StorageService:
         except Exception:
             pass
 
-    def _to_public_url(self, url: str) -> str:
-        prefix = f"{settings.S3_ENDPOINT_URL}/{self.bucket}/"
-        suffix = url[len(prefix) :] if url.startswith(prefix) else url
-        public_base = settings.S3_PRESIGNED_URL_RESOLVED.rstrip("/")
-        return f"{public_base}/{suffix}"
-
     def generate_presigned_read_url(
         self,
         key: str,
@@ -154,7 +148,7 @@ class StorageService:
             },
             ExpiresIn=expires_in,
         )
-        return self._to_public_url(url)
+        return url
 
     def generate_presigned_upload_url(
         self,
@@ -171,7 +165,7 @@ class StorageService:
             },
             ExpiresIn=expires_in,
         )
-        return self._to_public_url(url)
+        return url
 
     async def delete_file(self, key: str) -> bool:
         try:
