@@ -350,7 +350,7 @@ export function CourseForm({
         <div className="space-y-2">
           <Label>Category</Label>
           {isAddingCategory ? (
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <input
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
@@ -362,19 +362,19 @@ export function CourseForm({
                 }}
                 placeholder="New category name"
                 autoFocus
-                className="flex-1 h-12 bg-surface border border-border px-4 text-sm text-foreground rounded-sm focus:border-primary outline-none transition-all duration-300 placeholder:text-text-muted/50 font-mono"
+                className="flex-1 h-10 bg-surface border border-border px-3 text-sm text-foreground rounded-sm focus:border-primary outline-none transition-all duration-300 placeholder:text-text-muted/50 font-mono"
               />
               <button
                 type="button"
                 onClick={handleCreateCategory}
                 disabled={isCreatingCategory || !newCategoryName.trim()}
-                className="w-12 h-12 flex items-center justify-center bg-primary text-white rounded-sm hover:opacity-90 transition-all shrink-0 disabled:opacity-40"
+                className="w-9 h-9 flex items-center justify-center bg-primary text-white rounded-sm hover:opacity-90 transition-all shrink-0 disabled:opacity-40"
                 title="Save category"
               >
                 {isCreatingCategory ? (
                   <div className="luxury-loader luxury-loader-dark loader-sm" />
                 ) : (
-                  <Check size={16} />
+                  <Check size={14} />
                 )}
               </button>
               <button
@@ -383,14 +383,14 @@ export function CourseForm({
                   setIsAddingCategory(false);
                   setNewCategoryName("");
                 }}
-                className="w-12 h-12 flex items-center justify-center text-text-muted hover:text-danger transition-all rounded-sm border border-border shrink-0"
+                className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-danger transition-all rounded-sm border border-border shrink-0"
                 title="Cancel"
               >
-                <X size={16} />
+                <X size={14} />
               </button>
             </div>
           ) : (
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <div className="flex-1">
                 <Controller
                   name="category_id"
@@ -411,10 +411,11 @@ export function CourseForm({
               <button
                 type="button"
                 onClick={() => setIsAddingCategory(true)}
-                className="w-12 h-12 flex items-center justify-center text-primary hover:text-foreground hover:bg-primary/10 transition-all rounded-sm border border-border shrink-0"
+                className="h-8 px-2.5 flex items-center gap-1 text-2xs font-mono uppercase tracking-widest text-primary hover:bg-primary/10 hover:text-foreground transition-all rounded-sm border border-border shrink-0"
                 title="Add new category"
               >
-                <Plus size={16} />
+                <Plus size={12} />
+                New
               </button>
             </div>
           )}

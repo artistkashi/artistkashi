@@ -184,18 +184,20 @@ export function CourseReviewsSection({
 
   return (
     <div className="mb-16">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 border border-primary/20 flex items-center justify-center bg-gold-bg rounded">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="w-10 h-10 border border-primary/20 flex items-center justify-center bg-gold-bg rounded shrink-0">
             <MessageSquare className="text-primary" size={18} />
           </div>
-          <h2 className="text-text-main font-bold text-3xl">Student Reviews</h2>
+          <h2 className="text-text-main font-bold text-2xl sm:text-3xl leading-tight">
+            Student Reviews
+          </h2>
         </div>
         {isEnrolled && !myReview && isAuthenticated && (
           <PrimaryBtn
             type="button"
             onClick={() => setShowForm(true)}
-            className="text-xs"
+            className="text-xs px-4 py-3 sm:px-8 sm:py-4 w-full sm:w-auto justify-center"
           >
             <Sparkles size={14} className="mr-2" />
             Write Review
@@ -259,7 +261,7 @@ export function CourseReviewsSection({
                 </div>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <button
                   type="button"
                   onClick={handleCancelForm}
@@ -272,7 +274,7 @@ export function CourseReviewsSection({
                   type="button"
                   onClick={handleSubmit}
                   disabled={isSubmitting || !canSubmit}
-                  className="flex-1 text-xs"
+                  className="flex-1 text-xs px-4 py-3 sm:px-8 sm:py-4"
                 >
                   {isSubmitting ? (
                     <span className="luxury-loader scale-75" />
@@ -340,16 +342,16 @@ export function CourseReviewsSection({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4 mt-8">
+        <div className="flex items-center justify-center gap-2 sm:gap-4 mt-8">
           <button
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="w-10 h-10 border border-border flex items-center justify-center hover:border-primary hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed text-text-muted"
+            className="w-8 h-8 sm:w-10 sm:h-10 border border-border flex items-center justify-center hover:border-primary hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed text-text-muted"
           >
             <ChevronLeft size={16} />
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
               let pageNum: number;
               if (totalPages <= 5) {
@@ -367,7 +369,7 @@ export function CourseReviewsSection({
                   type="button"
                   onClick={() => setPage(pageNum)}
                   className={cn(
-                    "w-10 h-10 border text-xs font-mono transition-all",
+                    "w-8 h-8 sm:w-10 sm:h-10 border text-xs font-mono transition-all",
                     page === pageNum
                       ? "border-primary text-primary bg-gold-bg"
                       : "border-border text-text-muted hover:border-primary hover:text-primary"
@@ -382,7 +384,7 @@ export function CourseReviewsSection({
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="w-10 h-10 border border-border flex items-center justify-center hover:border-primary hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed text-text-muted"
+            className="w-8 h-8 sm:w-10 sm:h-10 border border-border flex items-center justify-center hover:border-primary hover:text-primary transition-all disabled:opacity-30 disabled:cursor-not-allowed text-text-muted"
           >
             <ChevronRight size={16} />
           </button>

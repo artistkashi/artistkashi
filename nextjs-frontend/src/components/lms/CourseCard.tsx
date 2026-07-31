@@ -279,9 +279,6 @@ export function CourseCardGrid({ course, delay = 0 }: CourseCardProps) {
                     )}
                   </button>
                 )}
-                <span className="text-text-muted text-xs font-mono uppercase tracking-widest flex items-center gap-1.5 group-hover:text-primary transition-colors border-b border-transparent group-hover:border-primary pb-0.5 leading-none font-medium">
-                  Enroll <Play size={11} className="fill-current" />
-                </span>
               </div>
             </div>
           </div>
@@ -396,9 +393,6 @@ export function CourseCardListItem({ course, delay = 0 }: CourseCardProps) {
                 )}
               </button>
             )}
-            <span className="text-text-muted text-xs font-mono uppercase tracking-widest flex items-center gap-1.5 group-hover:text-primary transition-colors border-b border-transparent group-hover:border-primary pb-0.5 leading-none font-medium">
-              Enroll <Play size={11} className="fill-current" />
-            </span>
           </div>
         </div>
       </Link>
