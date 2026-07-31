@@ -23,6 +23,7 @@ import { RevealBlock } from "@/components/ui/misc";
 import { ModalType, StatusModal } from "@/components/ui/StatusModal";
 import { useAuth } from "@/lib/auth-store";
 import { getSafeReturnTo } from "@/lib/auth-utils";
+import { useNavStore } from "@/lib/nav-store";
 import {
   enterVideoFullscreen,
   exitVideoFullscreen,
@@ -398,6 +399,7 @@ export default function CourseDetailPage({
     message: "",
   });
   const { user } = useAuth();
+  const endCourseNavigation = useNavStore((s) => s.endCourseNavigation);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -608,6 +610,10 @@ export default function CourseDetailPage({
   }, []);
 
   useEffect(() => {
+    endCourseNavigation();
+  }, [endCourseNavigation]);
+
+  useEffect(() => {
     if (course) document.title = course.title;
   }, [course]);
 
@@ -619,7 +625,10 @@ export default function CourseDetailPage({
     return <CourseDetailSkeleton />;
   }
 
-  if (courseError || !course) notFound();
+  if (courseError || !course) {
+    endCourseNavigation();
+    notFound();
+  }
 
   return (
     <main className="min-h-screen">

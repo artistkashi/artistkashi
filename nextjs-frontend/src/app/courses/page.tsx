@@ -9,6 +9,7 @@ import {
   CourseCardGrid,
   CourseCardListItem,
 } from "@/components/lms/CourseCard";
+import { CourseDetailSkeleton } from "@/components/lms/CourseDetailSkeleton";
 import { CustomSelect } from "@/components/ui/custom-select";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 import { RevealBlock } from "@/components/ui/misc";
@@ -27,6 +28,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { useNavStore } from "@/lib/nav-store";
 import { useQuery } from "@tanstack/react-query";
 import { Filter, Grid, List, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -44,6 +46,7 @@ function matchPrice(price: string, min: number, max: number): boolean {
 function CoursesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pendingCourseSlug = useNavStore((s) => s.pendingCourseSlug);
   const activeLevel = searchParams.get("level") ?? "";
   const activeCategory = searchParams.get("category") ?? "";
   const activeMinPrice = searchParams.get("minPrice") ?? "";
@@ -501,6 +504,11 @@ function CoursesPageContent() {
           </Pagination>
         )}
       </div>
+      {pendingCourseSlug && (
+        <div className="fixed inset-0 z-[100] bg-dark overflow-y-auto cursor-wait">
+          <CourseDetailSkeleton />
+        </div>
+      )}
     </main>
   );
 }

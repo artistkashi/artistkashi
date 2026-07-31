@@ -5,6 +5,7 @@ import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
 import { RevealBlock } from "@/components/ui/misc";
 import { useAuth } from "@/lib/auth-store";
 import { useCartStore } from "@/lib/cart-store";
+import { useNavStore } from "@/lib/nav-store";
 import { useWishlistStore } from "@/lib/wishlist-store";
 import { displayPrice } from "@/lib/utils";
 import { Check, Clock, Heart, Play, ShoppingBag } from "lucide-react";
@@ -111,11 +112,13 @@ function AddToCartBtn({ course }: { course: CourseListRead }) {
 
 export function CourseCard({ course, delay = 0 }: CourseCardProps) {
   const { user } = useAuth();
+  const startCourseNavigation = useNavStore((s) => s.startCourseNavigation);
 
   return (
     <RevealBlock delay={delay}>
       <Link
         href={`/courses/${course.slug}`}
+        onClick={() => startCourseNavigation(course.slug)}
         className="group bg-surface block w-full text-left transition-all duration-500 card-luxury-hover overflow-hidden rounded-sm"
       >
         <div className="relative overflow-hidden aspect-video">
@@ -177,8 +180,8 @@ export function CourseCard({ course, delay = 0 }: CourseCardProps) {
 
 export function CourseCardGrid({ course, delay = 0 }: CourseCardProps) {
   const { user } = useAuth();
-  const storeInCart = useCartStore((s) => s.courseIds);
-  const inCart = course.is_in_cart ?? !!(
+  const startCourseNavigation = useNavStore((s) => s.startCourseNavigation);
+  const storeInCart = useCartStore((s) => s.courseIds);  const inCart = course.is_in_cart ?? !!(
     course.id && storeInCart[course.id]
   );
   const addItem = useCartStore((s) => s.addItem);
@@ -202,6 +205,7 @@ export function CourseCardGrid({ course, delay = 0 }: CourseCardProps) {
     <RevealBlock delay={delay}>
       <Link
         href={`/courses/${course.slug}`}
+        onClick={() => startCourseNavigation(course.slug)}
         className="group bg-surface block w-full text-left transition-all duration-500 card-luxury-hover overflow-hidden rounded-sm"
       >
         <div className="relative overflow-hidden aspect-video">
@@ -289,6 +293,7 @@ export function CourseCardGrid({ course, delay = 0 }: CourseCardProps) {
 
 export function CourseCardListItem({ course, delay = 0 }: CourseCardProps) {
   const { user } = useAuth();
+  const startCourseNavigation = useNavStore((s) => s.startCourseNavigation);
   const storeInCart = useCartStore((s) => s.productIds);
   const inCart = course.is_in_cart ?? !!(
     course.id && storeInCart[course.id]
@@ -314,6 +319,7 @@ export function CourseCardListItem({ course, delay = 0 }: CourseCardProps) {
     <RevealBlock delay={delay}>
       <Link
         href={`/courses/${course.slug}`}
+        onClick={() => startCourseNavigation(course.slug)}
         className="group bg-surface flex flex-col sm:flex-row items-stretch transition-all duration-500 card-luxury-hover overflow-hidden rounded-sm"
       >
         <div className="relative w-full sm:w-36 lg:w-44 shrink-0 overflow-hidden aspect-video sm:aspect-auto sm:min-h-full">
