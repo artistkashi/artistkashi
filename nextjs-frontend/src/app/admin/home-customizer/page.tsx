@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Save,
@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PrimaryBtn } from "@/components/ui/buttons";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { ImagePicker } from "@/components/admin/ImagePicker";
 import {
   homePageSchema,
@@ -32,6 +33,17 @@ import {
 import { getHomePageSettings, updateHomePageSettings } from "@/api/openapi-client";
 import { toast } from "@/lib/toast";
 import { unwrap } from "@/api/client-service";
+
+const SOCIAL_PLATFORMS = [
+  "facebook",
+  "instagram",
+  "twitter",
+  "youtube",
+  "linkedin",
+  "whatsapp",
+  "pinterest",
+  "tiktok",
+];
 
 export default function HomeCustomizerPage() {
   const [activeSection, setActiveSection] = useState<string | null>("hero");
@@ -230,7 +242,7 @@ export default function HomeCustomizerPage() {
           </button>
           <PrimaryBtn
             onClick={handleSubmit(onSubmit)}
-            className="px-6 py-3"
+            className="px-6 py-3 whitespace-nowrap"
             disabled={isLoading}
           >
             <Save size={16} /> {isLoading ? "Saving..." : "Save to DB"}
@@ -937,26 +949,23 @@ export default function HomeCustomizerPage() {
                       className="bg-dark/50 border border-border/50 p-4 flex gap-4 items-start relative group"
                     >
                       <div className="w-40 shrink-0">
-                        <select
-                          {...register(`footer.socials.${index}.platform` as const)}
-                          className="w-full bg-dark border border-border/50 text-sm text-text-main outline-none focus:border-gold px-3 py-3"
-                        >
-                          {[
-                            "facebook",
-                            "instagram",
-                            "twitter",
-                            "youtube",
-                            "linkedin",
-                            "whatsapp",
-                            "pinterest",
-                            "tiktok",
-                          ].map((platform) => (
-                            <option key={platform} value={platform}>
-                              {platform.charAt(0).toUpperCase() +
-                                platform.slice(1)}
-                            </option>
-                          ))}
-                        </select>
+                        <Controller
+                          name={`footer.socials.${index}.platform` as const}
+                          control={control}
+                          render={({ field }) => (
+                            <CustomSelect
+                              placeholder="Platform"
+                              options={SOCIAL_PLATFORMS.map((platform) => ({
+                                value: platform,
+                                label:
+                                  platform.charAt(0).toUpperCase() +
+                                  platform.slice(1),
+                              }))}
+                              value={field.value}
+                              onChange={field.onChange}
+                            />
+                          )}
+                        />
                       </div>
                       <div className="flex-1">
                         <input
