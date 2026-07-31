@@ -61,7 +61,7 @@ export function HomePageClient({ initialSettings }: HomePageClientProps) {
   return (
     <main>
       {/* ── Hero ── */}
-      <WovenLightHero />
+      <WovenLightHero hero={settings.hero} />
 
       {/* ── Featured Paintings ── */}
       {hasFeaturedPaintings && (

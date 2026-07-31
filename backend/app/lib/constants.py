@@ -6,6 +6,7 @@ from app.schemas.site_config import (
     FaqItem,
     FaqSection,
     FeaturedSection,
+    FooterSection,
     HeroSection,
     HeroStat,
     HomePageConfig,
@@ -129,6 +130,7 @@ DEFAULT_HOME_PAGE_CONFIG = HomePageConfig(
         ghostBtnText="Browse Originals",
         ghostBtnLink="/shop",
     ),
+    footer=FooterSection(socials=[]),
 )
 
 DEFAULT_REVIEWS = [

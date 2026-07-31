@@ -89,6 +89,15 @@ class BannerSection(BaseModel):
     ghostBtnLink: str = Field("/shop", max_length=100)
 
 
+class SocialLink(BaseModel):
+    platform: str = Field(..., max_length=30)
+    url: str = Field(..., max_length=500)
+
+
+class FooterSection(BaseModel):
+    socials: list[SocialLink] = Field(default_factory=list)
+
+
 class HomePageConfig(BaseModel):
     hero: HeroSection
     featuredPaintings: FeaturedSection
@@ -100,6 +109,7 @@ class HomePageConfig(BaseModel):
     faq: FaqSection
     community: CommunitySection
     banner: BannerSection
+    footer: FooterSection = Field(default_factory=FooterSection)
 
 
 class SiteConfigCreate(BaseModel):

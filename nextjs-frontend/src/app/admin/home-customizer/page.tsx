@@ -17,6 +17,7 @@ import {
   BarChart3,
   MessageSquare,
   HelpCircle,
+  Share2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PrimaryBtn } from "@/components/ui/buttons";
@@ -52,7 +53,11 @@ export default function HomeCustomizerPage() {
     unwrap(getHomePageSettings())
       .then((data) => {
         if (active) {
-          reset(data as HomePageSettings);
+          reset({
+            ...defaultHomeSettings,
+            ...data,
+            footer: data?.footer ?? defaultHomeSettings.footer,
+          } as HomePageSettings);
         }
       })
       .catch(() => {
@@ -101,6 +106,15 @@ export default function HomeCustomizerPage() {
   } = useFieldArray({
     control,
     name: "community.items",
+  });
+
+  const {
+    fields: socials,
+    append: addSocial,
+    remove: removeSocial,
+  } = useFieldArray({
+    control,
+    name: "footer.socials",
   });
 
   const onSubmit = async (data: HomePageSettings) => {
@@ -632,6 +646,88 @@ export default function HomeCustomizerPage() {
                     />
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* --- Footer / Social Links --- */}
+        <div className="overflow-hidden">
+          <SectionHeader
+            id="footer"
+            title="Footer & Social Links"
+            icon={Share2}
+          />
+          {activeSection === "footer" && (
+            <div className="p-8 space-y-8 animate-in fade-in duration-300">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <label className="block text-tiny font-mono text-text-muted uppercase tracking-widest">
+                    Social Media Links
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => addSocial({ platform: "instagram", url: "" })}
+                    className="text-gold flex items-center gap-1 text-2xs font-mono uppercase tracking-widest hover:text-text-main transition-colors"
+                  >
+                    <Plus size={12} /> Add Link
+                  </button>
+                </div>
+                <p className="text-xs text-text-muted leading-relaxed">
+                  Only platforms with a URL set here will appear in the footer.
+                  Supported: Facebook, Instagram, Twitter/X, YouTube, LinkedIn,
+                  WhatsApp, Pinterest, TikTok.
+                </p>
+                <div className="space-y-4">
+                  {socials.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="bg-dark/50 border border-border/50 p-4 flex gap-4 items-start relative group"
+                    >
+                      <div className="w-40 shrink-0">
+                        <select
+                          {...register(`footer.socials.${index}.platform` as const)}
+                          className="w-full bg-dark border border-border/50 text-sm text-text-main outline-none focus:border-gold px-3 py-3"
+                        >
+                          {[
+                            "facebook",
+                            "instagram",
+                            "twitter",
+                            "youtube",
+                            "linkedin",
+                            "whatsapp",
+                            "pinterest",
+                            "tiktok",
+                          ].map((platform) => (
+                            <option key={platform} value={platform}>
+                              {platform.charAt(0).toUpperCase() +
+                                platform.slice(1)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          {...register(`footer.socials.${index}.url` as const)}
+                          placeholder="https://instagram.com/artistkashi"
+                          className="w-full bg-transparent border-b border-border/50 focus:border-gold outline-none py-2 text-sm text-text-main"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeSocial(index)}
+                        className="text-red-500/50 hover:text-red-500 transition-colors p-1"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {socials.length === 0 && (
+                    <div className="border border-dashed border-border/50 p-8 text-center text-text-muted text-xs font-mono uppercase tracking-widest">
+                      No social links configured
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}

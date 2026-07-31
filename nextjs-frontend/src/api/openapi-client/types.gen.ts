@@ -1972,6 +1972,12 @@ export type HomePageConfig = {
     faq: FaqSection;
     community: CommunitySection;
     banner: BannerSection;
+    footer?: {
+        socials: Array<{
+            platform: string;
+            url: string;
+        }>;
+    } | null;
 };
 
 /**

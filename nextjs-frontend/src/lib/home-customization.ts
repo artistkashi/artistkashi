@@ -105,6 +105,16 @@ export const homePageSchema = z.object({
     ghostBtnText: z.string().max(30, "Button text too long"),
     ghostBtnLink: z.string().max(100),
   }),
+
+  // Footer (social links)
+  footer: z.object({
+    socials: z.array(
+      z.object({
+        platform: z.string().max(30, "Platform too long"),
+        url: z.string().max(500, "URL too long"),
+      })
+    ),
+  }),
 });
 
 export type HomePageSettings = z.infer<typeof homePageSchema>;
@@ -218,5 +228,8 @@ export const defaultHomeSettings: HomePageSettings = {
     primaryBtnLink: "/courses",
     ghostBtnText: "Browse Originals",
     ghostBtnLink: "/shop",
+  },
+  footer: {
+    socials: [],
   },
 };

@@ -3,6 +3,7 @@
 import {
   CourseLevel,
   CourseRead,
+  createCourseCategory,
   listCourseCategories,
 } from "@/api/openapi-client";
 import { GhostBtn, PrimaryBtn } from "@/components/ui/buttons";
@@ -11,9 +12,9 @@ import { slugify } from "@/lib/slugify";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ImageUp, Play, Plus, Save, Trash2, X } from "lucide-react";
+import { Check, ImageUp, Play, Plus, Save, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { Controller, Resolver, useFieldArray, useForm } from "react-hook-form";
@@ -220,6 +221,29 @@ export function CourseForm({
       ),
   });
 
+  const queryClient = useQueryClient();
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+
+  const handleCreateCategory = async () => {
+    const name = newCategoryName.trim();
+    if (!name || isCreatingCategory) return;
+    setIsCreatingCategory(true);
+    try {
+      const res = await createCourseCategory({ body: { name } });
+      const newCategory = res.data?.data;
+      if (newCategory) {
+        await queryClient.invalidateQueries({ queryKey: ["course-categories"] });
+        setValue("category_id", String(newCategory.id));
+      }
+      setIsAddingCategory(false);
+      setNewCategoryName("");
+    } finally {
+      setIsCreatingCategory(false);
+    }
+  };
+
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
     initialData?.computed_thumbnail_url ?? null
   );
@@ -325,21 +349,75 @@ export function CourseForm({
         </div>
         <div className="space-y-2">
           <Label>Category</Label>
-          <Controller
-            name="category_id"
-            control={control}
-            render={({ field }) => (
-              <CustomSelect
-                placeholder="No category"
-                options={(categories ?? []).map((cat) => ({
-                  value: String(cat.id),
-                  label: cat.name,
-                }))}
-                value={field.value ?? ""}
-                onChange={(val) => field.onChange(val ? String(val) : null)}
+          {isAddingCategory ? (
+            <div className="flex gap-2">
+              <input
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleCreateCategory();
+                  }
+                }}
+                placeholder="New category name"
+                autoFocus
+                className="flex-1 h-12 bg-surface border border-border px-4 text-sm text-foreground rounded-sm focus:border-primary outline-none transition-all duration-300 placeholder:text-text-muted/50 font-mono"
               />
-            )}
-          />
+              <button
+                type="button"
+                onClick={handleCreateCategory}
+                disabled={isCreatingCategory || !newCategoryName.trim()}
+                className="w-12 h-12 flex items-center justify-center bg-primary text-white rounded-sm hover:opacity-90 transition-all shrink-0 disabled:opacity-40"
+                title="Save category"
+              >
+                {isCreatingCategory ? (
+                  <div className="luxury-loader luxury-loader-dark loader-sm" />
+                ) : (
+                  <Check size={16} />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAddingCategory(false);
+                  setNewCategoryName("");
+                }}
+                className="w-12 h-12 flex items-center justify-center text-text-muted hover:text-danger transition-all rounded-sm border border-border shrink-0"
+                title="Cancel"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <Controller
+                  name="category_id"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      placeholder="No category"
+                      options={(categories ?? []).map((cat) => ({
+                        value: String(cat.id),
+                        label: cat.name,
+                      }))}
+                      value={field.value ?? ""}
+                      onChange={(val) => field.onChange(val ? String(val) : null)}
+                    />
+                  )}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddingCategory(true)}
+                className="w-12 h-12 flex items-center justify-center text-primary hover:text-foreground hover:bg-primary/10 transition-all rounded-sm border border-border shrink-0"
+                title="Add new category"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

@@ -382,7 +382,7 @@ export default function CourseDetailPage({
     enabled: !!courseId && !!user,
   });
 
-  const isEnrolled = !!enrollment;
+  const isEnrolled = !!enrollment || user?.role === "admin";
 
   const { data: courseProgress } = useQuery<CourseProgressRead>({
     queryKey: ["course-progress", courseId],

@@ -5,7 +5,13 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
-export const WovenLightHero = () => {
+import type { HomePageSettings } from "@/lib/home-customization";
+
+export const WovenLightHero = ({
+  hero,
+}: {
+  hero: HomePageSettings["hero"];
+}) => {
   const textControls = useAnimation();
   const buttonControls = useAnimation();
 
@@ -36,7 +42,7 @@ export const WovenLightHero = () => {
     };
   }, [textControls, buttonControls]);
 
-  const headline = "Artist Kashi Studio";
+  const headline = hero.title || "Artist Kashi Studio";
   const headlineWords = headline.split(" ");
 
   return (
@@ -73,30 +79,33 @@ export const WovenLightHero = () => {
           animate={textControls}
           className="mx-auto mt-6 max-w-2xl text-base text-text-main/90 md:text-lg"
         >
-          Original paintings, custom commissions, and immersive art courses
-          designed for collectors and creators.
+          {hero.subtitle}
         </motion.p>
         <motion.div
           initial={{ opacity: 0 }}
           animate={buttonControls}
           className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
         >
-          <Link href="/shop">
-            <button
-              type="button"
-              className="w-56 cursor-pointer rounded-full border-2 border-gold bg-gold px-8 py-3 font-semibold text-dark backdrop-blur-sm transition-all hover:opacity-90"
-            >
-              Explore the Gallery
-            </button>
-          </Link>
-          <Link href="/courses">
-            <button
-              type="button"
-              className="w-56 cursor-pointer rounded-full border-2 border-gold/50 bg-gold/10 px-8 py-3 font-semibold text-gold backdrop-blur-sm transition-all hover:bg-gold/20"
-            >
-              Join Art Courses
-            </button>
-          </Link>
+          {hero.primaryBtnText && (
+            <Link href={hero.primaryBtnLink}>
+              <button
+                type="button"
+                className="w-56 cursor-pointer rounded-full border-2 border-gold bg-gold px-8 py-3 font-semibold text-dark backdrop-blur-sm transition-all hover:opacity-90"
+              >
+                {hero.primaryBtnText}
+              </button>
+            </Link>
+          )}
+          {hero.ghostBtnText && (
+            <Link href={hero.ghostBtnLink}>
+              <button
+                type="button"
+                className="w-56 cursor-pointer rounded-full border-2 border-gold/50 bg-gold/10 px-8 py-3 font-semibold text-gold backdrop-blur-sm transition-all hover:bg-gold/20"
+              >
+                {hero.ghostBtnText}
+              </button>
+            </Link>
+          )}
         </motion.div>
       </div>
     </section>
