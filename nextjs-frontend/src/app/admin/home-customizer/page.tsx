@@ -916,7 +916,7 @@ export default function HomeCustomizerPage() {
         </div>
 
         {/* --- Footer / Social Links --- */}
-        <div className="overflow-hidden">
+        <div className="overflow-visible">
           <SectionHeader
             id="footer"
             title="Footer & Social Links"
@@ -963,6 +963,7 @@ export default function HomeCustomizerPage() {
                               }))}
                               value={field.value}
                               onChange={field.onChange}
+                              dropdownPosition="top"
                             />
                           )}
                         />
