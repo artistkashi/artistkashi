@@ -26,15 +26,15 @@ export const WovenLightHero = ({
       opacity: 1,
       y: 0,
       transition: {
-        delay: i * 0.1 + 1.5,
-        duration: 1.2,
+        delay: i * 0.04,
+        duration: 0.9,
         ease: [0.2, 0.65, 0.3, 0.9],
       },
     }));
 
     buttonControls.start({
       opacity: 1,
-      transition: { delay: 2.5, duration: 1 },
+      transition: { delay: 0.35, duration: 0.8 },
     });
 
     return () => {

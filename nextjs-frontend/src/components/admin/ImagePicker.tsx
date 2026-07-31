@@ -54,7 +54,7 @@ export function ImagePicker({
   return (
     <div className={cn("space-y-3", className)}>
       {value ? (
-        <div className="relative overflow-hidden border border-border/60 bg-dark group">
+        <div className="relative overflow-hidden border border-border/60 bg-dark group rounded">
           <img
             src={value}
             alt="Preview"
@@ -100,7 +100,7 @@ export function ImagePicker({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className="flex items-center gap-2 px-3 py-2 border border-border text-2xs font-mono uppercase tracking-widest text-text-muted hover:text-gold hover:border-gold transition-colors disabled:opacity-40"
+          className="flex items-center gap-2 px-3 py-2 border border-border text-2xs font-mono uppercase tracking-widest text-text-muted hover:text-gold hover:border-gold transition-colors disabled:opacity-40 rounded"
         >
           {isUploading ? (
             <Loader2 size={12} className="animate-spin" />
@@ -116,7 +116,7 @@ export function ImagePicker({
             setUrlDraft(value);
           }}
           className={cn(
-            "flex items-center gap-2 px-3 py-2 border text-2xs font-mono uppercase tracking-widest transition-colors disabled:opacity-40",
+            "flex items-center gap-2 px-3 py-2 border text-2xs font-mono uppercase tracking-widest transition-colors disabled:opacity-40 rounded",
             showUrl
               ? "border-gold text-gold"
               : "border-border text-text-muted hover:text-gold hover:border-gold"
@@ -133,7 +133,7 @@ export function ImagePicker({
             value={urlDraft}
             onChange={(e) => setUrlDraft(e.target.value)}
             placeholder="https://example.com/image.jpg"
-            className="flex-1 bg-dark border border-border px-3 py-2 text-sm text-text-main focus:border-gold outline-none"
+            className="flex-1 bg-dark border border-border px-3 py-2 text-sm text-text-main focus:border-gold outline-none rounded"
           />
           <button
             type="button"
@@ -143,7 +143,7 @@ export function ImagePicker({
                 setShowUrl(false);
               }
             }}
-            className="px-4 py-2 bg-gold text-dark text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity"
+            className="px-4 py-2 bg-gold text-dark text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity rounded"
           >
             Apply
           </button>

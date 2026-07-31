@@ -188,13 +188,15 @@ export default function HomeCustomizerPage() {
       onClick={() => toggleSection(id)}
       className={cn(
         "w-full flex items-center justify-between p-6 transition-colors border-b border-border",
+        id === "hero" && "rounded-t-xl",
+        id === "footer" && activeSection !== id && "rounded-b-xl",
         activeSection === id ? "bg-muted" : "hover:bg-muted-light"
       )}
     >
       <div className="flex items-center gap-4">
         <div
           className={cn(
-            "w-10 h-10 flex items-center justify-center border transition-colors",
+            "w-10 h-10 flex items-center justify-center border transition-colors rounded",
             activeSection === id
               ? "bg-gold border-gold text-dark"
               : "border-border text-text-muted"
@@ -235,7 +237,7 @@ export default function HomeCustomizerPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => reset()}
-            className="flex items-center gap-2 px-4 py-2 text-xs font-mono tracking-widest uppercase text-text-muted hover:text-text-main transition-colors disabled:opacity-30"
+            className="flex items-center gap-2 px-4 py-2 text-xs font-mono tracking-widest uppercase text-text-muted hover:text-text-main transition-colors disabled:opacity-30 rounded"
             disabled={!isDirty || isLoading}
           >
             <RotateCcw size={14} /> Reset
@@ -252,7 +254,7 @@ export default function HomeCustomizerPage() {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="border border-border bg-muted-light divide-y divide-border"
+        className="border border-border bg-muted-light divide-y divide-border rounded-xl"
       >
         {/* --- Hero Section --- */}
         <div className="overflow-hidden">
@@ -266,7 +268,7 @@ export default function HomeCustomizerPage() {
                   </label>
                   <textarea
                     {...register("hero.title")}
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none h-32 resize-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded h-32 resize-none"
                   />
                   <CharCount value={watch("hero.title")} max={150} />
                 </div>
@@ -276,7 +278,7 @@ export default function HomeCustomizerPage() {
                   </label>
                   <textarea
                     {...register("hero.subtitle")}
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none h-32 resize-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded h-32 resize-none"
                   />
                   <CharCount value={watch("hero.subtitle")} max={300} />
                 </div>
@@ -330,7 +332,7 @@ export default function HomeCustomizerPage() {
                   <input
                     {...register("hero.primaryBtnText")}
                     placeholder="Begin Learning"
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
                 <div className="space-y-2">
@@ -340,7 +342,7 @@ export default function HomeCustomizerPage() {
                   <input
                     {...register("hero.primaryBtnLink")}
                     placeholder="/courses"
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
                 <div className="space-y-2">
@@ -350,7 +352,7 @@ export default function HomeCustomizerPage() {
                   <input
                     {...register("hero.ghostBtnText")}
                     placeholder="View Paintings"
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
                 <div className="space-y-2">
@@ -360,7 +362,7 @@ export default function HomeCustomizerPage() {
                   <input
                     {...register("hero.ghostBtnLink")}
                     placeholder="/shop"
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
               </div>
@@ -385,7 +387,7 @@ export default function HomeCustomizerPage() {
                   {heroStats.map((field, index) => (
                     <div
                       key={field.id}
-                      className="flex gap-2 items-start bg-dark/50 p-4 border border-border/50"
+                      className="flex gap-2 items-start bg-dark/50 p-4 border border-border/50 rounded"
                     >
                       <div className="flex-1 space-y-3">
                         <input
@@ -434,7 +436,7 @@ export default function HomeCustomizerPage() {
                     </label>
                     <textarea
                       {...register("featuredPaintings.title")}
-                      className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none h-24 resize-none"
+                      className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded h-24 resize-none"
                     />
                     <CharCount
                       value={watch("featuredPaintings.title")}
@@ -466,7 +468,7 @@ export default function HomeCustomizerPage() {
                   <input
                     {...register("about.label")}
                     placeholder="The Artist Behind the Vision"
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
                 <div className="space-y-2">
@@ -476,7 +478,7 @@ export default function HomeCustomizerPage() {
                   <input
                     {...register("about.title")}
                     placeholder="Mastering the Art of Visual Storytelling"
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
                 <div className="space-y-2">
@@ -486,7 +488,7 @@ export default function HomeCustomizerPage() {
                   <input
                     {...register("about.instructorRole")}
                     placeholder="Lead Instructor"
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
               </div>
@@ -498,7 +500,7 @@ export default function HomeCustomizerPage() {
                   </label>
                   <input
                     {...register("about.instructorName")}
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
@@ -529,7 +531,7 @@ export default function HomeCustomizerPage() {
                           | "about.description3"
                       )}
                       placeholder={`Paragraph ${num}`}
-                      className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none h-32 resize-none"
+                      className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded h-32 resize-none"
                     />
                     <CharCount
                       value={watch(
@@ -564,7 +566,7 @@ export default function HomeCustomizerPage() {
                   {aboutStats.map((field, index) => (
                     <div
                       key={field.id}
-                      className="flex gap-2 items-start bg-dark/50 p-4 border border-border/50"
+                      className="flex gap-2 items-start bg-dark/50 p-4 border border-border/50 rounded"
                     >
                       <div className="flex-1 space-y-2">
                         <input
@@ -606,7 +608,7 @@ export default function HomeCustomizerPage() {
                     </label>
                     <input
                       {...register("faq.label")}
-                      className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                      className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                     />
                   </div>
                   <div className="space-y-2">
@@ -615,7 +617,7 @@ export default function HomeCustomizerPage() {
                     </label>
                     <input
                       {...register("faq.title")}
-                      className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                      className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                     />
                   </div>
                   <div className="space-y-2 md:col-span-2">
@@ -624,7 +626,7 @@ export default function HomeCustomizerPage() {
                     </label>
                     <textarea
                       {...register("faq.description")}
-                      className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none h-20 resize-none"
+                      className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded h-20 resize-none"
                     />
                   </div>
                 </div>
@@ -646,7 +648,7 @@ export default function HomeCustomizerPage() {
                     {faqs.map((field, index) => (
                       <div
                         key={field.id}
-                        className="bg-dark/50 border border-border/50 p-6 space-y-4 relative group"
+                        className="bg-dark/50 border border-border/50 p-6 space-y-4 relative group rounded"
                       >
                         <button
                           type="button"
@@ -694,7 +696,7 @@ export default function HomeCustomizerPage() {
                   </label>
                   <input
                     {...register("community.label")}
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
                 <div className="space-y-2">
@@ -703,7 +705,7 @@ export default function HomeCustomizerPage() {
                   </label>
                   <input
                     {...register("community.title")}
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
@@ -712,7 +714,7 @@ export default function HomeCustomizerPage() {
                   </label>
                   <textarea
                     {...register("community.description")}
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none h-20 resize-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded h-20 resize-none"
                   />
                 </div>
               </div>
@@ -755,7 +757,7 @@ export default function HomeCustomizerPage() {
                           `community.items.${index}.avatar` as const
                         )}
                         placeholder="Initials"
-                        className="w-10 h-10 bg-muted border border-border text-gold text-xs font-bold text-center outline-none focus:border-gold"
+                        className="w-10 h-10 bg-muted border border-border text-gold text-xs font-bold text-center outline-none focus:border-gold rounded"
                         maxLength={2}
                       />
                       <div className="flex-1 space-y-1">
@@ -778,7 +780,7 @@ export default function HomeCustomizerPage() {
                     <textarea
                       {...register(`community.items.${index}.text` as const)}
                       placeholder="Review Text"
-                      className="w-full bg-dark border border-border/30 focus:border-gold outline-none p-4 text-sm text-text-muted h-24 resize-none"
+                      className="w-full bg-dark border border-border/30 focus:border-gold outline-none p-4 text-sm text-text-muted h-24 resize-none rounded"
                     />
                   </div>
                 ))}
@@ -799,7 +801,7 @@ export default function HomeCustomizerPage() {
                   </label>
                   <input
                     {...register("videoCta.label")}
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
                 <div className="space-y-2">
@@ -808,7 +810,7 @@ export default function HomeCustomizerPage() {
                   </label>
                   <input
                     {...register("videoCta.title")}
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
                 <div className="space-y-2">
@@ -830,7 +832,7 @@ export default function HomeCustomizerPage() {
                   <input
                     {...register("videoCta.videoUrl")}
                     placeholder="https://www.youtube.com/embed/..."
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                   <CharCount value={watch("videoCta.videoUrl")} max={500} />
                 </div>
@@ -851,7 +853,7 @@ export default function HomeCustomizerPage() {
                   </label>
                   <input
                     {...register("banner.label")}
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
                 <div className="space-y-2">
@@ -860,7 +862,7 @@ export default function HomeCustomizerPage() {
                   </label>
                   <textarea
                     {...register("banner.title")}
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none h-24 resize-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded h-24 resize-none"
                   />
                   <CharCount value={watch("banner.title")} max={150} />
                 </div>
@@ -870,7 +872,7 @@ export default function HomeCustomizerPage() {
                   </label>
                   <textarea
                     {...register("banner.description")}
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none h-24 resize-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded h-24 resize-none"
                   />
                   <CharCount value={watch("banner.description")} max={400} />
                 </div>
@@ -880,7 +882,7 @@ export default function HomeCustomizerPage() {
                   </label>
                   <input
                     {...register("banner.primaryBtnText")}
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
                 <div className="space-y-2">
@@ -889,7 +891,7 @@ export default function HomeCustomizerPage() {
                   </label>
                   <input
                     {...register("banner.primaryBtnLink")}
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
                 <div className="space-y-2">
@@ -898,7 +900,7 @@ export default function HomeCustomizerPage() {
                   </label>
                   <input
                     {...register("banner.ghostBtnText")}
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
                 <div className="space-y-2">
@@ -907,7 +909,7 @@ export default function HomeCustomizerPage() {
                   </label>
                   <input
                     {...register("banner.ghostBtnLink")}
-                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none"
+                    className="w-full bg-dark border border-border p-4 text-text-main focus:border-gold outline-none rounded"
                   />
                 </div>
               </div>
@@ -946,7 +948,7 @@ export default function HomeCustomizerPage() {
                   {socials.map((field, index) => (
                     <div
                       key={field.id}
-                      className="bg-dark/50 border border-border/50 p-4 flex gap-4 items-start relative group"
+                      className="bg-dark/50 border border-border/50 p-4 flex gap-4 items-start relative group rounded"
                     >
                       <div className="w-40 shrink-0">
                         <Controller
@@ -985,7 +987,7 @@ export default function HomeCustomizerPage() {
                     </div>
                   ))}
                   {socials.length === 0 && (
-                    <div className="border border-dashed border-border/50 p-8 text-center text-text-muted text-xs font-mono uppercase tracking-widest">
+                    <div className="border border-dashed border-border/50 p-8 text-center text-text-muted text-xs font-mono uppercase tracking-widest rounded">
                       No social links configured
                     </div>
                   )}
@@ -997,7 +999,7 @@ export default function HomeCustomizerPage() {
       </form>
 
       {/* Database Persist Info */}
-      <div className="mt-8 p-6 bg-gold/5 border border-gold/20 flex items-start gap-4">
+      <div className="mt-8 p-6 bg-gold/5 border border-gold/20 flex items-start gap-4 rounded">
         <AlertCircle className="text-gold shrink-0 mt-0.5" size={18} />
         <div>
           <h5 className="text-gold font-bold text-sm mb-1">
