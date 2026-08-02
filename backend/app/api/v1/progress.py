@@ -8,6 +8,7 @@ from fastapi import APIRouter, Query
 from app.api.dependencies import CurrentUserDep, DatabaseDep
 from app.core.auth.lms_guards import require_enrollment
 from app.models.lesson_progress import ProgressStatus
+from app.models.user import Role
 from app.schemas.lesson_progress import (
     CourseProgressRead,
     LessonProgressDetail,
@@ -59,7 +60,11 @@ async def update_lesson_progress(
         )
 
     progress = await progress_service.create_or_update_progress(
-        session=session, user_id=current_user.id, lesson_id=lesson_id, payload=payload
+        session=session,
+        user_id=current_user.id,
+        lesson_id=lesson_id,
+        payload=payload,
+        is_admin=current_user.role == Role.ADMIN,
     )
 
     percentage = await progress_service.get_lesson_progress_percentage(

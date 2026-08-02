@@ -8,11 +8,14 @@ from fastapi import APIRouter, Query
 from app.api.dependencies import CurrentUserOptionalDep, DatabaseDep
 from app.core.auth.lms_guards import verify_lesson_access
 from app.core.exceptions import ErrorCode, NotFoundException
+from app.crud.course import crud_course_lesson
+from app.models.course_lesson import LessonStatus
 from app.schemas.course import CourseCurriculumRead, CourseListRead, CourseRead
 from app.schemas.course_lesson import CourseLessonRead, CourseLessonReadWithVideo
 from app.schemas.responses import PaginatedResponse, SuccessResponse
 from app.services.course_service import course_service
 from app.services.lesson_service import lesson_service
+from app.services.storage_service import storage_service
 
 router = APIRouter(tags=["courses"])
 
@@ -131,6 +134,18 @@ async def get_lesson_video(
     )
 
     await _validate_lesson_course(lesson=lesson, course_id=course_id)
+
+    if lesson.status == LessonStatus.PROCESSING and lesson.video_key:
+        if await storage_service.file_exists(lesson.video_key):
+            await crud_course_lesson.update(
+                db=session,
+                id=lesson_id,
+                object={"status": LessonStatus.READY},
+            )
+            lesson = await lesson_service.get_lesson_with_video(
+                session=session,
+                lesson_id=lesson_id,
+            )
 
     return SuccessResponse(
         message="Lesson video retrieved successfully",

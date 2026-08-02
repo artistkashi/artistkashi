@@ -2,10 +2,15 @@
 
 import { ImageUp, Link2, Loader2, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
+import type { AxiosError } from "axios";
 
 import { client } from "@/api/openapi-client/client.gen";
+import { getErrorMessage } from "@/lib/error-handler";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_IMAGE_SIZE_MB = MAX_IMAGE_SIZE / (1024 * 1024);
 
 interface ImagePickerProps {
   value: string;
@@ -26,6 +31,10 @@ export function ImagePicker({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = async (file: File) => {
+    if (file.size > MAX_IMAGE_SIZE) {
+      toast.error(`Image must be ${MAX_IMAGE_SIZE_MB}MB or less`);
+      return;
+    }
     setIsUploading(true);
     try {
       const formData = new FormData();
@@ -42,7 +51,12 @@ export function ImagePicker({
       onChange(url);
       toast.success("Image uploaded");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed");
+      const axiosError = err as AxiosError;
+      if (axiosError.response?.status === 413) {
+        toast.error(`Image too large. Maximum size is ${MAX_IMAGE_SIZE_MB}MB.`);
+      } else {
+        toast.error(getErrorMessage(err));
+      }
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {

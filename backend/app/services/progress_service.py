@@ -54,13 +54,18 @@ class ProgressService:
         user_id: uuid.UUID,
         lesson_id: uuid.UUID,
         payload: LessonProgressUpdate,
+        is_admin: bool = False,
     ) -> LessonProgressRead:
         lesson = await lesson_service.get_lesson(session=session, lesson_id=lesson_id)
 
-        if not lesson.is_preview and not await enrollment_service.is_enrolled(
-            session=session,
-            user_id=user_id,
-            course_id=lesson.course_id,
+        if (
+            not lesson.is_preview
+            and not is_admin
+            and not await enrollment_service.is_enrolled(
+                session=session,
+                user_id=user_id,
+                course_id=lesson.course_id,
+            )
         ):
             raise AppException(
                 message="User is not enrolled in this course",
@@ -205,13 +210,18 @@ class ProgressService:
         session: AsyncSession,
         user_id: uuid.UUID,
         lesson_id: uuid.UUID,
+        is_admin: bool = False,
     ) -> LessonProgressRead:
         lesson = await lesson_service.get_lesson(session=session, lesson_id=lesson_id)
 
-        if not lesson.is_preview and not await enrollment_service.is_enrolled(
-            session=session,
-            user_id=user_id,
-            course_id=lesson.course_id,
+        if (
+            not lesson.is_preview
+            and not is_admin
+            and not await enrollment_service.is_enrolled(
+                session=session,
+                user_id=user_id,
+                course_id=lesson.course_id,
+            )
         ):
             raise AppException(
                 message="User is not enrolled in this course",

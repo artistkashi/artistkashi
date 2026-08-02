@@ -68,11 +68,20 @@ async def _process_video_background(
         logger.exception("Video processing failed for lesson %s", lesson_id)
         try:
             async with get_async_session_context() as session:
-                await crud_course_lesson.update(
-                    db=session, id=lesson_id, object={"status": LessonStatus.FAILED}
-                )
+                if await storage_service.file_exists(source_key):
+                    await crud_course_lesson.update(
+                        db=session,
+                        id=lesson_id,
+                        object={"status": LessonStatus.READY},
+                    )
+                else:
+                    await crud_course_lesson.update(
+                        db=session,
+                        id=lesson_id,
+                        object={"status": LessonStatus.FAILED},
+                    )
         except Exception:
-            logger.exception("Failed to update lesson status to FAILED")
+            logger.exception("Failed to update lesson status after processing failure")
 
 
 @router.post(
@@ -202,6 +211,13 @@ async def confirm_video_upload(
         duration_seconds=payload.duration_seconds,
     )
 
+    await crud_course_lesson.update(
+        db=session,
+        id=lesson_id,
+        object={"status": LessonStatus.READY},
+    )
+    lesson = await lesson_service.get_lesson(session=session, lesson_id=lesson_id)
+
     asyncio.create_task(
         _process_video_background(
             lesson_id=str(lesson_id),
@@ -211,7 +227,7 @@ async def confirm_video_upload(
     )
 
     return SuccessResponse(
-        message="Video uploaded successfully. Processing has been queued.",
+        message="Video uploaded successfully.",
         data=lesson,
     )
 

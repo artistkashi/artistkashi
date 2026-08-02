@@ -10,6 +10,8 @@ from app.core.exceptions import (
     ValidationException,
 )
 
+MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024  # 5MB
+
 
 class StorageService:
     def __init__(self):
@@ -67,6 +69,13 @@ class StorageService:
 
         if file.content_type not in allowed_types:
             raise ValidationException("Only JPEG, PNG, WEBP and GIF images are allowed")
+
+        content = await file.read()
+        if len(content) > MAX_IMAGE_SIZE_BYTES:
+            raise ValidationException(
+                f"Image size must be {MAX_IMAGE_SIZE_BYTES // (1024 * 1024)}MB or less"
+            )
+        await file.seek(0)
 
         s3_key = await self._upload(file, folder, key=key)
         return f"{settings.S3_PUBLIC_URL}/{s3_key}"

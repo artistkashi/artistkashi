@@ -26,7 +26,7 @@ from app.crud.course import (
 from app.models.cart import CartItem
 from app.models.course import Course
 from app.models.course_category import CourseCategory
-from app.models.course_lesson import CourseLesson
+from app.models.course_lesson import CourseLesson, LessonStatus
 from app.models.course_payment import CoursePayment, CoursePaymentStatus
 from app.models.course_section import CourseSection
 from app.models.review import ReviewType
@@ -514,6 +514,16 @@ class CourseService:
                 identifier=str(course_id),
                 error_code=ErrorCode.COURSE_NOT_FOUND,
             )
+
+        healed = False
+        for section in course.sections or []:
+            for lesson in section.lessons or []:
+                if lesson.status == LessonStatus.PROCESSING and lesson.video_key:
+                    if await storage_service.file_exists(lesson.video_key):
+                        lesson.status = LessonStatus.READY
+                        healed = True
+        if healed:
+            await session.commit()
 
         return CourseCurriculumRead.model_validate(course)
 

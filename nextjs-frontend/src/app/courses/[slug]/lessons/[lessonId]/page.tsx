@@ -19,6 +19,7 @@ import {
 } from "@/api/openapi-client";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useAuth } from "@/lib/auth-store";
+import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import {
   enterVideoFullscreen,
@@ -283,7 +284,13 @@ function VideoPlayer({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!videoUrl) return;
+    setVideoError(false);
+  }, [videoUrl]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -301,17 +308,20 @@ function VideoPlayer({
       setIsPlaying(false);
       onComplete();
     };
+    const onError = () => setVideoError(true);
 
     video.addEventListener("timeupdate", onTimeUpdate);
     video.addEventListener("play", onPlay);
     video.addEventListener("pause", onPauseEvt);
     video.addEventListener("ended", onEnded);
+    video.addEventListener("error", onError);
 
     return () => {
       video.removeEventListener("timeupdate", onTimeUpdate);
       video.removeEventListener("play", onPlay);
       video.removeEventListener("pause", onPauseEvt);
       video.removeEventListener("ended", onEnded);
+      video.removeEventListener("error", onError);
     };
   }, [onProgress, onPause, onComplete]);
 
@@ -341,9 +351,7 @@ function VideoPlayer({
       className="relative w-full h-full bg-black cursor-pointer flex items-center justify-center select-none"
       onClick={onTap ?? togglePlay}
     >
-      {!videoUrl ||
-      lessonStatus === "processing" ||
-      lessonStatus === "failed" ? (
+      {!videoUrl || videoError ? (
         <div className="flex flex-col items-center justify-center gap-2">
           {lessonStatus === "processing" ? (
             <>
@@ -526,6 +534,7 @@ export default function CourseLessonPlayerPage({
     },
     onError: (err) => {
       console.error("Failed to save progress:", err);
+      toast.error("Couldn't save progress. Check your connection and try again.");
     },
   });
 
