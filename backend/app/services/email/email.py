@@ -163,6 +163,9 @@ async def send_order_confirmation_email(
 async def send_order_shipped_email(
     user: UserRead,
     order_id: str,
+    courier_name: str,
+    tracking_number: str,
+    tracking_url: str | None = None,
 ):
     conf = get_email_config()
     order_link = f"{settings.FRONTEND_URL}/orders/{order_id}"
@@ -176,6 +179,9 @@ async def send_order_shipped_email(
             "order_id": order_id,
             "order_link": order_link,
             "dashboard_link": dashboard_link,
+            "courier_name": courier_name,
+            "tracking_number": tracking_number,
+            "tracking_url": tracking_url,
         },
         subtype=MessageType.html,
     )

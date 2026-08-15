@@ -188,6 +188,53 @@
         ]
       }
     },
+    "/api/admin/media/upload": {
+      "post": {
+        "tags": [
+          "ADMIN",
+          "admin-media"
+        ],
+        "summary": "Upload Media",
+        "operationId": "upload_media",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_ADMIN-upload_media"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_str_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
     "/api/admin/users": {
       "get": {
         "tags": [
@@ -2945,6 +2992,115 @@
         }
       }
     },
+    "/api/admin/courses/{course_id}/enroll": {
+      "post": {
+        "tags": [
+          "ADMIN",
+          "admin-courses"
+        ],
+        "summary": "Admin Direct Enroll",
+        "description": "Admin records an offline payment (UPI/bank/cash/etc.) and enrolls a student.",
+        "operationId": "admin_direct_enroll",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminDirectEnrollRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_CourseEnrollmentRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/courses/{course_id}/enrollments": {
+      "get": {
+        "tags": [
+          "ADMIN",
+          "admin-courses"
+        ],
+        "summary": "List Course Enrolled Students",
+        "operationId": "list_course_enrolled_students",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_AdminEnrolledStudentRead__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/enrollments": {
       "get": {
         "tags": [
@@ -4226,6 +4382,65 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/OrderUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_OrderRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/orders/{order_id}/ship": {
+      "post": {
+        "tags": [
+          "ADMIN",
+          "admin-orders"
+        ],
+        "summary": "Ship Order",
+        "operationId": "ship_order",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderShipRequest"
               }
             }
           }
@@ -6334,6 +6549,57 @@
         }
       }
     },
+    "/api/courses/by-ids": {
+      "get": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Get Courses By Ids",
+        "operationId": "get_courses_by_ids",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "title": "Ids"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_CourseListRead__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/courses/{slug}": {
       "get": {
         "tags": [
@@ -7464,6 +7730,37 @@
         }
       }
     },
+    "/api/config/home": {
+      "get": {
+        "tags": [
+          "site-config"
+        ],
+        "summary": "Get Home Page Settings",
+        "operationId": "site_config_get_home_page_settings",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_HomePageConfig_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/products": {
       "get": {
         "tags": [
@@ -7505,6 +7802,57 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PaginatedResponse_ProductCardRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products/by-ids": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get Products By Ids",
+        "operationId": "get_products_by_ids",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "title": "Ids"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse_list_ProductCardRead__"
                 }
               }
             }
@@ -8557,8 +8905,20 @@
             "format": "uuid",
             "title": "Course Id"
           },
-          "razorpay_order_id": {
+          "payment_method": {
             "type": "string",
+            "title": "Payment Method",
+            "default": "razorpay"
+          },
+          "razorpay_order_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Razorpay Order Id"
           },
           "razorpay_payment_id": {
@@ -8603,6 +8963,17 @@
               }
             ],
             "title": "Paid At"
+          },
+          "admin_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Admin Note"
           },
           "user_full_name": {
             "anyOf": [
@@ -8655,11 +9026,221 @@
           "id",
           "user_id",
           "course_id",
-          "razorpay_order_id",
           "amount",
           "status"
         ],
         "title": "AdminCoursePaymentRead"
+      },
+      "AdminDirectEnrollRequest": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "amount_paid": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,8}|(?=[\\d.]{1,11}0*$)\\d{0,8}\\.\\d{0,2}0*$)"
+              }
+            ],
+            "title": "Amount Paid"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "amount_paid"
+        ],
+        "title": "AdminDirectEnrollRequest",
+        "description": "Admin records an offline payment and enrolls a student directly."
+      },
+      "AdminEnrolledStudentRead": {
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "course_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Course Id"
+          },
+          "enrolled_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Enrolled At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          },
+          "user_full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Full Name"
+          },
+          "user_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Email"
+          },
+          "amount_paid": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount Paid"
+          },
+          "payment_method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Method"
+          },
+          "payment_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Status"
+          },
+          "paid_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paid At"
+          },
+          "admin_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Admin Note"
+          },
+          "progress_percentage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Percentage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created_at",
+          "id",
+          "user_id",
+          "course_id",
+          "enrolled_at"
+        ],
+        "title": "AdminEnrolledStudentRead",
+        "description": "Enrollment entry shown in the admin course's Enrolled Students list."
       },
       "AdminOrderDetailRead": {
         "properties": {
@@ -8738,6 +9319,62 @@
             "type": "string",
             "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Total Amount"
+          },
+          "courier_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Courier Name"
+          },
+          "tracking_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tracking Number"
+          },
+          "tracking_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tracking Url"
+          },
+          "shipping_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipping Note"
+          },
+          "shipped_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipped At"
           },
           "items": {
             "items": {
@@ -9304,6 +9941,20 @@
           "payload"
         ],
         "title": "Body_ADMIN-update_product"
+      },
+      "Body_ADMIN-upload_media": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_ADMIN-upload_media"
       },
       "Body_auth-login": {
         "properties": {
@@ -11900,11 +12551,11 @@
           },
           "items": {
             "items": {
-              "type": "integer"
+              "type": "string"
             },
             "type": "array",
             "title": "Items",
-            "description": "IDs of featured entities"
+            "description": "UUIDs of featured products/courses"
           }
         },
         "type": "object",
@@ -11913,6 +12564,19 @@
           "title"
         ],
         "title": "FeaturedSection"
+      },
+      "FooterSection": {
+        "properties": {
+          "socials": {
+            "items": {
+              "$ref": "#/components/schemas/SocialLink"
+            },
+            "type": "array",
+            "title": "Socials"
+          }
+        },
+        "type": "object",
+        "title": "FooterSection"
       },
       "ForgotPasswordRequest": {
         "properties": {
@@ -12093,6 +12757,9 @@
           },
           "banner": {
             "$ref": "#/components/schemas/BannerSection"
+          },
+          "footer": {
+            "$ref": "#/components/schemas/FooterSection"
           }
         },
         "type": "object",
@@ -12853,6 +13520,62 @@
             "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
             "title": "Total Amount"
           },
+          "courier_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Courier Name"
+          },
+          "tracking_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tracking Number"
+          },
+          "tracking_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tracking Url"
+          },
+          "shipping_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipping Note"
+          },
+          "shipped_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipped At"
+          },
           "items": {
             "items": {
               "$ref": "#/components/schemas/OrderItemRead"
@@ -12872,6 +13595,52 @@
           "total_amount"
         ],
         "title": "OrderRead"
+      },
+      "OrderShipRequest": {
+        "properties": {
+          "courier_name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Courier Name"
+          },
+          "tracking_number": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Tracking Number"
+          },
+          "tracking_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tracking Url"
+          },
+          "shipping_note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipping Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "courier_name",
+          "tracking_number"
+        ],
+        "title": "OrderShipRequest"
       },
       "OrderStatus": {
         "type": "string",
@@ -15511,6 +16280,26 @@
         ],
         "title": "SetPasswordRequest"
       },
+      "SocialLink": {
+        "properties": {
+          "platform": {
+            "type": "string",
+            "maxLength": 30,
+            "title": "Platform"
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "platform",
+          "url"
+        ],
+        "title": "SocialLink"
+      },
       "StatusCounts": {
         "properties": {
           "wishlist_count": {
@@ -16945,6 +17734,46 @@
         ],
         "title": "SuccessResponse[list[AddressRead]]"
       },
+      "SuccessResponse_list_AdminEnrolledStudentRead__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AdminEnrolledStudentRead"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[list[AdminEnrolledStudentRead]]"
+      },
       "SuccessResponse_list_CartItemRead__": {
         "properties": {
           "success": {
@@ -17105,6 +17934,46 @@
         ],
         "title": "SuccessResponse[list[CourseLessonRead]]"
       },
+      "SuccessResponse_list_CourseListRead__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CourseListRead"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[list[CourseListRead]]"
+      },
       "SuccessResponse_list_CourseSectionRead__": {
         "properties": {
           "success": {
@@ -17184,6 +18053,46 @@
           "message"
         ],
         "title": "SuccessResponse[list[LessonProgressRead]]"
+      },
+      "SuccessResponse_list_ProductCardRead__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ProductCardRead"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[list[ProductCardRead]]"
       },
       "SuccessResponse_list_ProductImageRead__": {
         "properties": {
@@ -17344,6 +18253,43 @@
           "message"
         ],
         "title": "SuccessResponse[list[WishlistRead]]"
+      },
+      "SuccessResponse_str_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "status": {
+            "type": "integer",
+            "title": "Status",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse[str]"
       },
       "TestimonialItem": {
         "properties": {

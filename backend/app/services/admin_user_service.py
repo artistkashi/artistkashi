@@ -39,7 +39,11 @@ class AdminUserService:
         if is_verified is not None:
             filters["is_verified"] = is_verified
         if search:
-            filters["full_name__ilike"] = f"%{search}%"
+            like = f"%{search}%"
+            filters["_or"] = {
+                "full_name__ilike": like,
+                "email__ilike": like,
+            }
 
         if provider_type == "google":
             filters["auth_providers__provider"] = ProviderType.GOOGLE

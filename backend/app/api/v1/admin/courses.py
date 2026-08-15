@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, File, Form, Query, UploadFile
@@ -14,7 +15,10 @@ from app.schemas.course import (
     CourseStatsRead,
     CourseUpdate,
 )
+from app.schemas.course_enrollment import CourseEnrollmentRead
+from app.schemas.course_payment import AdminDirectEnrollRequest, AdminEnrolledStudentRead
 from app.schemas.responses import PaginatedResponse, SuccessResponse
+from app.services.course_payment_service import course_payment_service
 from app.services.course_service import course_service
 
 router = APIRouter(prefix="/courses", tags=["admin-courses"])
@@ -119,6 +123,47 @@ async def get_course_stats(
         course_id=course_id,
     )
     return SuccessResponse(message="Course stats retrieved successfully", data=stats)
+
+
+@router.post(
+    "/{course_id}/enroll",
+    response_model=SuccessResponse[CourseEnrollmentRead],
+)
+async def admin_direct_enroll(
+    course_id: uuid.UUID,
+    payload: AdminDirectEnrollRequest,
+    session: DatabaseDep,
+):
+    """Admin records an offline payment (UPI/bank/cash/etc.) and enrolls a student."""
+    enrollment = await course_payment_service.admin_direct_enroll(
+        session=session,
+        course_id=course_id,
+        user_id=payload.user_id,
+        amount_paid=payload.amount_paid,
+        note=payload.note,
+    )
+    return SuccessResponse(
+        message="Student enrolled successfully with direct payment",
+        data=enrollment,
+    )
+
+
+@router.get(
+    "/{course_id}/enrollments",
+    response_model=SuccessResponse[list[AdminEnrolledStudentRead]],
+)
+async def list_course_enrolled_students(
+    course_id: uuid.UUID,
+    session: DatabaseDep,
+):
+    students = await course_payment_service.list_course_enrolled_students(
+        session=session,
+        course_id=course_id,
+    )
+    return SuccessResponse(
+        message="Enrolled students retrieved successfully",
+        data=students,
+    )
 
 
 @router.get("", response_model=PaginatedResponse[CourseListRead])

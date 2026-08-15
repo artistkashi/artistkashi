@@ -40,7 +40,7 @@ export default function NotFound() {
             </Link>
             <button
               onClick={() => window.history.back()}
-              className="px-8 py-4 border border-border text-text-main hover:border-gold hover:text-gold transition-all duration-300 flex items-center gap-2 font-medium"
+              className="px-8 py-4 border border-border rounded-sm text-text-main hover:border-gold hover:text-gold transition-all duration-300 flex items-center gap-2 font-medium"
             >
               <ArrowLeft size={18} /> Go Back
             </button>

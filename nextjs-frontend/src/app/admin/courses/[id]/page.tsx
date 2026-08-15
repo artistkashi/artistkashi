@@ -54,6 +54,7 @@ import {
   CourseForm,
   type CourseFormValues,
 } from "@/components/admin/courses/CourseForm";
+import { EnrolledStudentsSection } from "@/components/admin/EnrolledStudentsSection";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CustomSelect } from "@/components/ui/custom-select";
@@ -748,18 +749,22 @@ function LessonBuilder({
                     <span
                       className={cn(
                         "capitalize",
-                        lesson.status === "ready"
-                          ? "text-emerald-400"
-                          : lesson.status === "processing" && !lesson.video_key
-                            ? "text-text-muted"
-                            : lesson.status === "processing"
-                              ? "text-amber-400"
-                              : "text-red-400"
+                        lesson.status === "ready" && !lesson.video_key
+                          ? "text-red-400"
+                          : lesson.status === "ready"
+                            ? "text-emerald-400"
+                            : lesson.status === "processing" && !lesson.video_key
+                              ? "text-text-muted"
+                              : lesson.status === "processing"
+                                ? "text-amber-400"
+                                : "text-red-400"
                       )}
                     >
-                      {lesson.status === "processing" && !lesson.video_key
+                      {lesson.status === "ready" && !lesson.video_key
                         ? "no video"
-                        : lesson.status}
+                        : lesson.status === "processing" && !lesson.video_key
+                          ? "no video"
+                          : lesson.status}
                     </span>
                   </div>
                 </div>
@@ -1248,6 +1253,7 @@ export default function AdminCourseDetailPage({
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="h-10!">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="students">Students</TabsTrigger>
           <TabsTrigger value="curriculum">Curriculum</TabsTrigger>
           <TabsTrigger value="details">Details</TabsTrigger>
           <TabsTrigger value="sections">Sections</TabsTrigger>
@@ -1365,6 +1371,10 @@ export default function AdminCourseDetailPage({
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="students">
+          <EnrolledStudentsSection courseId={course.id} courseTitle={course.title} />
         </TabsContent>
 
         <TabsContent value="curriculum">
@@ -1509,7 +1519,7 @@ export default function AdminCourseDetailPage({
 
 function StatBox({ label, value, count }: { label: string; value: string; count?: number }) {
   return (
-    <div className="rounded border border-border bg-dark/30 p-5 text-center">
+    <div className="rounded border border-border bg-dark/30 p-5 flex flex-col items-center justify-center text-center">
       <div className="text-2xl font-bold text-text-main">
         {count !== undefined ? <AnimatedCounter target={count} /> : value}
       </div>
@@ -1626,19 +1636,23 @@ function CurriculumTab({
                       <span
                         className={cn(
                           "text-2xs font-mono uppercase tracking-wider px-2 py-0.5 rounded-sm border",
-                          lesson.status === "ready"
-                            ? "text-emerald-400 border-emerald-400/30"
-                            : lesson.status === "processing" &&
-                                !lesson.video_key
-                              ? "text-text-muted border-border"
-                              : lesson.status === "processing"
-                                ? "text-amber-400 border-amber-400/30"
-                                : "text-red-400 border-red-400/30"
+                          lesson.status === "ready" && !lesson.video_key
+                            ? "text-red-400 border-red-400/30"
+                            : lesson.status === "ready"
+                              ? "text-emerald-400 border-emerald-400/30"
+                              : lesson.status === "processing" &&
+                                  !lesson.video_key
+                                ? "text-text-muted border-border"
+                                : lesson.status === "processing"
+                                  ? "text-amber-400 border-amber-400/30"
+                                  : "text-red-400 border-red-400/30"
                         )}
                       >
-                        {lesson.status === "processing" && !lesson.video_key
+                        {lesson.status === "ready" && !lesson.video_key
                           ? "no video"
-                          : lesson.status}
+                          : lesson.status === "processing" && !lesson.video_key
+                            ? "no video"
+                            : lesson.status}
                       </span>
                     </div>
                   </div>

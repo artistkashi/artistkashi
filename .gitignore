@@ -161,6 +161,12 @@ gha-creds-*.json
 
 local-shared-data/
 
+# QA scripts/artifacts (contain local paths, tokens, and dev credentials)
+qa/
+**/qa-*.mjs
+**/browser-qa.mjs
+**/openapi_test.json
+
 # Postman
 postman/
 .postman/

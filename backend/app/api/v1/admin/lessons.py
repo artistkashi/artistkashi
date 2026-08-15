@@ -34,6 +34,21 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/courses/{course_id}", tags=["admin-lessons"])
 
 
+async def _get_lesson_video_key(lesson_id: str) -> str | None:
+    try:
+        async with get_async_session_context() as session:
+            lesson = await crud_course_lesson.get(
+                db=session,
+                id=lesson_id,
+                schema_to_select=CourseLessonRead,
+                return_as_model=True,
+            )
+            return getattr(lesson, "video_key", None)
+    except Exception:
+        logger.exception("Failed to read lesson video_key for %s", lesson_id)
+        return None
+
+
 async def _process_video_background(
     lesson_id: str,
     course_id: str,
@@ -52,6 +67,19 @@ async def _process_video_background(
             source_key=source_key, course_id=course_id, lesson_id=lesson_id
         )
 
+        # Guard against a stale task: if the lesson was re-uploaded (or its
+        # video removed) while this task was running, do not overwrite the
+        # newer state or delete a file that is no longer this lesson's.
+        current_key = await _get_lesson_video_key(lesson_id)
+        if current_key != source_key:
+            logger.info(
+                "Skipping video update for lesson %s: current key %r != source %r",
+                lesson_id,
+                current_key,
+                source_key,
+            )
+            return
+
         async with get_async_session_context() as session:
             update = {"status": LessonStatus.READY, "video_duration_seconds": duration}
             if new_key != source_key:
@@ -67,19 +95,16 @@ async def _process_video_background(
     except Exception:
         logger.exception("Video processing failed for lesson %s", lesson_id)
         try:
+            current_key = await _get_lesson_video_key(lesson_id)
+            if current_key != source_key:
+                # A newer upload is in flight for this lesson; leave it alone.
+                return
             async with get_async_session_context() as session:
-                if await storage_service.file_exists(source_key):
-                    await crud_course_lesson.update(
-                        db=session,
-                        id=lesson_id,
-                        object={"status": LessonStatus.READY},
-                    )
-                else:
-                    await crud_course_lesson.update(
-                        db=session,
-                        id=lesson_id,
-                        object={"status": LessonStatus.FAILED},
-                    )
+                await crud_course_lesson.update(
+                    db=session,
+                    id=lesson_id,
+                    object={"status": LessonStatus.FAILED},
+                )
         except Exception:
             logger.exception("Failed to update lesson status after processing failure")
 

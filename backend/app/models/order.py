@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import enum
 import uuid
+from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import Enum, ForeignKey, Integer, Numeric, String
+from sqlalchemy import DateTime, Enum, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -65,6 +66,15 @@ class Order(Base, TimestampMixin):
     razorpay_order_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     razorpay_payment_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     razorpay_signature: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
+    # Shipment details
+    courier_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    tracking_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    tracking_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    shipping_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    shipped_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     shipping_address_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("addresses.id", ondelete="SET NULL"), nullable=True

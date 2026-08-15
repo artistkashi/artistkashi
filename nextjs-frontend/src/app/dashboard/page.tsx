@@ -5,6 +5,7 @@ import { GhostBtn, PrimaryBtn } from "@/components/ui/buttons";
 import { cn, displayPrice } from "@/lib/utils";
 import { format } from "date-fns";
 import {
+  ArrowUpRight,
   BookOpen,
   Calendar,
   Camera,
@@ -25,11 +26,16 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { GoogleLoginButton } from "@/components/auth/google-login-button";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { unwrap, unwrapVoid } from "@/api/client-service";
-import type { BodyUsersUpdateOwnProfile, CourseListRead, OrderRead } from "@/api/openapi-client";
+import type {
+  BodyUsersUpdateOwnProfile,
+  CourseListRead,
+  OrderRead,
+} from "@/api/openapi-client";
 import {
   coursesListCourses,
   listMyEnrollments,
@@ -58,9 +64,25 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [greeting, setGreeting] = useState("Welcome");
-  const { user, logout, getAuthProviders, setPassword, changePassword, linkGoogle, unlinkGoogle, refreshUser } =
-    useAuth();
+  const {
+    user,
+    logout,
+    getAuthProviders,
+    setPassword,
+    changePassword,
+    linkGoogle,
+    unlinkGoogle,
+    refreshUser,
+  } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "orders" || tab === "courses" || tab === "settings") {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   const [providers, setProviders] = useState<{
     providers: Array<{
@@ -159,10 +181,8 @@ export default function DashboardPage() {
     setIsSavingProfile(true);
     try {
       const body: BodyUsersUpdateOwnProfile = {};
-      if (data.fullName !== user?.full_name)
-        body.full_name = data.fullName;
-      if (data.phone !== (user?.phone || ""))
-        body.phone = data.phone ?? "";
+      if (data.fullName !== user?.full_name) body.full_name = data.fullName;
+      if (data.phone !== (user?.phone || "")) body.phone = data.phone ?? "";
       if (selectedFileRef.current)
         body.profile_picture_file = selectedFileRef.current;
 
@@ -564,6 +584,12 @@ export default function DashboardPage() {
                                   {displayPrice(r.total_amount)}
                                 </span>
                               </div>
+                              <Link
+                                href={`/orders/${r.id}`}
+                                className="text-tiny font-mono tracking-widest uppercase text-gold hover:text-text-main transition-colors pt-1 inline-flex items-center gap-1"
+                              >
+                                View Order <ArrowUpRight size={12} />
+                              </Link>
                             </div>
                           );
                         })}
@@ -580,6 +606,7 @@ export default function DashboardPage() {
                                 "Date",
                                 "Amount",
                                 "Status",
+                                "",
                               ].map((h) => (
                                 <th
                                   key={h}
@@ -633,6 +660,14 @@ export default function DashboardPage() {
                                     >
                                       {r.status}
                                     </span>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    <Link
+                                      href={`/orders/${r.id}`}
+                                      className="text-tiny font-mono tracking-widest uppercase text-gold hover:text-text-main transition-colors inline-flex items-center gap-1"
+                                    >
+                                      View <ArrowUpRight size={12} />
+                                    </Link>
                                   </td>
                                 </tr>
                               );
@@ -828,7 +863,10 @@ export default function DashboardPage() {
                     {!providers ? (
                       <div className="border border-border bg-surface rounded overflow-hidden divide-y divide-border">
                         {Array.from({ length: 2 }).map((_, i) => (
-                          <div key={i} className="px-6 md:px-8 py-5 md:py-6 flex items-center gap-4">
+                          <div
+                            key={i}
+                            className="px-6 md:px-8 py-5 md:py-6 flex items-center gap-4"
+                          >
                             <Skeleton className="w-10 h-10 rounded-sm shrink-0" />
                             <div className="flex-1 space-y-2">
                               <Skeleton className="h-4 w-24" />
@@ -845,11 +883,9 @@ export default function DashboardPage() {
                             name="Google"
                             description="Sign in with your Google account"
                             icon={<Globe size={18} className="text-gold" />}
-                            isConnected={
-                              providers.providers.some(
-                                (p) => p.provider === "google"
-                              )
-                            }
+                            isConnected={providers.providers.some(
+                              (p) => p.provider === "google"
+                            )}
                             action={
                               providers.providers.some(
                                 (p) => p.provider === "google"
@@ -859,7 +895,9 @@ export default function DashboardPage() {
                                   disabled={isUnlinking}
                                   className="text-red text-xs font-mono tracking-widest uppercase hover:text-red/70 transition-colors disabled:opacity-50"
                                 >
-                                  {isUnlinking ? "Disconnecting..." : "Disconnect"}
+                                  {isUnlinking
+                                    ? "Disconnecting..."
+                                    : "Disconnect"}
                                 </button>
                               ) : (
                                 <button
@@ -897,15 +935,17 @@ export default function DashboardPage() {
                               Set a Password
                             </h2>
                             <p className="text-text-muted text-tiny font-mono mb-3">
-                              Add password-based login to your account so you can
-                              sign in without Google.
+                              Add password-based login to your account so you
+                              can sign in without Google.
                             </p>
                             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                               <div className="relative flex-1">
                                 <input
                                   type={showNewPassword ? "text" : "password"}
                                   value={newPassword}
-                                  onChange={(e) => setNewPassword(e.target.value)}
+                                  onChange={(e) =>
+                                    setNewPassword(e.target.value)
+                                  }
                                   placeholder="Enter new password"
                                   className="w-full glass-input rounded text-text-main px-3 py-2.5 pr-10 text-sm focus:border-gold transition-colors"
                                 />
@@ -958,8 +998,8 @@ export default function DashboardPage() {
                                 Change Password
                               </h2>
                               <p className="text-text-muted text-tiny font-mono mt-0.5">
-                                Use 8+ characters with one uppercase letter and one
-                                special character.
+                                Use 8+ characters with one uppercase letter and
+                                one special character.
                               </p>
                             </div>
                             {showChangePassword ? (
@@ -972,13 +1012,17 @@ export default function DashboardPage() {
                                     <input
                                       type={showCpCurrent ? "text" : "password"}
                                       value={cpCurrent}
-                                      onChange={(e) => setCpCurrent(e.target.value)}
+                                      onChange={(e) =>
+                                        setCpCurrent(e.target.value)
+                                      }
                                       className="w-full glass-input rounded text-text-main px-3 py-2.5 pr-10 text-sm focus:border-gold transition-colors"
                                       placeholder="Enter current password"
                                     />
                                     <button
                                       type="button"
-                                      onClick={() => setShowCpCurrent((v) => !v)}
+                                      onClick={() =>
+                                        setShowCpCurrent((v) => !v)
+                                      }
                                       className="absolute inset-y-0 right-0 flex items-center px-3 text-text-muted hover:text-text-main transition-colors"
                                       aria-label={
                                         showCpCurrent
@@ -1032,13 +1076,17 @@ export default function DashboardPage() {
                                     <input
                                       type={showCpConfirm ? "text" : "password"}
                                       value={cpConfirm}
-                                      onChange={(e) => setCpConfirm(e.target.value)}
+                                      onChange={(e) =>
+                                        setCpConfirm(e.target.value)
+                                      }
                                       className="w-full glass-input rounded text-text-main px-3 py-2.5 pr-10 text-sm focus:border-gold transition-colors"
                                       placeholder="Confirm new password"
                                     />
                                     <button
                                       type="button"
-                                      onClick={() => setShowCpConfirm((v) => !v)}
+                                      onClick={() =>
+                                        setShowCpConfirm((v) => !v)
+                                      }
                                       className="absolute inset-y-0 right-0 flex items-center px-3 text-text-muted hover:text-text-main transition-colors"
                                       aria-label={
                                         showCpConfirm
@@ -1062,7 +1110,9 @@ export default function DashboardPage() {
                                           key={i}
                                           className="text-tiny text-red font-mono flex items-start gap-1.5"
                                         >
-                                          <span className="mt-0.5 shrink-0">•</span>
+                                          <span className="mt-0.5 shrink-0">
+                                            •
+                                          </span>
                                           {err}
                                         </li>
                                       ))}
@@ -1090,7 +1140,10 @@ export default function DashboardPage() {
                                     className="px-6! text-xs! py-3!"
                                   >
                                     {isChangingPassword ? (
-                                      <Loader2 size={14} className="animate-spin" />
+                                      <Loader2
+                                        size={14}
+                                        className="animate-spin"
+                                      />
                                     ) : (
                                       "Save Password"
                                     )}
@@ -1156,8 +1209,8 @@ export default function DashboardPage() {
                   Link Your Google Account
                 </h3>
                 <p className="text-text-muted text-sm leading-relaxed">
-                  Connect your Google account for one-click sign-in. Your profile
-                  picture and name will sync automatically.
+                  Connect your Google account for one-click sign-in. Your
+                  profile picture and name will sync automatically.
                 </p>
               </div>
               <div className="px-8 pb-8 flex justify-center">

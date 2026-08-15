@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Numeric, String
+from sqlalchemy import DateTime, Enum, ForeignKey, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -35,8 +35,14 @@ class CoursePayment(Base, TimestampMixin):
         index=True,
     )
 
-    razorpay_order_id: Mapped[str] = mapped_column(
-        String(255), nullable=False, unique=True, index=True
+    # Payment source: "razorpay" (online checkout) or "direct" (admin-recorded
+    # offline payment). Follows the Order.payment_method convention.
+    payment_method: Mapped[str] = mapped_column(
+        String(50), default="razorpay", nullable=False
+    )
+
+    razorpay_order_id: Mapped[str | None] = mapped_column(
+        String(255), nullable=True, unique=True, index=True
     )
 
     razorpay_payment_id: Mapped[str | None] = mapped_column(
@@ -62,6 +68,8 @@ class CoursePayment(Base, TimestampMixin):
     paid_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+
+    admin_note: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     user = relationship("User", back_populates="course_payments")
     course = relationship("Course", back_populates="payments")

@@ -36,6 +36,8 @@ HTTP_ERROR_MESSAGES = {
     ErrorCode.COURSE_ALREADY_EXISTS.value: "Course already exists",
     ErrorCode.COURSE_NOT_PUBLISHED.value: "Course is not published",
     ErrorCode.COURSE_SLUG_CONFLICT.value: "Course slug already in use",
+    ErrorCode.COURSE_ALREADY_PUBLISHED.value: "Course is already published",
+    ErrorCode.COURSE_HAS_ENROLLMENTS.value: "Course has enrolled students",
     ErrorCode.SECTION_NOT_FOUND.value: "Section not found",
     ErrorCode.LESSON_NOT_FOUND.value: "Lesson not found",
     ErrorCode.ENROLLMENT_NOT_FOUND.value: "Enrollment not found",

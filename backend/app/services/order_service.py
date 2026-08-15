@@ -1,11 +1,11 @@
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 import razorpay
-from fastcrud import CountConfig, JoinConfig, compute_offset
-from sqlalchemy import func, select, text
+from fastcrud import JoinConfig, compute_offset
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, load_only, selectinload
+from sqlalchemy.orm import joinedload
 
 from app.core.config import settings
 from app.core.exceptions import (
@@ -30,6 +30,7 @@ from app.schemas.order import (
     OrderItemDetailRead,
     OrderListParams,
     OrderRead,
+    OrderShipRequest,
     PaymentVerificationRequest,
 )
 from app.schemas.product import (
@@ -37,7 +38,10 @@ from app.schemas.product import (
     ProductVariantRead,
 )
 from app.schemas.user import PublicUserRead, UserRead
-from app.services.email.email import send_order_confirmation_email
+from app.services.email.email import (
+    send_order_confirmation_email,
+    send_order_shipped_email,
+)
 from app.services.product_service import product_variant_service
 
 
@@ -435,6 +439,73 @@ class OrderService:
 
         order_data.items = detail_items
         return order_data
+
+    async def mark_as_shipped(
+        self,
+        db: AsyncSession,
+        order_id: UUID,
+        payload: OrderShipRequest,
+    ) -> OrderRead:
+        # Lock the order row so concurrent ship requests serialize: only the
+        # first one observes status == CONFIRMED and sends the email; later
+        # ones see SHIPPED and fail fast (no duplicate emails, no races).
+        stmt = (
+            select(Order)
+            .where(Order.id == order_id)
+            .with_for_update()
+        )
+        result = await db.execute(stmt)
+        order = result.scalar_one_or_none()
+        if not order:
+            raise NotFoundException(
+                "Order", order_id, error_code=ErrorCode.ORDER_NOT_FOUND
+            )
+
+        if order.status != OrderStatus.CONFIRMED:
+            raise ValidationException(
+                "Order can only be shipped from 'confirmed' status, "
+                f"current status: '{order.status.value}'"
+            )
+        if order.payment_status != PaymentStatus.PAID:
+            raise ValidationException(
+                "Order cannot be shipped until payment is completed"
+            )
+
+        await crud_order.update(
+            db=db,
+            id=order_id,
+            object={
+                "status": OrderStatus.SHIPPED,
+                "courier_name": payload.courier_name,
+                "tracking_number": payload.tracking_number,
+                "tracking_url": payload.tracking_url,
+                "shipping_note": payload.shipping_note,
+                "shipped_at": datetime.now(UTC),
+            },
+        )
+
+        try:
+            user = await crud_user_order.get(
+                db=db, id=order.user_id, schema_to_select=UserRead, return_as_model=True
+            )
+            if user:
+                await send_order_shipped_email(
+                    user=user,
+                    order_id=str(order_id),
+                    courier_name=payload.courier_name,
+                    tracking_number=payload.tracking_number,
+                    tracking_url=payload.tracking_url,
+                )
+        except Exception:
+            pass
+
+        return await crud_order.get_with_relations(
+            db=db,
+            id=order_id,
+            relationships=["items"],
+            schema_to_select=OrderRead,
+            return_as_model=True,
+        )
 
 
 order_service = OrderService()

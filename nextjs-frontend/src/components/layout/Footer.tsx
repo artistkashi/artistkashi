@@ -3,9 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 
-import { getHomePageConfigPublic } from "@/api/openapi-client";
+import { siteConfigGetHomePageSettings } from "@/api/openapi-client";
 import { unwrap } from "@/api/client-service";
-import { defaultHomeSettings, HomePageSettings } from "@/lib/home-customization";
+import {
+  defaultHomeSettings,
+  HomePageSettings,
+} from "@/lib/home-customization";
 
 const PLATFORM_LABELS: Record<string, string> = {
   facebook: "Facebook",
@@ -23,7 +26,7 @@ export function Footer() {
     queryKey: ["home-config"],
     queryFn: async () => {
       try {
-        return ((await unwrap(getHomePageConfigPublic())) ??
+        return ((await unwrap(siteConfigGetHomePageSettings())) ??
           defaultHomeSettings) as HomePageSettings;
       } catch {
         return defaultHomeSettings;

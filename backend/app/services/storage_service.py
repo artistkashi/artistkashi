@@ -1,5 +1,6 @@
 import asyncio
 import uuid
+from urllib.parse import urlsplit, urlunsplit
 
 import boto3
 from fastapi import UploadFile
@@ -24,6 +25,27 @@ class StorageService:
         )
 
         self.bucket = settings.S3_BUCKET_NAME
+
+        # Presigned URLs must be reachable from the browser. S3_ENDPOINT_URL
+        # is often an internal container hostname (e.g. http://minio:9000)
+        # that browsers cannot resolve, while S3_PUBLIC_URL is the public
+        # origin. The SigV4 signature includes the Host header, so the URL
+        # must be generated with the SAME origin the browser will use. We
+        # sign with a client pointed at the public origin (presigning never
+        # contacts the server, so the internal endpoint is not needed).
+        public = urlsplit(settings.S3_PUBLIC_URL) if settings.S3_PUBLIC_URL else None
+        if public and public.scheme and public.netloc:
+            self.presign_endpoint = f"{public.scheme}://{public.netloc}"
+        else:
+            self.presign_endpoint = settings.S3_ENDPOINT_URL
+
+        self.presign_client = boto3.client(
+            "s3",
+            endpoint_url=self.presign_endpoint,
+            aws_access_key_id=settings.S3_ACCESS_KEY,
+            aws_secret_access_key=settings.S3_SECRET_KEY,
+            region_name="auto",
+        )
 
     async def _upload(
         self,
@@ -149,7 +171,7 @@ class StorageService:
         key: str,
         expires_in: int = 3600,
     ) -> str:
-        url = self.client.generate_presigned_url(
+        url = self.presign_client.generate_presigned_url(
             "get_object",
             Params={
                 "Bucket": self.bucket,
@@ -162,16 +184,22 @@ class StorageService:
     def generate_presigned_upload_url(
         self,
         key: str,
-        content_type: str,
+        content_type: str | None = None,
         expires_in: int = 3600,
     ) -> str:
-        url = self.client.generate_presigned_url(
+        params: dict = {
+            "Bucket": self.bucket,
+            "Key": key,
+        }
+        # NOTE: ContentType is intentionally NOT part of the signed params.
+        # Browsers send `file.type`, which is often empty (e.g. .mkv, .mov,
+        # .avi) or differs from what the server signed, which breaks the
+        # SigV4 signature (SignatureDoesNotMatch -> 403). Signing only the
+        # key keeps uploads working for any MIME type; the stored object's
+        # Content-Type is irrelevant for <video> playback.
+        url = self.presign_client.generate_presigned_url(
             "put_object",
-            Params={
-                "Bucket": self.bucket,
-                "Key": key,
-                "ContentType": content_type,
-            },
+            Params=params,
             ExpiresIn=expires_in,
         )
         return url

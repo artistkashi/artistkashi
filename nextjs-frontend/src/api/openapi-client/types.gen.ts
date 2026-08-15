@@ -203,9 +203,13 @@ export type AdminCoursePaymentRead = {
      */
     course_id: string;
     /**
+     * Payment Method
+     */
+    payment_method?: string;
+    /**
      * Razorpay Order Id
      */
-    razorpay_order_id: string;
+    razorpay_order_id?: string | null;
     /**
      * Razorpay Payment Id
      */
@@ -227,6 +231,10 @@ export type AdminCoursePaymentRead = {
      */
     paid_at?: string | null;
     /**
+     * Admin Note
+     */
+    admin_note?: string | null;
+    /**
      * User Full Name
      */
     user_full_name?: string | null;
@@ -242,6 +250,102 @@ export type AdminCoursePaymentRead = {
      * Course Slug
      */
     course_slug?: string | null;
+};
+
+/**
+ * AdminDirectEnrollRequest
+ *
+ * Admin records an offline payment and enrolls a student directly.
+ */
+export type AdminDirectEnrollRequest = {
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Amount Paid
+     */
+    amount_paid: number | string;
+    /**
+     * Note
+     */
+    note?: string | null;
+};
+
+/**
+ * AdminEnrolledStudentRead
+ *
+ * Enrollment entry shown in the admin course's Enrolled Students list.
+ */
+export type AdminEnrolledStudentRead = {
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Course Id
+     */
+    course_id: string;
+    /**
+     * Enrolled At
+     */
+    enrolled_at: string;
+    /**
+     * Completed At
+     */
+    completed_at?: string | null;
+    /**
+     * Expires At
+     */
+    expires_at?: string | null;
+    /**
+     * Is Active
+     */
+    is_active?: boolean;
+    /**
+     * User Full Name
+     */
+    user_full_name?: string | null;
+    /**
+     * User Email
+     */
+    user_email?: string | null;
+    /**
+     * Amount Paid
+     */
+    amount_paid?: string | null;
+    /**
+     * Payment Method
+     */
+    payment_method?: string | null;
+    /**
+     * Payment Status
+     */
+    payment_status?: string | null;
+    /**
+     * Paid At
+     */
+    paid_at?: string | null;
+    /**
+     * Admin Note
+     */
+    admin_note?: string | null;
+    /**
+     * Progress Percentage
+     */
+    progress_percentage?: number | null;
 };
 
 /**
@@ -286,6 +390,26 @@ export type AdminOrderDetailRead = {
      * Total Amount
      */
     total_amount: string;
+    /**
+     * Courier Name
+     */
+    courier_name?: string | null;
+    /**
+     * Tracking Number
+     */
+    tracking_number?: string | null;
+    /**
+     * Tracking Url
+     */
+    tracking_url?: string | null;
+    /**
+     * Shipping Note
+     */
+    shipping_note?: string | null;
+    /**
+     * Shipped At
+     */
+    shipped_at?: string | null;
     /**
      * Items
      */
@@ -576,6 +700,16 @@ export type BodyAdminUpdateProduct = {
      * Files
      */
     files?: Array<Blob | File> | null;
+};
+
+/**
+ * Body_ADMIN-upload_media
+ */
+export type BodyAdminUploadMedia = {
+    /**
+     * File
+     */
+    file: Blob | File;
 };
 
 /**
@@ -1859,6 +1993,16 @@ export type FeaturedSection = {
 };
 
 /**
+ * FooterSection
+ */
+export type FooterSection = {
+    /**
+     * Socials
+     */
+    socials?: Array<SocialLink>;
+};
+
+/**
  * ForgotPasswordRequest
  */
 export type ForgotPasswordRequest = {
@@ -1972,12 +2116,7 @@ export type HomePageConfig = {
     faq: FaqSection;
     community: CommunitySection;
     banner: BannerSection;
-    footer?: {
-        socials: Array<{
-            platform: string;
-            url: string;
-        }>;
-    } | null;
+    footer?: FooterSection;
 };
 
 /**
@@ -2353,9 +2492,51 @@ export type OrderRead = {
      */
     total_amount: string;
     /**
+     * Courier Name
+     */
+    courier_name?: string | null;
+    /**
+     * Tracking Number
+     */
+    tracking_number?: string | null;
+    /**
+     * Tracking Url
+     */
+    tracking_url?: string | null;
+    /**
+     * Shipping Note
+     */
+    shipping_note?: string | null;
+    /**
+     * Shipped At
+     */
+    shipped_at?: string | null;
+    /**
      * Items
      */
     items?: Array<OrderItemRead>;
+};
+
+/**
+ * OrderShipRequest
+ */
+export type OrderShipRequest = {
+    /**
+     * Courier Name
+     */
+    courier_name: string;
+    /**
+     * Tracking Number
+     */
+    tracking_number: string;
+    /**
+     * Tracking Url
+     */
+    tracking_url?: string | null;
+    /**
+     * Shipping Note
+     */
+    shipping_note?: string | null;
 };
 
 /**
@@ -3729,6 +3910,20 @@ export type SetPasswordRequest = {
 };
 
 /**
+ * SocialLink
+ */
+export type SocialLink = {
+    /**
+     * Platform
+     */
+    platform: string;
+    /**
+     * Url
+     */
+    url: string;
+};
+
+/**
  * StatusCounts
  */
 export type StatusCounts = {
@@ -4543,6 +4738,29 @@ export type SuccessResponseListAddressRead = {
 };
 
 /**
+ * SuccessResponse[list[AdminEnrolledStudentRead]]
+ */
+export type SuccessResponseListAdminEnrolledStudentRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<AdminEnrolledStudentRead> | null;
+    meta?: Meta;
+};
+
+/**
  * SuccessResponse[list[CartItemRead]]
  */
 export type SuccessResponseListCartItemRead = {
@@ -4635,6 +4853,29 @@ export type SuccessResponseListCourseLessonRead = {
 };
 
 /**
+ * SuccessResponse[list[CourseListRead]]
+ */
+export type SuccessResponseListCourseListRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<CourseListRead> | null;
+    meta?: Meta;
+};
+
+/**
  * SuccessResponse[list[CourseSectionRead]]
  */
 export type SuccessResponseListCourseSectionRead = {
@@ -4677,6 +4918,29 @@ export type SuccessResponseListLessonProgressRead = {
      * Data
      */
     data?: Array<LessonProgressRead> | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[list[ProductCardRead]]
+ */
+export type SuccessResponseListProductCardRead = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<ProductCardRead> | null;
     meta?: Meta;
 };
 
@@ -4773,9 +5037,9 @@ export type SuccessResponseListWishlistRead = {
 };
 
 /**
- * SuccessResponse[list[ProductCardRead]]
+ * SuccessResponse[str]
  */
-export type SuccessResponseListProductCardRead = {
+export type SuccessResponseStr = {
     /**
      * Success
      */
@@ -4791,30 +5055,7 @@ export type SuccessResponseListProductCardRead = {
     /**
      * Data
      */
-    data?: Array<ProductCardRead> | null;
-    meta?: Meta;
-};
-
-/**
- * SuccessResponse[list[CourseListRead]]
- */
-export type SuccessResponseListCourseListRead = {
-    /**
-     * Success
-     */
-    success?: boolean;
-    /**
-     * Status
-     */
-    status?: number;
-    /**
-     * Message
-     */
-    message: string;
-    /**
-     * Data
-     */
-    data?: Array<CourseListRead> | null;
+    data?: string | null;
     meta?: Meta;
 };
 
@@ -6500,6 +6741,52 @@ export type SuccessResponseListCourseLessonReadWritable = {
 };
 
 /**
+ * SuccessResponse[list[CourseListRead]]
+ */
+export type SuccessResponseListCourseListReadWritable = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<CourseListReadWritable> | null;
+    meta?: Meta;
+};
+
+/**
+ * SuccessResponse[list[ProductCardRead]]
+ */
+export type SuccessResponseListProductCardReadWritable = {
+    /**
+     * Success
+     */
+    success?: boolean;
+    /**
+     * Status
+     */
+    status?: number;
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * Data
+     */
+    data?: Array<ProductCardReadWritable> | null;
+    meta?: Meta;
+};
+
+/**
  * SuccessResponse[list[ProductVariantRead]]
  */
 export type SuccessResponseListProductVariantReadWritable = {
@@ -6693,6 +6980,31 @@ export type UpdateHomePageSettingsResponses = {
 };
 
 export type UpdateHomePageSettingsResponse = UpdateHomePageSettingsResponses[keyof UpdateHomePageSettingsResponses];
+
+export type UploadMediaData = {
+    body: BodyAdminUploadMedia;
+    path?: never;
+    query?: never;
+    url: '/api/admin/media/upload';
+};
+
+export type UploadMediaErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type UploadMediaError = UploadMediaErrors[keyof UploadMediaErrors];
+
+export type UploadMediaResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseStr;
+};
+
+export type UploadMediaResponse = UploadMediaResponses[keyof UploadMediaResponses];
 
 export type ListAdminUsersData = {
     body?: never;
@@ -8190,6 +8502,66 @@ export type GetCourseStatsResponses = {
 
 export type GetCourseStatsResponse = GetCourseStatsResponses[keyof GetCourseStatsResponses];
 
+export type AdminDirectEnrollData = {
+    body: AdminDirectEnrollRequest;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{course_id}/enroll';
+};
+
+export type AdminDirectEnrollErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type AdminDirectEnrollError = AdminDirectEnrollErrors[keyof AdminDirectEnrollErrors];
+
+export type AdminDirectEnrollResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseCourseEnrollmentRead;
+};
+
+export type AdminDirectEnrollResponse = AdminDirectEnrollResponses[keyof AdminDirectEnrollResponses];
+
+export type ListCourseEnrolledStudentsData = {
+    body?: never;
+    path: {
+        /**
+         * Course Id
+         */
+        course_id: string;
+    };
+    query?: never;
+    url: '/api/admin/courses/{course_id}/enrollments';
+};
+
+export type ListCourseEnrolledStudentsErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type ListCourseEnrolledStudentsError = ListCourseEnrolledStudentsErrors[keyof ListCourseEnrolledStudentsErrors];
+
+export type ListCourseEnrolledStudentsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseListAdminEnrolledStudentRead;
+};
+
+export type ListCourseEnrolledStudentsResponse = ListCourseEnrolledStudentsResponses[keyof ListCourseEnrolledStudentsResponses];
+
 export type ListEnrollmentsData = {
     body?: never;
     path?: never;
@@ -8843,6 +9215,36 @@ export type UpdateOrderStatusResponses = {
 };
 
 export type UpdateOrderStatusResponse = UpdateOrderStatusResponses[keyof UpdateOrderStatusResponses];
+
+export type ShipOrderData = {
+    body: OrderShipRequest;
+    path: {
+        /**
+         * Order Id
+         */
+        order_id: string;
+    };
+    query?: never;
+    url: '/api/admin/orders/{order_id}/ship';
+};
+
+export type ShipOrderErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type ShipOrderError = ShipOrderErrors[keyof ShipOrderErrors];
+
+export type ShipOrderResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseOrderRead;
+};
+
+export type ShipOrderResponse = ShipOrderResponses[keyof ShipOrderResponses];
 
 export type ListCoursePaymentsData = {
     body?: never;
@@ -9996,6 +10398,36 @@ export type CoursesListCoursesResponses = {
 
 export type CoursesListCoursesResponse = CoursesListCoursesResponses[keyof CoursesListCoursesResponses];
 
+export type GetCoursesByIdsData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Ids
+         */
+        ids: Array<string>;
+    };
+    url: '/api/courses/by-ids';
+};
+
+export type GetCoursesByIdsErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetCoursesByIdsError = GetCoursesByIdsErrors[keyof GetCoursesByIdsErrors];
+
+export type GetCoursesByIdsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseListCourseListRead;
+};
+
+export type GetCoursesByIdsResponse = GetCoursesByIdsResponses[keyof GetCoursesByIdsResponses];
+
 export type CoursesGetCourseData = {
     body?: never;
     path: {
@@ -10636,6 +11068,31 @@ export type UpdateProductReviewResponses = {
 
 export type UpdateProductReviewResponse = UpdateProductReviewResponses[keyof UpdateProductReviewResponses];
 
+export type SiteConfigGetHomePageSettingsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/config/home';
+};
+
+export type SiteConfigGetHomePageSettingsErrors = {
+    /**
+     * Error 422
+     */
+    422: ErrorResponse;
+};
+
+export type SiteConfigGetHomePageSettingsError = SiteConfigGetHomePageSettingsErrors[keyof SiteConfigGetHomePageSettingsErrors];
+
+export type SiteConfigGetHomePageSettingsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseHomePageConfig;
+};
+
+export type SiteConfigGetHomePageSettingsResponse = SiteConfigGetHomePageSettingsResponses[keyof SiteConfigGetHomePageSettingsResponses];
+
 export type ProductsListProductsData = {
     body?: never;
     path?: never;
@@ -10669,6 +11126,36 @@ export type ProductsListProductsResponses = {
 };
 
 export type ProductsListProductsResponse = ProductsListProductsResponses[keyof ProductsListProductsResponses];
+
+export type GetProductsByIdsData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Ids
+         */
+        ids: Array<string>;
+    };
+    url: '/api/products/by-ids';
+};
+
+export type GetProductsByIdsErrors = {
+    /**
+     * Validation Error
+     */
+    422: ErrorResponse;
+};
+
+export type GetProductsByIdsError = GetProductsByIdsErrors[keyof GetProductsByIdsErrors];
+
+export type GetProductsByIdsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponseListProductCardRead;
+};
+
+export type GetProductsByIdsResponse = GetProductsByIdsResponses[keyof GetProductsByIdsResponses];
 
 export type ProductsGetProductData = {
     body?: never;
@@ -11058,82 +11545,3 @@ export type GetCountsResponses = {
 };
 
 export type GetCountsResponse = GetCountsResponses[keyof GetCountsResponses];
-
-export type GetHomePageConfigPublicData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/config/home';
-};
-
-export type GetHomePageConfigPublicErrors = {
-    /**
-     * Error 422
-     */
-    422: ErrorResponse;
-};
-
-export type GetHomePageConfigPublicError = GetHomePageConfigPublicErrors[keyof GetHomePageConfigPublicErrors];
-
-export type GetHomePageConfigPublicResponses = {
-    /**
-     * Successful Response
-     */
-    200: SuccessResponseHomePageConfig;
-};
-
-export type GetHomePageConfigPublicResponse = GetHomePageConfigPublicResponses[keyof GetHomePageConfigPublicResponses];
-
-export type GetProductsByIdsData = {
-    body?: never;
-    path?: never;
-    query?: {
-        ids: Array<string>;
-    };
-    url: '/api/products/by-ids';
-};
-
-export type GetProductsByIdsErrors = {
-    /**
-     * Error 422
-     */
-    422: ErrorResponse;
-};
-
-export type GetProductsByIdsError = GetProductsByIdsErrors[keyof GetProductsByIdsErrors];
-
-export type GetProductsByIdsResponses = {
-    /**
-     * Successful Response
-     */
-    200: SuccessResponseListProductCardRead;
-};
-
-export type GetProductsByIdsResponse = GetProductsByIdsResponses[keyof GetProductsByIdsResponses];
-
-export type GetCoursesByIdsData = {
-    body?: never;
-    path?: never;
-    query?: {
-        ids: Array<string>;
-    };
-    url: '/api/courses/by-ids';
-};
-
-export type GetCoursesByIdsErrors = {
-    /**
-     * Error 422
-     */
-    422: ErrorResponse;
-};
-
-export type GetCoursesByIdsError = GetCoursesByIdsErrors[keyof GetCoursesByIdsErrors];
-
-export type GetCoursesByIdsResponses = {
-    /**
-     * Successful Response
-     */
-    200: SuccessResponseListCourseListRead;
-};
-
-export type GetCoursesByIdsResponse = GetCoursesByIdsResponses[keyof GetCoursesByIdsResponses];

@@ -62,7 +62,7 @@ export default function AdminPage() {
         {stats.map((s) => (
           <div
             key={s.label}
-            className="bg-muted-light border border-border p-6 group hover:border-gold transition-all"
+            className="bg-muted-light border border-border p-6 group hover:border-gold transition-all rounded-sm"
           >
             <div className="flex justify-between items-start mb-4">
               <div className="text-2xs font-mono text-text-muted tracking-widest uppercase">
@@ -84,7 +84,7 @@ export default function AdminPage() {
       </div>
 
       {/* Recent Activity Table */}
-      <div className="border border-border bg-muted-light">
+      <div className="border border-border bg-muted-light rounded-sm overflow-hidden">
         <div className="px-8 py-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h2 className="text-text-main font-bold text-xl uppercase tracking-tight">
             Recent Acquisitions
@@ -181,8 +181,8 @@ export default function AdminPage() {
             { label: "Site Security", icon: Lock, href: "/admin/settings" },
           ].map((a) => (
             <Link key={a.label} href={a.href}>
-              <button className="w-full group bg-muted-light border border-border hover:border-gold transition-all flex items-center gap-4 p-6 text-left">
-                <div className="w-10 h-10 bg-dark border border-border group-hover:border-gold flex items-center justify-center transition-colors">
+              <button className="w-full group bg-muted-light border border-border hover:border-gold transition-all flex items-center gap-4 p-6 text-left rounded-sm">
+                <div className="w-10 h-10 bg-dark border border-border group-hover:border-gold flex items-center justify-center transition-colors rounded-sm">
                   <a.icon
                     size={18}
                     className="text-text-muted group-hover:text-gold transition-colors"

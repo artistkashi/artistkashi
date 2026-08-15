@@ -13,6 +13,7 @@ from app.schemas.order import (
     OrderDashboardRead,
     OrderListParams,
     OrderRead,
+    OrderShipRequest,
     OrderUpdate,
 )
 from app.schemas.responses import PaginatedResponse, SuccessResponse
@@ -20,7 +21,6 @@ from app.schemas.user import UserRead
 from app.services.email.email import (
     send_order_cancelled_email,
     send_order_delivered_email,
-    send_order_shipped_email,
 )
 from app.services.order_service import order_service
 
@@ -53,14 +53,22 @@ async def get_order_details(order_id: UUID, db: DatabaseDep) -> SuccessResponse:
 async def update_order_status(
     order_id: UUID, payload: OrderUpdate, db: DatabaseDep
 ) -> SuccessResponse:
-    order = await crud_order.get(db=db, id=order_id)
+    # Row lock so concurrent status updates serialize and cannot both pass
+    # the transition guard (prevents e.g. duplicate delivered emails).
+    from sqlalchemy import select
+
+    from app.models.order import Order
+
+    stmt = select(Order).where(Order.id == order_id).with_for_update()
+    result = await db.execute(stmt)
+    order = result.scalar_one_or_none()
     if not order:
         raise NotFoundException("Order", order_id, error_code=ErrorCode.ORDER_NOT_FOUND)
 
     if payload.status is not None:
         VALID_TRANSITIONS: dict[str, set[str]] = {
             "pending": {"confirmed", "cancelled"},
-            "confirmed": {"shipped", "cancelled"},
+            "confirmed": {"cancelled"},
             "shipped": {"delivered", "cancelled"},
             "delivered": set(),
             "cancelled": set(),
@@ -68,7 +76,8 @@ async def update_order_status(
         allowed = VALID_TRANSITIONS.get(order.status.value, set())
         if payload.status.value not in allowed:
             raise ValidationException(
-                f"Cannot transition from '{order.status.value}' to '{payload.status.value}'"
+                "Cannot transition from "
+                f"'{order.status.value}' to '{payload.status.value}'"
             )
 
     updated_order = await crud_order.update(db=db, id=order_id, object=payload)
@@ -80,9 +89,7 @@ async def update_order_status(
             )
             if user:
                 order_id_str = str(order_id)
-                if payload.status.value == "shipped":
-                    await send_order_shipped_email(user=user, order_id=order_id_str)
-                elif payload.status.value == "delivered":
+                if payload.status.value == "delivered":
                     await send_order_delivered_email(user=user, order_id=order_id_str)
                 elif payload.status.value == "cancelled":
                     await send_order_cancelled_email(user=user, order_id=order_id_str)
@@ -90,3 +97,13 @@ async def update_order_status(
             pass
 
     return SuccessResponse(message="Order status updated", data=updated_order)
+
+
+@router.post("/{order_id}/ship", response_model=SuccessResponse[OrderRead])
+async def ship_order(
+    order_id: UUID, payload: OrderShipRequest, db: DatabaseDep
+) -> SuccessResponse:
+    order = await order_service.mark_as_shipped(
+        db=db, order_id=order_id, payload=payload
+    )
+    return SuccessResponse(message="Order shipped successfully", data=order)

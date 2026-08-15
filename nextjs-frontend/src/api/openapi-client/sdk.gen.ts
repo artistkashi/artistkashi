@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { AddToCartData, AddToCartErrors, AddToCartResponses, AddToWishlistData, AddToWishlistErrors, AddToWishlistResponses, AdminEnrollUserData, AdminEnrollUserErrors, AdminEnrollUserResponses, AdminStatsData, AdminStatsErrors, AdminStatsResponses, ArchiveProductData, ArchiveProductErrors, ArchiveProductResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, ClearCartData, ClearCartErrors, ClearCartResponses, ConfirmVideoUploadData, ConfirmVideoUploadErrors, ConfirmVideoUploadResponses, ContinueWatchingData, ContinueWatchingErrors, ContinueWatchingResponses, CoursesGetCourseData, CoursesGetCourseErrors, CoursesGetCourseResponses, CoursesListCoursesData, CoursesListCoursesErrors, CoursesListCoursesResponses, CreateAddressData, CreateAddressErrors, CreateAddressResponses, CreateCategoryData, CreateCategoryErrors, CreateCategoryResponses, CreateCourseCategoryData, CreateCourseCategoryErrors, CreateCourseCategoryResponses, CreateCourseData, CreateCourseErrors, CreateCourseResponses, CreateCourseReviewData, CreateCourseReviewErrors, CreateCourseReviewResponses, CreateLessonData, CreateLessonErrors, CreateLessonResponses, CreateMediumData, CreateMediumErrors, CreateMediumResponses, CreateOrderData, CreateOrderErrors, CreateOrderResponses, CreateProductData, CreateProductErrors, CreateProductResponses, CreateProductReviewData, CreateProductReviewErrors, CreateProductReviewResponses, CreateSectionData, CreateSectionErrors, CreateSectionResponses, CreateVariantTypeData, CreateVariantTypeErrors, CreateVariantTypeResponses, DeleteAddressData, DeleteAddressErrors, DeleteAddressResponses, DeleteCategoryData, DeleteCategoryErrors, DeleteCategoryResponses, DeleteCourseCategoryData, DeleteCourseCategoryErrors, DeleteCourseCategoryResponses, DeleteCourseData, DeleteCourseErrors, DeleteCourseResponses, DeleteCourseReviewData, DeleteCourseReviewErrors, DeleteCourseReviewResponses, DeleteEnrollmentData, DeleteEnrollmentErrors, DeleteEnrollmentResponses, DeleteLessonData, DeleteLessonErrors, DeleteLessonResponses, DeleteMediumData, DeleteMediumErrors, DeleteMediumResponses, DeleteOwnAccountData, DeleteOwnAccountErrors, DeleteOwnAccountResponses, DeleteProductData, DeleteProductErrors, DeleteProductResponses, DeleteProductReviewData, DeleteProductReviewErrors, DeleteProductReviewResponses, DeleteReviewData, DeleteReviewErrors, DeleteReviewResponses, DeleteSectionData, DeleteSectionErrors, DeleteSectionResponses, DeleteVariantTypeData, DeleteVariantTypeErrors, DeleteVariantTypeResponses, EnrollInCourseData, EnrollInCourseErrors, EnrollInCourseResponses, FeatureCourseData, FeatureCourseErrors, FeatureCourseResponses, FeaturedProductsData, FeaturedProductsErrors, FeaturedProductsResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetAdminUserDetailData, GetAdminUserDetailErrors, GetAdminUserDetailResponses, GetAllLessonProgressesData, GetAllLessonProgressesErrors, GetAllLessonProgressesResponses, GetAuthProvidersData, GetAuthProvidersErrors, GetAuthProvidersResponses, GetCategoryData, GetCategoryErrors, GetCategoryResponses, GetCountsData, GetCountsErrors, GetCountsResponses, GetCoursesByIdsData, GetCoursesByIdsErrors, GetCoursesByIdsResponses, GetHomePageConfigPublicData, GetHomePageConfigPublicErrors, GetHomePageConfigPublicResponses, GetProductsByIdsData, GetProductsByIdsErrors, GetProductsByIdsResponses, SuccessResponseListCourseListRead, SuccessResponseListProductCardRead, GetCourseCategoryData, GetCourseCategoryErrors, GetCourseCategoryResponses, GetCourseCurriculumData, GetCourseCurriculumErrors, GetCourseCurriculumResponses, GetCourseData, GetCourseErrors, GetCourseProgressData, GetCourseProgressErrors, GetCourseProgressResponses, GetCourseResponses, GetCourseStatsData, GetCourseStatsErrors, GetCourseStatsResponses, GetEnrollmentData, GetEnrollmentErrors, GetEnrollmentResponses, GetEnrollmentStatusData, GetEnrollmentStatusErrors, GetEnrollmentStatusResponses, GetHomePageSettingsData, GetHomePageSettingsErrors, GetHomePageSettingsResponses, GetImageData, GetImageErrors, GetImageResponses, GetLessonData, GetLessonErrors, GetLessonProgressData, GetLessonProgressErrors, GetLessonProgressResponses, GetLessonResponses, GetLessonVideoData, GetLessonVideoErrors, GetLessonVideoResponses, GetMediumData, GetMediumErrors, GetMediumResponses, GetMyCartData, GetMyCartErrors, GetMyCartResponses, GetMyCourseReviewData, GetMyCourseReviewErrors, GetMyCourseReviewResponses, GetMyProductReviewData, GetMyProductReviewErrors, GetMyProductReviewResponses, GetMyWishlistData, GetMyWishlistErrors, GetMyWishlistResponses, GetOrderDetailsData, GetOrderDetailsErrors, GetOrderDetailsResponses, GetProductBySlugData, GetProductBySlugErrors, GetProductBySlugResponses, GetProductData, GetProductErrors, GetProductImagesData, GetProductImagesErrors, GetProductImagesResponses, GetProductResponses, GetReviewDetailData, GetReviewDetailErrors, GetReviewDetailResponses, GetVariantData, GetVariantErrors, GetVariantResponses, GetVariantTypeData, GetVariantTypeErrors, GetVariantTypeResponses, GoogleAuthData, GoogleAuthErrors, GoogleAuthResponses, HealthCheckData, HealthCheckDetailedData, HealthCheckDetailedErrors, HealthCheckDetailedResponses, HealthCheckErrors, HealthCheckResponses, InitiateCoursePurchaseData, InitiateCoursePurchaseErrors, InitiateCoursePurchaseResponses, InitVideoUploadData, InitVideoUploadErrors, InitVideoUploadResponses, LinkGoogleData, LinkGoogleErrors, LinkGoogleResponses, ListAddressesData, ListAddressesErrors, ListAddressesResponses, ListAdminUsersData, ListAdminUsersErrors, ListAdminUsersResponses, ListAllReviewsData, ListAllReviewsErrors, ListAllReviewsResponses, ListCategoriesData, ListCategoriesErrors, ListCategoriesResponses, ListCourseCategoriesData, ListCourseCategoriesErrors, ListCourseCategoriesResponses, ListCoursePaymentsData, ListCoursePaymentsErrors, ListCoursePaymentsResponses, ListCourseReviewsData, ListCourseReviewsErrors, ListCourseReviewsResponses, ListCoursesData, ListCoursesErrors, ListCoursesResponses, ListEnrollmentsData, ListEnrollmentsErrors, ListEnrollmentsResponses, ListMediumsData, ListMediumsErrors, ListMediumsResponses, ListMyEnrollmentsData, ListMyEnrollmentsErrors, ListMyEnrollmentsResponses, ListMyOrdersData, ListMyOrdersErrors, ListMyOrdersResponses, ListOrdersData, ListOrdersErrors, ListOrdersResponses, ListProductReviewsData, ListProductReviewsErrors, ListProductReviewsResponses, ListProductsData, ListProductsErrors, ListProductsResponses, ListProfilesData, ListProfilesErrors, ListProfilesResponses, ListPublicCourseCategoriesData, ListPublicCourseCategoriesErrors, ListPublicCourseCategoriesResponses, ListSessionsData, ListSessionsErrors, ListSessionsResponses, ListVariantsData, ListVariantsErrors, ListVariantsResponses, ListVariantTypesData, ListVariantTypesErrors, ListVariantTypesResponses, LoginData, LoginErrors, LoginResponses, LogoutAllData, LogoutAllErrors, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, MeData, MeErrors, MeResponses, MoveLessonData, MoveLessonErrors, MoveLessonResponses, OrdersGetOrderDetailsData, OrdersGetOrderDetailsErrors, OrdersGetOrderDetailsResponses, OverviewData, OverviewErrors, OverviewResponses, ProductsGetProductData, ProductsGetProductErrors, ProductsGetProductResponses, ProductsListProductsData, ProductsListProductsErrors, ProductsListProductsResponses, PublishCourseData, PublishCourseErrors, PublishCourseResponses, PublishProductData, PublishProductErrors, PublishProductResponses, ReadMyAddressesData, ReadMyAddressesErrors, ReadMyAddressesResponses, ReadOwnProfileData, ReadOwnProfileErrors, ReadOwnProfileResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, RemoveFromCartData, RemoveFromCartErrors, RemoveFromCartResponses, RemoveFromWishlistData, RemoveFromWishlistErrors, RemoveFromWishlistResponses, ReorderLessonsData, ReorderLessonsErrors, ReorderLessonsResponses, ReorderSectionsData, ReorderSectionsErrors, ReorderSectionsResponses, RequestVerificationData, RequestVerificationErrors, RequestVerificationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, RevokeSessionData, RevokeSessionErrors, RevokeSessionResponses, SearchProductsData, SearchProductsErrors, SearchProductsResponses, SetPasswordData, SetPasswordErrors, SetPasswordResponses, UnenrollFromCourseData, UnenrollFromCourseErrors, UnenrollFromCourseResponses, UnfeatureCourseData, UnfeatureCourseErrors, UnfeatureCourseResponses, UnlinkGoogleData, UnlinkGoogleErrors, UnlinkGoogleResponses, UnpublishCourseData, UnpublishCourseErrors, UnpublishCourseResponses, UpdateAddressData, UpdateAddressErrors, UpdateAddressResponses, UpdateCartItemData, UpdateCartItemErrors, UpdateCartItemResponses, UpdateCategoryData, UpdateCategoryErrors, UpdateCategoryResponses, UpdateCourseCategoryData, UpdateCourseCategoryErrors, UpdateCourseCategoryResponses, UpdateCourseData, UpdateCourseErrors, UpdateCourseResponses, UpdateCourseReviewData, UpdateCourseReviewErrors, UpdateCourseReviewResponses, UpdateHomePageSettingsData, UpdateHomePageSettingsErrors, UpdateHomePageSettingsResponses, UpdateLessonData, UpdateLessonErrors, UpdateLessonProgressData, UpdateLessonProgressErrors, UpdateLessonProgressResponses, UpdateLessonResponses, UpdateMediumData, UpdateMediumErrors, UpdateMediumResponses, UpdateOrderStatusData, UpdateOrderStatusErrors, UpdateOrderStatusResponses, UpdateOwnProfileData, UpdateOwnProfileErrors, UpdateOwnProfileResponses, UpdateProductData, UpdateProductErrors, UpdateProductResponses, UpdateProductReviewData, UpdateProductReviewErrors, UpdateProductReviewResponses, UpdateReviewData, UpdateReviewErrors, UpdateReviewResponses, UpdateSectionData, UpdateSectionErrors, UpdateSectionResponses, UpdateUserStatusData, UpdateUserStatusErrors, UpdateUserStatusResponses, UpdateVariantTypeData, UpdateVariantTypeErrors, UpdateVariantTypeResponses, VerifyCoursePaymentData, VerifyCoursePaymentErrors, VerifyCoursePaymentResponses, VerifyEmailData, VerifyEmailErrors, VerifyEmailResponses, VerifyPaymentData, VerifyPaymentErrors, VerifyPaymentResponses } from './types.gen';
+import type { AddToCartData, AddToCartErrors, AddToCartResponses, AddToWishlistData, AddToWishlistErrors, AddToWishlistResponses, AdminDirectEnrollData, AdminDirectEnrollErrors, AdminDirectEnrollResponses, AdminEnrollUserData, AdminEnrollUserErrors, AdminEnrollUserResponses, AdminStatsData, AdminStatsErrors, AdminStatsResponses, ArchiveProductData, ArchiveProductErrors, ArchiveProductResponses, ChangePasswordData, ChangePasswordErrors, ChangePasswordResponses, ClearCartData, ClearCartErrors, ClearCartResponses, ConfirmVideoUploadData, ConfirmVideoUploadErrors, ConfirmVideoUploadResponses, ContinueWatchingData, ContinueWatchingErrors, ContinueWatchingResponses, CoursesGetCourseData, CoursesGetCourseErrors, CoursesGetCourseResponses, CoursesListCoursesData, CoursesListCoursesErrors, CoursesListCoursesResponses, CreateAddressData, CreateAddressErrors, CreateAddressResponses, CreateCategoryData, CreateCategoryErrors, CreateCategoryResponses, CreateCourseCategoryData, CreateCourseCategoryErrors, CreateCourseCategoryResponses, CreateCourseData, CreateCourseErrors, CreateCourseResponses, CreateCourseReviewData, CreateCourseReviewErrors, CreateCourseReviewResponses, CreateLessonData, CreateLessonErrors, CreateLessonResponses, CreateMediumData, CreateMediumErrors, CreateMediumResponses, CreateOrderData, CreateOrderErrors, CreateOrderResponses, CreateProductData, CreateProductErrors, CreateProductResponses, CreateProductReviewData, CreateProductReviewErrors, CreateProductReviewResponses, CreateSectionData, CreateSectionErrors, CreateSectionResponses, CreateVariantTypeData, CreateVariantTypeErrors, CreateVariantTypeResponses, DeleteAddressData, DeleteAddressErrors, DeleteAddressResponses, DeleteCategoryData, DeleteCategoryErrors, DeleteCategoryResponses, DeleteCourseCategoryData, DeleteCourseCategoryErrors, DeleteCourseCategoryResponses, DeleteCourseData, DeleteCourseErrors, DeleteCourseResponses, DeleteCourseReviewData, DeleteCourseReviewErrors, DeleteCourseReviewResponses, DeleteEnrollmentData, DeleteEnrollmentErrors, DeleteEnrollmentResponses, DeleteLessonData, DeleteLessonErrors, DeleteLessonResponses, DeleteMediumData, DeleteMediumErrors, DeleteMediumResponses, DeleteOwnAccountData, DeleteOwnAccountErrors, DeleteOwnAccountResponses, DeleteProductData, DeleteProductErrors, DeleteProductResponses, DeleteProductReviewData, DeleteProductReviewErrors, DeleteProductReviewResponses, DeleteReviewData, DeleteReviewErrors, DeleteReviewResponses, DeleteSectionData, DeleteSectionErrors, DeleteSectionResponses, DeleteVariantTypeData, DeleteVariantTypeErrors, DeleteVariantTypeResponses, EnrollInCourseData, EnrollInCourseErrors, EnrollInCourseResponses, FeatureCourseData, FeatureCourseErrors, FeatureCourseResponses, FeaturedProductsData, FeaturedProductsErrors, FeaturedProductsResponses, ForgotPasswordData, ForgotPasswordErrors, ForgotPasswordResponses, GetAdminUserDetailData, GetAdminUserDetailErrors, GetAdminUserDetailResponses, GetAllLessonProgressesData, GetAllLessonProgressesErrors, GetAllLessonProgressesResponses, GetAuthProvidersData, GetAuthProvidersErrors, GetAuthProvidersResponses, GetCategoryData, GetCategoryErrors, GetCategoryResponses, GetCountsData, GetCountsErrors, GetCountsResponses, GetCourseCategoryData, GetCourseCategoryErrors, GetCourseCategoryResponses, GetCourseCurriculumData, GetCourseCurriculumErrors, GetCourseCurriculumResponses, GetCourseData, GetCourseErrors, GetCourseProgressData, GetCourseProgressErrors, GetCourseProgressResponses, GetCourseResponses, GetCoursesByIdsData, GetCoursesByIdsErrors, GetCoursesByIdsResponses, GetCourseStatsData, GetCourseStatsErrors, GetCourseStatsResponses, GetEnrollmentData, GetEnrollmentErrors, GetEnrollmentResponses, GetEnrollmentStatusData, GetEnrollmentStatusErrors, GetEnrollmentStatusResponses, GetHomePageSettingsData, GetHomePageSettingsErrors, GetHomePageSettingsResponses, GetImageData, GetImageErrors, GetImageResponses, GetLessonData, GetLessonErrors, GetLessonProgressData, GetLessonProgressErrors, GetLessonProgressResponses, GetLessonResponses, GetLessonVideoData, GetLessonVideoErrors, GetLessonVideoResponses, GetMediumData, GetMediumErrors, GetMediumResponses, GetMyCartData, GetMyCartErrors, GetMyCartResponses, GetMyCourseReviewData, GetMyCourseReviewErrors, GetMyCourseReviewResponses, GetMyProductReviewData, GetMyProductReviewErrors, GetMyProductReviewResponses, GetMyWishlistData, GetMyWishlistErrors, GetMyWishlistResponses, GetOrderDetailsData, GetOrderDetailsErrors, GetOrderDetailsResponses, GetProductBySlugData, GetProductBySlugErrors, GetProductBySlugResponses, GetProductData, GetProductErrors, GetProductImagesData, GetProductImagesErrors, GetProductImagesResponses, GetProductResponses, GetProductsByIdsData, GetProductsByIdsErrors, GetProductsByIdsResponses, GetReviewDetailData, GetReviewDetailErrors, GetReviewDetailResponses, GetVariantData, GetVariantErrors, GetVariantResponses, GetVariantTypeData, GetVariantTypeErrors, GetVariantTypeResponses, GoogleAuthData, GoogleAuthErrors, GoogleAuthResponses, HealthCheckData, HealthCheckDetailedData, HealthCheckDetailedErrors, HealthCheckDetailedResponses, HealthCheckErrors, HealthCheckResponses, InitiateCoursePurchaseData, InitiateCoursePurchaseErrors, InitiateCoursePurchaseResponses, InitVideoUploadData, InitVideoUploadErrors, InitVideoUploadResponses, LinkGoogleData, LinkGoogleErrors, LinkGoogleResponses, ListAddressesData, ListAddressesErrors, ListAddressesResponses, ListAdminUsersData, ListAdminUsersErrors, ListAdminUsersResponses, ListAllReviewsData, ListAllReviewsErrors, ListAllReviewsResponses, ListCategoriesData, ListCategoriesErrors, ListCategoriesResponses, ListCourseCategoriesData, ListCourseCategoriesErrors, ListCourseCategoriesResponses, ListCourseEnrolledStudentsData, ListCourseEnrolledStudentsErrors, ListCourseEnrolledStudentsResponses, ListCoursePaymentsData, ListCoursePaymentsErrors, ListCoursePaymentsResponses, ListCourseReviewsData, ListCourseReviewsErrors, ListCourseReviewsResponses, ListCoursesData, ListCoursesErrors, ListCoursesResponses, ListEnrollmentsData, ListEnrollmentsErrors, ListEnrollmentsResponses, ListMediumsData, ListMediumsErrors, ListMediumsResponses, ListMyEnrollmentsData, ListMyEnrollmentsErrors, ListMyEnrollmentsResponses, ListMyOrdersData, ListMyOrdersErrors, ListMyOrdersResponses, ListOrdersData, ListOrdersErrors, ListOrdersResponses, ListProductReviewsData, ListProductReviewsErrors, ListProductReviewsResponses, ListProductsData, ListProductsErrors, ListProductsResponses, ListProfilesData, ListProfilesErrors, ListProfilesResponses, ListPublicCourseCategoriesData, ListPublicCourseCategoriesErrors, ListPublicCourseCategoriesResponses, ListSessionsData, ListSessionsErrors, ListSessionsResponses, ListVariantsData, ListVariantsErrors, ListVariantsResponses, ListVariantTypesData, ListVariantTypesErrors, ListVariantTypesResponses, LoginData, LoginErrors, LoginResponses, LogoutAllData, LogoutAllErrors, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, MeData, MeErrors, MeResponses, MoveLessonData, MoveLessonErrors, MoveLessonResponses, OrdersGetOrderDetailsData, OrdersGetOrderDetailsErrors, OrdersGetOrderDetailsResponses, OverviewData, OverviewErrors, OverviewResponses, ProductsGetProductData, ProductsGetProductErrors, ProductsGetProductResponses, ProductsListProductsData, ProductsListProductsErrors, ProductsListProductsResponses, PublishCourseData, PublishCourseErrors, PublishCourseResponses, PublishProductData, PublishProductErrors, PublishProductResponses, ReadMyAddressesData, ReadMyAddressesErrors, ReadMyAddressesResponses, ReadOwnProfileData, ReadOwnProfileErrors, ReadOwnProfileResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, RemoveFromCartData, RemoveFromCartErrors, RemoveFromCartResponses, RemoveFromWishlistData, RemoveFromWishlistErrors, RemoveFromWishlistResponses, ReorderLessonsData, ReorderLessonsErrors, ReorderLessonsResponses, ReorderSectionsData, ReorderSectionsErrors, ReorderSectionsResponses, RequestVerificationData, RequestVerificationErrors, RequestVerificationResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, RevokeSessionData, RevokeSessionErrors, RevokeSessionResponses, SearchProductsData, SearchProductsErrors, SearchProductsResponses, SetPasswordData, SetPasswordErrors, SetPasswordResponses, ShipOrderData, ShipOrderErrors, ShipOrderResponses, SiteConfigGetHomePageSettingsData, SiteConfigGetHomePageSettingsErrors, SiteConfigGetHomePageSettingsResponses, UnenrollFromCourseData, UnenrollFromCourseErrors, UnenrollFromCourseResponses, UnfeatureCourseData, UnfeatureCourseErrors, UnfeatureCourseResponses, UnlinkGoogleData, UnlinkGoogleErrors, UnlinkGoogleResponses, UnpublishCourseData, UnpublishCourseErrors, UnpublishCourseResponses, UpdateAddressData, UpdateAddressErrors, UpdateAddressResponses, UpdateCartItemData, UpdateCartItemErrors, UpdateCartItemResponses, UpdateCategoryData, UpdateCategoryErrors, UpdateCategoryResponses, UpdateCourseCategoryData, UpdateCourseCategoryErrors, UpdateCourseCategoryResponses, UpdateCourseData, UpdateCourseErrors, UpdateCourseResponses, UpdateCourseReviewData, UpdateCourseReviewErrors, UpdateCourseReviewResponses, UpdateHomePageSettingsData, UpdateHomePageSettingsErrors, UpdateHomePageSettingsResponses, UpdateLessonData, UpdateLessonErrors, UpdateLessonProgressData, UpdateLessonProgressErrors, UpdateLessonProgressResponses, UpdateLessonResponses, UpdateMediumData, UpdateMediumErrors, UpdateMediumResponses, UpdateOrderStatusData, UpdateOrderStatusErrors, UpdateOrderStatusResponses, UpdateOwnProfileData, UpdateOwnProfileErrors, UpdateOwnProfileResponses, UpdateProductData, UpdateProductErrors, UpdateProductResponses, UpdateProductReviewData, UpdateProductReviewErrors, UpdateProductReviewResponses, UpdateReviewData, UpdateReviewErrors, UpdateReviewResponses, UpdateSectionData, UpdateSectionErrors, UpdateSectionResponses, UpdateUserStatusData, UpdateUserStatusErrors, UpdateUserStatusResponses, UpdateVariantTypeData, UpdateVariantTypeErrors, UpdateVariantTypeResponses, UploadMediaData, UploadMediaErrors, UploadMediaResponses, VerifyCoursePaymentData, VerifyCoursePaymentErrors, VerifyCoursePaymentResponses, VerifyEmailData, VerifyEmailErrors, VerifyEmailResponses, VerifyPaymentData, VerifyPaymentErrors, VerifyPaymentResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -70,6 +70,21 @@ export const updateHomePageSettings = <ThrowOnError extends boolean = false>(opt
     ...options,
     headers: {
         'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Upload Media
+ */
+export const uploadMedia = <ThrowOnError extends boolean = false>(options: Options<UploadMediaData, ThrowOnError>) => (options.client ?? client).post<UploadMediaResponses, UploadMediaErrors, ThrowOnError>({
+    ...formDataBodySerializer,
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/media/upload',
+    ...options,
+    headers: {
+        'Content-Type': null,
         ...options.headers
     }
 });
@@ -601,6 +616,32 @@ export const getCourseStats = <ThrowOnError extends boolean = false>(options: Op
 });
 
 /**
+ * Admin Direct Enroll
+ *
+ * Admin records an offline payment (UPI/bank/cash/etc.) and enrolls a student.
+ */
+export const adminDirectEnroll = <ThrowOnError extends boolean = false>(options: Options<AdminDirectEnrollData, ThrowOnError>) => (options.client ?? client).post<AdminDirectEnrollResponses, AdminDirectEnrollErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{course_id}/enroll',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List Course Enrolled Students
+ */
+export const listCourseEnrolledStudents = <ThrowOnError extends boolean = false>(options: Options<ListCourseEnrolledStudentsData, ThrowOnError>) => (options.client ?? client).get<ListCourseEnrolledStudentsResponses, ListCourseEnrolledStudentsErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/courses/{course_id}/enrollments',
+    ...options
+});
+
+/**
  * List Enrollments
  */
 export const listEnrollments = <ThrowOnError extends boolean = false>(options?: Options<ListEnrollmentsData, ThrowOnError>) => (options?.client ?? client).get<ListEnrollmentsResponses, ListEnrollmentsErrors, ThrowOnError>({
@@ -827,6 +868,20 @@ export const updateOrderStatus = <ThrowOnError extends boolean = false>(options:
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/admin/orders/{order_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Ship Order
+ */
+export const shipOrder = <ThrowOnError extends boolean = false>(options: Options<ShipOrderData, ThrowOnError>) => (options.client ?? client).post<ShipOrderResponses, ShipOrderErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/admin/orders/{order_id}/ship',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -1296,6 +1351,16 @@ export const coursesListCourses = <ThrowOnError extends boolean = false>(options
 });
 
 /**
+ * Get Courses By Ids
+ */
+export const getCoursesByIds = <ThrowOnError extends boolean = false>(options: Options<GetCoursesByIdsData, ThrowOnError>) => (options.client ?? client).get<GetCoursesByIdsResponses, GetCoursesByIdsErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/courses/by-ids',
+    ...options
+});
+
+/**
  * Get Course
  */
 export const coursesGetCourse = <ThrowOnError extends boolean = false>(options: Options<CoursesGetCourseData, ThrowOnError>) => (options.client ?? client).get<CoursesGetCourseResponses, CoursesGetCourseErrors, ThrowOnError>({
@@ -1520,12 +1585,31 @@ export const updateProductReview = <ThrowOnError extends boolean = false>(option
 });
 
 /**
+ * Get Home Page Settings
+ */
+export const siteConfigGetHomePageSettings = <ThrowOnError extends boolean = false>(options?: Options<SiteConfigGetHomePageSettingsData, ThrowOnError>) => (options?.client ?? client).get<SiteConfigGetHomePageSettingsResponses, SiteConfigGetHomePageSettingsErrors, ThrowOnError>({
+    responseType: 'json',
+    url: '/api/config/home',
+    ...options
+});
+
+/**
  * List Products
  */
 export const productsListProducts = <ThrowOnError extends boolean = false>(options?: Options<ProductsListProductsData, ThrowOnError>) => (options?.client ?? client).get<ProductsListProductsResponses, ProductsListProductsErrors, ThrowOnError>({
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/products',
+    ...options
+});
+
+/**
+ * Get Products By Ids
+ */
+export const getProductsByIds = <ThrowOnError extends boolean = false>(options: Options<GetProductsByIdsData, ThrowOnError>) => (options.client ?? client).get<GetProductsByIdsResponses, GetProductsByIdsErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/products/by-ids',
     ...options
 });
 
@@ -1690,32 +1774,5 @@ export const getCounts = <ThrowOnError extends boolean = false>(options?: Option
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/status/counts',
-    ...options
-});
-
-/**
- * Get Home Page Config (Public)
- */
-export const getHomePageConfigPublic = <ThrowOnError extends boolean = false>(options?: Options<GetHomePageConfigPublicData, ThrowOnError>) => (options?.client ?? client).get<GetHomePageConfigPublicResponses, GetHomePageConfigPublicErrors, ThrowOnError>({
-    responseType: 'json',
-    url: '/api/config/home',
-    ...options
-});
-
-/**
- * Get Products By Ids
- */
-export const getProductsByIds = <ThrowOnError extends boolean = false>(options: Options<GetProductsByIdsData, ThrowOnError>) => (options.client ?? client).get<GetProductsByIdsResponses, GetProductsByIdsErrors, ThrowOnError>({
-    responseType: 'json',
-    url: '/api/products/by-ids',
-    ...options
-});
-
-/**
- * Get Courses By Ids
- */
-export const getCoursesByIds = <ThrowOnError extends boolean = false>(options: Options<GetCoursesByIdsData, ThrowOnError>) => (options.client ?? client).get<GetCoursesByIdsResponses, GetCoursesByIdsErrors, ThrowOnError>({
-    responseType: 'json',
-    url: '/api/courses/by-ids',
     ...options
 });

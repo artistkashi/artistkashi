@@ -24,6 +24,9 @@ export function getErrorMessage(error: unknown): string {
 
   // Handle cases where the server is down or returns non-JSON
   if (axiosError.isAxiosError) {
+    if (axiosError.response?.status === 413) {
+      return "File too large. The maximum upload size is 5MB.";
+    }
     if (axiosError.code === "ERR_NETWORK") {
       return "Unable to connect to the server. Please check your internet connection.";
     }

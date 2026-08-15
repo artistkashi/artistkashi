@@ -8,8 +8,10 @@ import {
   listCoursePayments,
   listOrders,
   OrderDashboardRead,
+  OrderShipRequest,
   OrderStatus,
   PaymentStatus,
+  shipOrder,
   updateOrderStatus,
 } from "@/api/openapi-client";
 import { AnimatedCounter } from "@/components/dashboard/AnimatedCounter";
@@ -223,6 +225,25 @@ export default function AdminOrdersPage() {
     onError: (err) => {
       const message =
         err instanceof Error ? err.message : "Failed to update status";
+      toast.error(message);
+    },
+  });
+
+  const shipMutation = useMutation({
+    mutationFn: ({
+      orderId,
+      payload,
+    }: {
+      orderId: string;
+      payload: OrderShipRequest;
+    }) => unwrap(shipOrder({ path: { order_id: orderId }, body: payload })),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+      setIsDetailsOpen(false);
+    },
+    onError: (err) => {
+      const message =
+        err instanceof Error ? err.message : "Failed to ship order";
       toast.error(message);
     },
   });
@@ -1527,7 +1548,13 @@ export default function AdminOrdersPage() {
             onUpdateStatus={(status) =>
               statusMutation.mutate({ orderId: selectedOrder.id, status })
             }
-            isUpdating={statusMutation.isPending}
+            onShip={(payload) =>
+              shipMutation.mutate({
+                orderId: selectedOrder.id,
+                payload,
+              })
+            }
+            isUpdating={statusMutation.isPending || shipMutation.isPending}
           />
         )}
       </AnimatePresence>
@@ -1860,29 +1887,202 @@ function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
 
 // ─── Order details modal ────────────────────────────────────────────────────
 
+const COURIER_OPTIONS = [
+  { value: "Blue Dart", label: "Blue Dart" },
+  { value: "Delhivery", label: "Delhivery" },
+  { value: "DTDC", label: "DTDC" },
+  { value: "India Post", label: "India Post" },
+  { value: "Speed Post", label: "Speed Post" },
+  { value: "Professional Couriers", label: "Professional Couriers" },
+  { value: "Other", label: "Other" },
+];
+
+function ShipForm({
+  onShip,
+  isUpdating,
+  onCancel,
+}: {
+  onShip: (payload: OrderShipRequest) => void;
+  isUpdating: boolean;
+  onCancel: () => void;
+}) {
+  const [courierName, setCourierName] = useState("");
+  const [customCourier, setCustomCourier] = useState("");
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const [trackingUrl, setTrackingUrl] = useState("");
+  const [shippingNote, setShippingNote] = useState("");
+  const [errors, setErrors] = useState<{
+    courier?: string;
+    tracking?: string;
+    url?: string;
+  }>({});
+
+  const resolvedCourier =
+    courierName === "Other" ? customCourier.trim() : courierName.trim();
+
+  const handleSubmit = () => {
+    const nextErrors: typeof errors = {};
+    if (!resolvedCourier) {
+      nextErrors.courier = "Courier name is required";
+    }
+    if (!trackingNumber.trim()) {
+      nextErrors.tracking = "Tracking number is required";
+    }
+    if (trackingUrl.trim()) {
+      try {
+        const parsed = new URL(trackingUrl.trim());
+        if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+          nextErrors.url = "Tracking URL must be http or https";
+        }
+      } catch {
+        nextErrors.url = "Enter a valid tracking URL";
+      }
+    }
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    onShip({
+      courier_name: resolvedCourier,
+      tracking_number: trackingNumber.trim(),
+      tracking_url: trackingUrl.trim() || undefined,
+      shipping_note: shippingNote.trim() || undefined,
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <label className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-2 block">
+          Courier
+        </label>
+        <CustomSelect
+          options={COURIER_OPTIONS}
+          value={courierName}
+          onChange={(val) => {
+            setCourierName(String(val));
+            setErrors((e) => ({ ...e, courier: undefined }));
+          }}
+          placeholder="Select courier"
+        />
+        {courierName === "Other" && (
+          <input
+            type="text"
+            value={customCourier}
+            onChange={(e) => {
+              setCustomCourier(e.target.value);
+              setErrors((err) => ({ ...err, courier: undefined }));
+            }}
+            placeholder="Enter courier name"
+            className="mt-2 w-full bg-surface border border-border px-4 py-3 text-sm text-foreground rounded-sm focus:border-primary focus:outline-none"
+          />
+        )}
+        {errors.courier && (
+          <p className="text-xs text-danger mt-1">{errors.courier}</p>
+        )}
+      </div>
+
+      <div>
+        <label className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-2 block">
+          Tracking Number *
+        </label>
+        <input
+          type="text"
+          value={trackingNumber}
+          onChange={(e) => {
+            setTrackingNumber(e.target.value);
+            setErrors((err) => ({ ...err, tracking: undefined }));
+          }}
+          placeholder="e.g. 437812345678"
+          className="w-full bg-surface border border-border px-4 py-3 text-sm text-foreground rounded-sm focus:border-primary focus:outline-none"
+        />
+        {errors.tracking && (
+          <p className="text-xs text-danger mt-1">{errors.tracking}</p>
+        )}
+      </div>
+
+      <div>
+        <label className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-2 block">
+          Tracking URL (optional)
+        </label>
+        <input
+          type="text"
+          value={trackingUrl}
+          onChange={(e) => {
+            setTrackingUrl(e.target.value);
+            setErrors((err) => ({ ...err, url: undefined }));
+          }}
+          placeholder="https://www.dtdc.in/tracking/..."
+          className="w-full bg-surface border border-border px-4 py-3 text-sm text-foreground rounded-sm focus:border-primary focus:outline-none"
+        />
+        {errors.url && <p className="text-xs text-danger mt-1">{errors.url}</p>}
+        {!errors.url && (
+          <p className="text-2xs text-text-muted mt-1">
+            If left empty, customers see the tracking number only.
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-2 block">
+          Shipping Note (optional)
+        </label>
+        <textarea
+          value={shippingNote}
+          onChange={(e) => setShippingNote(e.target.value)}
+          rows={3}
+          placeholder="e.g. Delicate artwork, handle with care"
+          className="w-full bg-surface border border-border px-4 py-3 text-sm text-foreground rounded-sm focus:border-primary focus:outline-none resize-none"
+        />
+      </div>
+
+      <div className="flex gap-3 pt-2">
+        <GhostBtn
+          className="flex-1 justify-center py-3 text-xs"
+          onClick={onCancel}
+          disabled={isUpdating}
+        >
+          CANCEL
+        </GhostBtn>
+        <PrimaryBtn
+          className="flex-1 justify-center py-3 text-xs"
+          onClick={handleSubmit}
+          disabled={isUpdating}
+        >
+          {isUpdating ? "SHIPPING..." : "CONFIRM SHIPMENT"}
+        </PrimaryBtn>
+      </div>
+    </div>
+  );
+}
+
 function OrderDetailsModal({
   order,
   onClose,
   onUpdateStatus,
+  onShip,
   isUpdating,
 }: {
   order: AdminOrderDetailRead;
   onClose: () => void;
   onUpdateStatus: (status: OrderStatus) => void;
+  onShip: (payload: OrderShipRequest) => void;
   isUpdating: boolean;
 }) {
   const [pendingStatus, setPendingStatus] = useState<OrderStatus | null>(null);
+  const [isShipping, setIsShipping] = useState(false);
   const hasChanges = pendingStatus !== null && pendingStatus !== order.status;
 
   const VALID_TRANSITIONS: Record<string, string[]> = {
     pending: ["confirmed", "cancelled"],
-    confirmed: ["shipped", "cancelled"],
+    confirmed: ["cancelled"],
     shipped: ["delivered", "cancelled"],
     delivered: [],
     cancelled: [],
   };
 
   const allowedNext = VALID_TRANSITIONS[order.status] ?? [];
+  const canShip = order.status === "confirmed";
+  const isShipped = order.status === "shipped" && !!order.courier_name;
 
   const handleSave = () => {
     if (pendingStatus) {
@@ -2110,35 +2310,153 @@ function OrderDetailsModal({
               </div>
             </section>
 
+            {/* Shipment Details */}
+            {isShipped && (
+              <section className="space-y-4">
+                <h3 className="text-xs font-mono font-bold text-text-muted uppercase tracking-[0.3em] flex items-center gap-2">
+                  <ArrowUpRight size={14} /> Shipment Details
+                </h3>
+                <div className="bg-dark-soft border border-border p-6 rounded-sm space-y-3">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-2">
+                        Courier
+                      </p>
+                      <p className="text-sm font-bold text-text-main uppercase">
+                        {order.courier_name}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-2">
+                        Tracking Number
+                      </p>
+                      <p className="text-sm font-bold text-text-main font-mono">
+                        {order.tracking_number}
+                      </p>
+                    </div>
+                  </div>
+                  {order.shipped_at && (
+                    <div>
+                      <p className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-2">
+                        Shipped On
+                      </p>
+                      <p className="text-sm font-bold text-text-main">
+                        {format(
+                          new Date(order.shipped_at),
+                          "dd MMM yyyy, HH:mm"
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  {order.tracking_url && (
+                    <div className="pt-3 border-t border-border/10">
+                      <a
+                        href={order.tracking_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-mono text-gold underline decoration-gold/40 underline-offset-4 hover:text-text-main transition-colors"
+                      >
+                        TRACK PACKAGE ↗
+                      </a>
+                    </div>
+                  )}
+                  {order.shipping_note && (
+                    <div className="pt-3 border-t border-border/10">
+                      <p className="text-2xs font-mono text-text-muted uppercase tracking-widest mb-2">
+                        Note
+                      </p>
+                      <p className="text-xs text-text-main leading-relaxed">
+                        {order.shipping_note}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
             {/* Actions */}
             <section className="space-y-4 print-hide">
               <h3 className="text-xs font-mono font-bold text-text-muted uppercase tracking-[0.3em]">
-                Update Status
+                {canShip && !isShipped
+                  ? isShipping
+                    ? "Ship Order"
+                    : "Shipping"
+                  : "Update Status"}
               </h3>
-              <div className="grid grid-cols-2 gap-3 rounded-sm overflow-hidden">
-                {ORDER_STATUSES.map((s) => {
-                  const isSaved = order.status === s;
-                  const isSelected = (pendingStatus ?? order.status) === s;
-                  const isDisabled = !allowedNext.includes(s) && !isSaved;
-                  return (
+
+              {canShip && !isShipped ? (
+                isShipping ? (
+                  <ShipForm
+                    onShip={onShip}
+                    isUpdating={isUpdating}
+                    onCancel={() => setIsShipping(false)}
+                  />
+                ) : (
+                  <div className="space-y-3">
                     <button
-                      key={s}
-                      disabled={isDisabled}
-                      onClick={() => setPendingStatus(s)}
-                      className={cn(
-                        "px-4 py-3 text-2xs font-mono uppercase tracking-[0.2em] border transition-all rounded",
-                        isSelected
-                          ? "border-gold bg-gold/10 text-gold"
-                          : "border-border text-text-muted hover:border-gold/50 hover:text-text-main bg-dark/40",
-                        isDisabled && "opacity-30 cursor-not-allowed"
-                      )}
+                      onClick={() => setIsShipping(true)}
+                      className="w-full px-4 py-3.5 text-xs font-mono uppercase tracking-[0.2em] border border-gold bg-gold/10 text-gold rounded-sm hover:bg-gold/20 transition-all"
                     >
-                      {s}
-                      {isSaved && " (current)"}
+                      MARK AS SHIPPED
                     </button>
-                  );
-                })}
-              </div>
+                    {allowedNext.length > 0 && (
+                      <div className="grid grid-cols-2 gap-3 rounded-sm overflow-hidden">
+                        {ORDER_STATUSES.filter((s) => s !== "shipped").map(
+                          (s) => {
+                            const isSaved = order.status === s;
+                            const isSelected =
+                              (pendingStatus ?? order.status) === s;
+                            const isDisabled =
+                              !allowedNext.includes(s) && !isSaved;
+                            return (
+                              <button
+                                key={s}
+                                disabled={isDisabled}
+                                onClick={() => setPendingStatus(s)}
+                                className={cn(
+                                  "px-4 py-3 text-2xs font-mono uppercase tracking-[0.2em] border transition-all rounded",
+                                  isSelected
+                                    ? "border-gold bg-gold/10 text-gold"
+                                    : "border-border text-text-muted hover:border-gold/50 hover:text-text-main bg-dark/40",
+                                  isDisabled && "opacity-30 cursor-not-allowed"
+                                )}
+                              >
+                                {s}
+                                {isSaved && " (current)"}
+                              </button>
+                            );
+                          }
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              ) : (
+                <div className="grid grid-cols-2 gap-3 rounded-sm overflow-hidden">
+                  {ORDER_STATUSES.filter((s) => s !== "shipped").map((s) => {
+                    const isSaved = order.status === s;
+                    const isSelected = (pendingStatus ?? order.status) === s;
+                    const isDisabled = !allowedNext.includes(s) && !isSaved;
+                    return (
+                      <button
+                        key={s}
+                        disabled={isDisabled}
+                        onClick={() => setPendingStatus(s)}
+                        className={cn(
+                          "px-4 py-3 text-2xs font-mono uppercase tracking-[0.2em] border transition-all rounded",
+                          isSelected
+                            ? "border-gold bg-gold/10 text-gold"
+                            : "border-border text-text-muted hover:border-gold/50 hover:text-text-main bg-dark/40",
+                          isDisabled && "opacity-30 cursor-not-allowed"
+                        )}
+                      >
+                        {s}
+                        {isSaved && " (current)"}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </section>
           </div>
 

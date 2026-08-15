@@ -121,7 +121,7 @@ function Counter({
 
     return 10 ** exponent;
   }),
-  gap = 8,
+  gap = 0,
   borderRadius = 4,
   horizontalPadding = 8,
   textColor = "inherit",
@@ -205,7 +205,6 @@ export function AnimatedCounter({
   fontSize,
   textColor,
   fontWeight,
-  gap,
 }: AnimatedCounterProps) {
   const finalFontSize = fontSize ?? 28;
 
@@ -216,7 +215,7 @@ export function AnimatedCounter({
         fontSize={finalFontSize}
         textColor={textColor}
         fontWeight={fontWeight}
-        gap={gap}
+        gap={0}
         borderRadius={0}
         horizontalPadding={0}
       />

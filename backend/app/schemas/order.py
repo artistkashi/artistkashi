@@ -1,8 +1,9 @@
 from datetime import datetime
 from decimal import Decimal
+from urllib.parse import urlparse
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.core.schema import TimestampSchemaRead
 from app.models.order import OrderStatus, PaymentStatus
@@ -64,6 +65,42 @@ class OrderUpdate(BaseModel):
     razorpay_signature: str | None = None
 
 
+class OrderShipRequest(BaseModel):
+    courier_name: str = Field(..., min_length=1, max_length=100)
+    tracking_number: str = Field(..., min_length=1, max_length=100)
+    tracking_url: str | None = Field(None, max_length=500)
+    shipping_note: str | None = Field(None, max_length=2000)
+
+    @field_validator("courier_name", "tracking_number", mode="before")
+    @classmethod
+    def strip_required_fields(cls, value):
+        if isinstance(value, str):
+            value = value.strip()
+        return value
+
+    @field_validator("tracking_url", mode="before")
+    @classmethod
+    def validate_tracking_url(cls, value):
+        if value is None:
+            return None
+        value = value.strip()
+        if not value:
+            return None
+        parsed = urlparse(value)
+        if parsed.scheme not in ("http", "https") or not parsed.netloc:
+            raise ValueError("Tracking URL must be a valid http/https URL")
+        return value
+
+    @field_validator("shipping_note", mode="before")
+    @classmethod
+    def strip_shipping_note(cls, value):
+        if isinstance(value, str):
+            value = value.strip()
+            if not value:
+                return None
+        return value
+
+
 class OrderRead(OrderBase, TimestampSchemaRead):
     id: UUID
     user_id: UUID
@@ -71,6 +108,11 @@ class OrderRead(OrderBase, TimestampSchemaRead):
     payment_status: PaymentStatus
     razorpay_order_id: str | None = None
     total_amount: Decimal
+    courier_name: str | None = None
+    tracking_number: str | None = None
+    tracking_url: str | None = None
+    shipping_note: str | None = None
+    shipped_at: datetime | None = None
     items: list[OrderItemRead] = []
 
     model_config = ConfigDict(from_attributes=True)
