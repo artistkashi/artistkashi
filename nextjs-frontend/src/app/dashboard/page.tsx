@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { GhostBtn, PrimaryBtn } from "@/components/ui/buttons";
 
 import { cn, displayPrice } from "@/lib/utils";
