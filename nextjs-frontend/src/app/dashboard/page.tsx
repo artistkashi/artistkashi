@@ -30,7 +30,7 @@ import {
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { GoogleLoginButton } from "@/components/auth/google-login-button";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, Suspense } from "react";
 
 import { unwrap, unwrapVoid } from "@/api/client-service";
 import type {
@@ -63,8 +63,22 @@ import { SessionManager } from "@/components/dashboard/SessionManager";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 
-export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState("overview");
+function TabInitializer() {
+  const searchParams = useSearchParams();
+  const [initialTab, setInitialTab] = useState("overview");
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "orders" || tab === "courses" || tab === "settings") {
+      setInitialTab(tab);
+    }
+  }, [searchParams]);
+
+  return <DashboardContent initialTab={initialTab} />;
+}
+
+function DashboardContent({ initialTab }: { initialTab: string }) {
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [greeting, setGreeting] = useState("Welcome");
   const {
     user,
@@ -77,14 +91,6 @@ export default function DashboardPage() {
     refreshUser,
   } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const tab = searchParams.get("tab");
-    if (tab === "orders" || tab === "courses" || tab === "settings") {
-      setActiveTab(tab);
-    }
-  }, [searchParams]);
 
   const [providers, setProviders] = useState<{
     providers: Array<{
@@ -1281,5 +1287,13 @@ export default function DashboardPage() {
         )}
       </main>
     </AuthGuard>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={null}>
+      <TabInitializer />
+    </Suspense>
   );
 }
